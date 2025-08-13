@@ -901,6 +901,16 @@ export class DisasterRecovery extends EventEmitter {
     this.healthCheckIntervals.set(site.id, intervalId);
   }
 
+  /**
+   * Stop all recurring timers to prevent memory leaks
+   */
+  public stopHealthChecks(): void {
+    for (const [, interval] of this.healthCheckIntervals) {
+      clearInterval(interval);
+    }
+    this.healthCheckIntervals.clear();
+  }
+
   private async checkSiteHealth(site: SiteConfig): Promise<boolean> {
     try {
       // Simulate health check - in real implementation, make HTTP request

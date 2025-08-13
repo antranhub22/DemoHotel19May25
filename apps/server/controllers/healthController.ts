@@ -9,6 +9,7 @@ import { Request, Response } from "express";
 // ✅ v3.0: Import Advanced Health Check System
 
 // ✅ v2.0: Enhanced architecture imports
+import { MemoryManager } from "@server/middleware/memoryOptimization";
 import { HotelResearchService } from "@server/services/hotelResearch";
 import { TenantService } from "@server/services/tenantService";
 import { VapiIntegrationService } from "@server/services/vapiIntegration";
@@ -536,7 +537,35 @@ export class HealthController {
   public static async getHealth(_req: Request, res: Response): Promise<void> {
     try {
       const health = await HealthController.getBasicHealth();
-      (res as any).status(200).json(health);
+
+      // Add memory stats and optional GC trigger without changing routes
+      const mem = process.memoryUsage();
+      const memory = {
+        rss: Math.round(mem.rss / 1024 / 1024),
+        heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+        heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+        external: Math.round(mem.external / 1024 / 1024),
+        arrayBuffers: Math.round(mem.arrayBuffers / 1024 / 1024),
+        percentUsed: Number(((mem.heapUsed / mem.heapTotal) * 100).toFixed(2)),
+      };
+
+      let gcTriggered = false;
+      const query = (res.req?.query || {}) as Record<string, string>;
+      if (
+        (query.gc === "true" || query.gc === "1") &&
+        typeof global.gc === "function"
+      ) {
+        try {
+          global.gc();
+          gcTriggered = true;
+        } catch {}
+      }
+
+      (res as any).status(200).json({
+        ...health,
+        memory,
+        gcTriggered,
+      });
     } catch (error) {
       logger.error(
         "❌ [HealthController] Basic health check failed",
@@ -741,8 +770,21 @@ export class HealthController {
       // ✅ NEW v2.0: Check individual service health
       const serviceHealth = await this.checkAllServices();
 
+      // Optional GC trigger (no route change)
+      const queryGc = (res.req?.query?.gc as string | undefined) || "false";
+      if (queryGc === "true" || queryGc === "1") {
+        try {
+          if (global.gc) {
+            global.gc();
+            logger.debug("♻️ [Health] Manual GC triggered via query", "Health");
+          }
+        } catch {}
+      }
+
       const responseTime = Date.now() - startTime;
       const memoryUsage = process.memoryUsage();
+      const memoryManager = MemoryManager.getInstance();
+      const memStats = memoryManager.getMemoryReport();
 
       const detailedHealth = {
         status:
@@ -769,6 +811,10 @@ export class HealthController {
           heapUsed: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
           external: Math.round(memoryUsage.external / 1024 / 1024), // MB
           arrayBuffers: Math.round(memoryUsage.arrayBuffers / 1024 / 1024), // MB
+          percentUsed: Number(
+            ((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100).toFixed(2),
+          ),
+          managerStats: memStats,
         },
 
         // Database Health

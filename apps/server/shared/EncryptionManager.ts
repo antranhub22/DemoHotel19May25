@@ -656,7 +656,7 @@ export class EncryptionManager extends EventEmitter {
   // ============================================
 
   private startKeyRotationScheduler() {
-    setInterval(
+    this.rotationInterval = setInterval(
       () => {
         this.checkKeyRotation();
       },
@@ -665,7 +665,7 @@ export class EncryptionManager extends EventEmitter {
   }
 
   private startCacheCleanup() {
-    setInterval(() => {
+    this.cacheCleanupInterval = setInterval(() => {
       const now = Date.now();
       for (const [keyId, cached] of this.keyCache.entries()) {
         if (cached.expiry <= now) {
@@ -673,6 +673,21 @@ export class EncryptionManager extends EventEmitter {
         }
       }
     }, 60000); // Clean every minute
+  }
+
+  // Timers
+  private rotationInterval?: NodeJS.Timeout;
+  private cacheCleanupInterval?: NodeJS.Timeout;
+
+  public stop(): void {
+    if (this.rotationInterval) {
+      clearInterval(this.rotationInterval);
+      this.rotationInterval = undefined;
+    }
+    if (this.cacheCleanupInterval) {
+      clearInterval(this.cacheCleanupInterval);
+      this.cacheCleanupInterval = undefined;
+    }
   }
 
   private async checkKeyRotation() {

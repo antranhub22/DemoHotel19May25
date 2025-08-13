@@ -571,10 +571,6 @@ export class ConnectionPoolManager extends EventEmitter {
 
   private async waitForConnection(tags: string[] = []): Promise<string> {
     return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error("Connection acquire timeout"));
-      }, this.config.pool.acquireTimeoutMs);
-
       const onConnectionAvailable = (connectionId: string) => {
         const connection = this.connections.get(connectionId);
         if (connection && connection.state === "idle") {
@@ -585,6 +581,11 @@ export class ConnectionPoolManager extends EventEmitter {
           }
         }
       };
+
+      const timeout = setTimeout(() => {
+        this.removeListener("connectionAvailable", onConnectionAvailable);
+        reject(new Error("Connection acquire timeout"));
+      }, this.config.pool.acquireTimeoutMs);
 
       this.on("connectionAvailable", onConnectionAvailable);
     });
@@ -846,30 +847,6 @@ export class ConnectionPoolManager extends EventEmitter {
         errorRate: metrics.performance.errorRate,
         threshold: thresholds.highErrorRate,
       });
-    }
-  }
-
-  private async performHealthChecks(): Promise<void> {
-    const connections = Array.from(this.connections.entries());
-
-    for (const [id, connection] of connections) {
-      if (connection.state === "active") {
-        const activeTime = Date.now() - connection.lastUsedAt.getTime();
-
-        // Check for connection leaks (connections active too long)
-        if (activeTime > 300000) {
-          // 5 minutes
-          const leak: ConnectionLeak = {
-            connectionId: id,
-            acquiredAt: connection.lastUsedAt,
-            query: connection.currentQuery,
-            stackTrace: "Simulated stack trace",
-            duration: activeTime,
-          };
-
-          this.emit("connectionLeak", leak);
-        }
-      }
     }
   }
 

@@ -1,8 +1,8 @@
-import { spawn } from 'child_process';
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { spawn } from "child_process";
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
 
 // ============================================
 // Types & Interfaces
@@ -11,7 +11,7 @@ import * as path from 'path';
 export interface BackupConfig {
   database: {
     enabled: boolean;
-    type: 'postgresql' | 'sqlite' | 'mysql';
+    type: "postgresql" | "sqlite" | "mysql";
     connectionString: string;
     backupPath: string;
     retentionDays: number;
@@ -32,7 +32,7 @@ export interface BackupConfig {
     enabled: boolean;
     configPaths: string[];
     environmentFiles: string[];
-    secretsHandling: 'exclude' | 'encrypt' | 'mask';
+    secretsHandling: "exclude" | "encrypt" | "mask";
     backupPath: string;
     retentionDays: number;
   };
@@ -48,7 +48,7 @@ export interface BackupConfig {
   crossRegion: {
     enabled: boolean;
     regions: string[];
-    replicationStrategy: 'sync' | 'async' | 'scheduled';
+    replicationStrategy: "sync" | "async" | "scheduled";
     cloudProviders: CloudProvider[];
     encryptionInTransit: boolean;
   };
@@ -72,19 +72,19 @@ export interface BackupSchedule {
   id: string;
   name: string;
   enabled: boolean;
-  type: 'full' | 'incremental' | 'differential';
-  frequency: 'hourly' | 'daily' | 'weekly' | 'monthly';
+  type: "full" | "incremental" | "differential";
+  frequency: "hourly" | "daily" | "weekly" | "monthly";
   time: string; // HH:MM format
   daysOfWeek?: number[]; // 0-6, Sunday = 0
   dayOfMonth?: number; // 1-31
   retentionCount: number;
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  priority: "low" | "medium" | "high" | "critical";
 }
 
 export interface CloudProvider {
   id: string;
   name: string;
-  type: 'aws' | 'azure' | 'gcp' | 'digitalocean' | 'custom';
+  type: "aws" | "azure" | "gcp" | "digitalocean" | "custom";
   credentials: {
     accessKey?: string;
     secretKey?: string;
@@ -98,9 +98,9 @@ export interface CloudProvider {
 export interface BackupJob {
   id: string;
   scheduleId: string;
-  type: 'database' | 'filesystem' | 'configuration' | 'application_state';
-  backupType: 'full' | 'incremental' | 'differential';
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  type: "database" | "filesystem" | "configuration" | "application_state";
+  backupType: "full" | "incremental" | "differential";
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   startTime: Date;
   endTime?: Date;
   duration?: number; // milliseconds
@@ -120,8 +120,8 @@ export interface BackupJob {
 export interface BackupMetadata {
   id: string;
   timestamp: Date;
-  type: 'database' | 'filesystem' | 'configuration' | 'application_state';
-  backupType: 'full' | 'incremental' | 'differential';
+  type: "database" | "filesystem" | "configuration" | "application_state";
+  backupType: "full" | "incremental" | "differential";
   size: number;
   compressed: boolean;
   encrypted: boolean;
@@ -132,16 +132,16 @@ export interface BackupMetadata {
   restoration: {
     tested: boolean;
     lastTestDate?: Date;
-    testResult?: 'success' | 'failure';
+    testResult?: "success" | "failure";
   };
 }
 
 export interface RestoreJob {
   id: string;
   backupId: string;
-  type: 'full' | 'selective' | 'point_in_time';
+  type: "full" | "selective" | "point_in_time";
   targetLocation: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  status: "pending" | "running" | "completed" | "failed" | "cancelled";
   startTime: Date;
   endTime?: Date;
   duration?: number;
@@ -173,66 +173,66 @@ export interface BackupStatistics {
 const defaultBackupConfig: BackupConfig = {
   database: {
     enabled: true,
-    type: 'postgresql',
+    type: "postgresql",
     connectionString:
-      process.env.DATABASE_URL || 'postgresql://localhost:5432/hotel_db',
-    backupPath: './backups/database',
+      process.env.DATABASE_URL || "postgresql://localhost:5432/hotel_db",
+    backupPath: "./backups/database",
     retentionDays: 30,
     compressionEnabled: true,
     encryptionEnabled: true,
     schedules: [
       {
-        id: 'daily-full',
-        name: 'Daily Full Database Backup',
+        id: "daily-full",
+        name: "Daily Full Database Backup",
         enabled: true,
-        type: 'full',
-        frequency: 'daily',
-        time: '02:00',
+        type: "full",
+        frequency: "daily",
+        time: "02:00",
         retentionCount: 7,
-        priority: 'high',
+        priority: "high",
       },
       {
-        id: 'hourly-incremental',
-        name: 'Hourly Incremental Backup',
+        id: "hourly-incremental",
+        name: "Hourly Incremental Backup",
         enabled: true,
-        type: 'incremental',
-        frequency: 'hourly',
-        time: '00',
+        type: "incremental",
+        frequency: "hourly",
+        time: "00",
         retentionCount: 24,
-        priority: 'medium',
+        priority: "medium",
       },
     ],
   },
   filesystem: {
     enabled: true,
-    paths: ['./uploads', './assets', './logs'],
-    excludePatterns: ['*.tmp', '*.log', '*.cache', 'node_modules/**'],
-    backupPath: './backups/filesystem',
+    paths: ["./uploads", "./assets", "./logs"],
+    excludePatterns: ["*.tmp", "*.log", "*.cache", "node_modules/**"],
+    backupPath: "./backups/filesystem",
     retentionDays: 14,
     incrementalBackup: true,
     compressionLevel: 6,
   },
   configuration: {
     enabled: true,
-    configPaths: ['./config', './.env.example', './package.json'],
-    environmentFiles: ['./.env', './.env.local'],
-    secretsHandling: 'encrypt',
-    backupPath: './backups/configuration',
+    configPaths: ["./config", "./.env.example", "./package.json"],
+    environmentFiles: ["./.env", "./.env.local"],
+    secretsHandling: "encrypt",
+    backupPath: "./backups/configuration",
     retentionDays: 90,
   },
   applicationState: {
     enabled: true,
-    statePaths: ['./data/state', './data/sessions'],
+    statePaths: ["./data/state", "./data/sessions"],
     sessionsBackup: true,
     cacheBackup: false,
     logsBackup: true,
-    backupPath: './backups/application',
+    backupPath: "./backups/application",
     retentionDays: 7,
   },
   crossRegion: {
     enabled: false,
-    regions: ['us-east-1', 'eu-west-1'],
-    replicationStrategy: 'scheduled',
+    regions: ["us-east-1", "eu-west-1"],
+    replicationStrategy: "scheduled",
     cloudProviders: [],
     encryptionInTransit: true,
   },
@@ -271,8 +271,8 @@ export class BackupManager extends EventEmitter {
     this.initializeBackupManager();
 
     console.log(
-      '💾 BackupManager initialized with comprehensive backup solutions',
-      'BackupManager'
+      "💾 BackupManager initialized with comprehensive backup solutions",
+      "BackupManager",
     );
   }
 
@@ -297,9 +297,9 @@ export class BackupManager extends EventEmitter {
       // Cleanup old backups
       this.startCleanupScheduler();
 
-      this.emit('initialized');
+      this.emit("initialized");
     } catch (error) {
-      console.error('Failed to initialize backup manager:', error);
+      console.error("Failed to initialize backup manager:", error);
       throw error;
     }
   }
@@ -310,8 +310,8 @@ export class BackupManager extends EventEmitter {
       this.config.filesystem.backupPath,
       this.config.configuration.backupPath,
       this.config.applicationState.backupPath,
-      './backups/metadata',
-      './backups/temp',
+      "./backups/metadata",
+      "./backups/temp",
     ];
 
     for (const dir of dirs) {
@@ -345,58 +345,58 @@ export class BackupManager extends EventEmitter {
 
   async createDatabaseBackup(
     scheduleId?: string,
-    backupType: 'full' | 'incremental' = 'full'
+    backupType: "full" | "incremental" = "full",
   ): Promise<string> {
     if (!this.config.database.enabled) {
-      throw new Error('Database backup is disabled');
+      throw new Error("Database backup is disabled");
     }
 
     const jobId = crypto.randomUUID();
     const job: BackupJob = {
       id: jobId,
-      scheduleId: scheduleId || 'manual',
-      type: 'database',
+      scheduleId: scheduleId || "manual",
+      type: "database",
       backupType,
-      status: 'pending',
+      status: "pending",
       startTime: new Date(),
-      location: '',
+      location: "",
       metadata: {
         sourceSize: 0,
         encrypted: this.config.database.encryptionEnabled,
-        checksum: '',
-        version: '1.0',
+        checksum: "",
+        version: "1.0",
       },
     };
 
     this.activeJobs.set(jobId, job);
-    this.emit('backupStarted', job);
+    this.emit("backupStarted", job);
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Generate backup filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `db_${backupType}_${timestamp}.sql`;
       const backupPath = path.join(this.config.database.backupPath, filename);
 
       // Perform database backup based on type
       let backupSize = 0;
       switch (this.config.database.type) {
-        case 'postgresql':
+        case "postgresql":
           backupSize = await this.createPostgreSQLBackup(
             backupPath,
-            backupType
+            backupType,
           );
           break;
-        case 'sqlite':
+        case "sqlite":
           backupSize = await this.createSQLiteBackup(backupPath);
           break;
-        case 'mysql':
+        case "mysql":
           backupSize = await this.createMySQLBackup(backupPath, backupType);
           break;
         default:
           throw new Error(
-            `Unsupported database type: ${this.config.database.type}`
+            `Unsupported database type: ${this.config.database.type}`,
           );
       }
 
@@ -414,8 +414,8 @@ export class BackupManager extends EventEmitter {
         if (finalPath !== backupPath) {
           await fs.unlink(
             this.config.database.compressionEnabled
-              ? backupPath + '.gz'
-              : backupPath
+              ? backupPath + ".gz"
+              : backupPath,
           );
         }
       }
@@ -427,7 +427,7 @@ export class BackupManager extends EventEmitter {
       const stats = await fs.stat(finalPath);
 
       // Update job
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.size = stats.size;
@@ -442,7 +442,7 @@ export class BackupManager extends EventEmitter {
       const metadata: BackupMetadata = {
         id: crypto.randomUUID(),
         timestamp: job.startTime,
-        type: 'database',
+        type: "database",
         backupType,
         size: stats.size,
         compressed: this.config.database.compressionEnabled,
@@ -450,11 +450,11 @@ export class BackupManager extends EventEmitter {
         checksum,
         location: finalPath,
         expiryDate: new Date(
-          Date.now() + this.config.database.retentionDays * 24 * 60 * 60 * 1000
+          Date.now() + this.config.database.retentionDays * 24 * 60 * 60 * 1000,
         ),
         dependencies:
-          backupType === 'incremental'
-            ? this.getLastFullBackupIds('database')
+          backupType === "incremental"
+            ? this.getLastFullBackupIds("database")
             : [],
         restoration: {
           tested: false,
@@ -465,19 +465,19 @@ export class BackupManager extends EventEmitter {
       await this.saveBackupMetadata(metadata);
 
       this.updateStatistics();
-      this.emit('backupCompleted', job);
+      this.emit("backupCompleted", job);
 
       console.log(
-        `✅ Database backup completed: ${finalPath} (${this.formatSize(stats.size)})`
+        `✅ Database backup completed: ${finalPath} (${this.formatSize(stats.size)})`,
       );
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.errors = [error.message];
 
-      this.emit('backupFailed', job);
+      this.emit("backupFailed", job);
       console.error(`❌ Database backup failed:`, error);
       throw error;
     } finally {
@@ -487,42 +487,42 @@ export class BackupManager extends EventEmitter {
 
   private async createPostgreSQLBackup(
     backupPath: string,
-    backupType: 'full' | 'incremental'
+    backupType: "full" | "incremental",
   ): Promise<number> {
     return new Promise((resolve, reject) => {
       // Parse connection string
       const url = new URL(this.config.database.connectionString);
 
       const args = [
-        '--host',
+        "--host",
         url.hostname,
-        '--port',
-        url.port || '5432',
-        '--username',
+        "--port",
+        url.port || "5432",
+        "--username",
         url.username,
-        '--dbname',
+        "--dbname",
         url.pathname.slice(1),
-        '--file',
+        "--file",
         backupPath,
-        '--verbose',
+        "--verbose",
       ];
 
-      if (backupType === 'full') {
-        args.push('--create', '--clean');
+      if (backupType === "full") {
+        args.push("--create", "--clean");
       }
 
       // Set password through environment
       const env = { ...process.env, PGPASSWORD: url.password };
 
-      const pgDump = spawn('pg_dump', args, { env });
+      const pgDump = spawn("pg_dump", args, { env });
 
-      let errorOutput = '';
+      let errorOutput = "";
 
-      pgDump.stderr.on('data', data => {
+      pgDump.stderr.on("data", (data) => {
         errorOutput += data.toString();
       });
 
-      pgDump.on('close', async code => {
+      pgDump.on("close", async (code) => {
         if (code === 0) {
           try {
             const stats = await fs.stat(backupPath);
@@ -535,7 +535,7 @@ export class BackupManager extends EventEmitter {
         }
       });
 
-      pgDump.on('error', error => {
+      pgDump.on("error", (error) => {
         reject(new Error(`Failed to start pg_dump: ${error.message}`));
       });
     });
@@ -543,7 +543,7 @@ export class BackupManager extends EventEmitter {
 
   private async createSQLiteBackup(backupPath: string): Promise<number> {
     // For SQLite, we can just copy the database file
-    const dbPath = this.config.database.connectionString.replace('sqlite:', '');
+    const dbPath = this.config.database.connectionString.replace("sqlite:", "");
     await fs.copyFile(dbPath, backupPath);
 
     const stats = await fs.stat(backupPath);
@@ -552,42 +552,42 @@ export class BackupManager extends EventEmitter {
 
   private async createMySQLBackup(
     backupPath: string,
-    backupType: 'full' | 'incremental'
+    backupType: "full" | "incremental",
   ): Promise<number> {
     return new Promise((resolve, reject) => {
       // Parse connection string
       const url = new URL(this.config.database.connectionString);
 
       const args = [
-        '--host',
+        "--host",
         url.hostname,
-        '--port',
-        url.port || '3306',
-        '--user',
+        "--port",
+        url.port || "3306",
+        "--user",
         url.username,
-        '--password=' + url.password,
-        '--single-transaction',
-        '--routines',
-        '--triggers',
+        "--password=" + url.password,
+        "--single-transaction",
+        "--routines",
+        "--triggers",
         url.pathname.slice(1),
       ];
 
-      if (backupType === 'full') {
-        args.push('--add-drop-database', '--create-options');
+      if (backupType === "full") {
+        args.push("--add-drop-database", "--create-options");
       }
 
-      const mysqldump = spawn('mysqldump', args);
-      const writeStream = require('fs').createWriteStream(backupPath);
+      const mysqldump = spawn("mysqldump", args);
+      const writeStream = require("fs").createWriteStream(backupPath);
 
       mysqldump.stdout.pipe(writeStream);
 
-      let errorOutput = '';
+      let errorOutput = "";
 
-      mysqldump.stderr.on('data', data => {
+      mysqldump.stderr.on("data", (data) => {
         errorOutput += data.toString();
       });
 
-      mysqldump.on('close', async code => {
+      mysqldump.on("close", async (code) => {
         writeStream.end();
 
         if (code === 0) {
@@ -599,12 +599,12 @@ export class BackupManager extends EventEmitter {
           }
         } else {
           reject(
-            new Error(`mysqldump failed with code ${code}: ${errorOutput}`)
+            new Error(`mysqldump failed with code ${code}: ${errorOutput}`),
           );
         }
       });
 
-      mysqldump.on('error', error => {
+      mysqldump.on("error", (error) => {
         reject(new Error(`Failed to start mysqldump: ${error.message}`));
       });
     });
@@ -616,36 +616,36 @@ export class BackupManager extends EventEmitter {
 
   async createFilesystemBackup(scheduleId?: string): Promise<string> {
     if (!this.config.filesystem.enabled) {
-      throw new Error('Filesystem backup is disabled');
+      throw new Error("Filesystem backup is disabled");
     }
 
     const jobId = crypto.randomUUID();
     const job: BackupJob = {
       id: jobId,
-      scheduleId: scheduleId || 'manual',
-      type: 'filesystem',
+      scheduleId: scheduleId || "manual",
+      type: "filesystem",
       backupType: this.config.filesystem.incrementalBackup
-        ? 'incremental'
-        : 'full',
-      status: 'pending',
+        ? "incremental"
+        : "full",
+      status: "pending",
       startTime: new Date(),
-      location: '',
+      location: "",
       metadata: {
         sourceSize: 0,
         encrypted: false,
-        checksum: '',
-        version: '1.0',
+        checksum: "",
+        version: "1.0",
       },
     };
 
     this.activeJobs.set(jobId, job);
-    this.emit('backupStarted', job);
+    this.emit("backupStarted", job);
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Generate backup filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `fs_${job.backupType}_${timestamp}.tar.gz`;
       const backupPath = path.join(this.config.filesystem.backupPath, filename);
 
@@ -653,7 +653,7 @@ export class BackupManager extends EventEmitter {
       await this.createTarArchive(
         this.config.filesystem.paths,
         backupPath,
-        this.config.filesystem.excludePatterns
+        this.config.filesystem.excludePatterns,
       );
 
       // Get file size
@@ -663,7 +663,7 @@ export class BackupManager extends EventEmitter {
       const checksum = await this.calculateChecksum(backupPath);
 
       // Update job
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.size = stats.size;
@@ -674,7 +674,7 @@ export class BackupManager extends EventEmitter {
       const metadata: BackupMetadata = {
         id: crypto.randomUUID(),
         timestamp: job.startTime,
-        type: 'filesystem',
+        type: "filesystem",
         backupType: job.backupType,
         size: stats.size,
         compressed: true,
@@ -683,7 +683,7 @@ export class BackupManager extends EventEmitter {
         location: backupPath,
         expiryDate: new Date(
           Date.now() +
-          this.config.filesystem.retentionDays * 24 * 60 * 60 * 1000
+            this.config.filesystem.retentionDays * 24 * 60 * 60 * 1000,
         ),
         dependencies: [],
         restoration: {
@@ -695,19 +695,19 @@ export class BackupManager extends EventEmitter {
       await this.saveBackupMetadata(metadata);
 
       this.updateStatistics();
-      this.emit('backupCompleted', job);
+      this.emit("backupCompleted", job);
 
       console.log(
-        `✅ Filesystem backup completed: ${backupPath} (${this.formatSize(stats.size)})`
+        `✅ Filesystem backup completed: ${backupPath} (${this.formatSize(stats.size)})`,
       );
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.errors = [error.message];
 
-      this.emit('backupFailed', job);
+      this.emit("backupFailed", job);
       console.error(`❌ Filesystem backup failed:`, error);
       throw error;
     } finally {
@@ -721,44 +721,44 @@ export class BackupManager extends EventEmitter {
 
   async createConfigurationBackup(scheduleId?: string): Promise<string> {
     if (!this.config.configuration.enabled) {
-      throw new Error('Configuration backup is disabled');
+      throw new Error("Configuration backup is disabled");
     }
 
     const jobId = crypto.randomUUID();
     const job: BackupJob = {
       id: jobId,
-      scheduleId: scheduleId || 'manual',
-      type: 'configuration',
-      backupType: 'full',
-      status: 'pending',
+      scheduleId: scheduleId || "manual",
+      type: "configuration",
+      backupType: "full",
+      status: "pending",
       startTime: new Date(),
-      location: '',
+      location: "",
       metadata: {
         sourceSize: 0,
-        encrypted: this.config.configuration.secretsHandling === 'encrypt',
-        checksum: '',
-        version: '1.0',
+        encrypted: this.config.configuration.secretsHandling === "encrypt",
+        checksum: "",
+        version: "1.0",
       },
     };
 
     this.activeJobs.set(jobId, job);
-    this.emit('backupStarted', job);
+    this.emit("backupStarted", job);
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Generate backup filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `config_${timestamp}.tar.gz`;
       const backupPath = path.join(
         this.config.configuration.backupPath,
-        filename
+        filename,
       );
 
       // Handle secrets based on configuration
       const pathsToBackup = [...this.config.configuration.configPaths];
 
-      if (this.config.configuration.secretsHandling !== 'exclude') {
+      if (this.config.configuration.secretsHandling !== "exclude") {
         pathsToBackup.push(...this.config.configuration.environmentFiles);
       }
 
@@ -767,7 +767,7 @@ export class BackupManager extends EventEmitter {
 
       // Encrypt if handling secrets with encryption
       let finalPath = backupPath;
-      if (this.config.configuration.secretsHandling === 'encrypt') {
+      if (this.config.configuration.secretsHandling === "encrypt") {
         finalPath = await this.encryptFile(backupPath);
         await fs.unlink(backupPath);
       }
@@ -779,7 +779,7 @@ export class BackupManager extends EventEmitter {
       const checksum = await this.calculateChecksum(finalPath);
 
       // Update job
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.size = stats.size;
@@ -790,16 +790,16 @@ export class BackupManager extends EventEmitter {
       const metadata: BackupMetadata = {
         id: crypto.randomUUID(),
         timestamp: job.startTime,
-        type: 'configuration',
-        backupType: 'full',
+        type: "configuration",
+        backupType: "full",
         size: stats.size,
         compressed: true,
-        encrypted: this.config.configuration.secretsHandling === 'encrypt',
+        encrypted: this.config.configuration.secretsHandling === "encrypt",
         checksum,
         location: finalPath,
         expiryDate: new Date(
           Date.now() +
-          this.config.configuration.retentionDays * 24 * 60 * 60 * 1000
+            this.config.configuration.retentionDays * 24 * 60 * 60 * 1000,
         ),
         dependencies: [],
         restoration: {
@@ -811,19 +811,19 @@ export class BackupManager extends EventEmitter {
       await this.saveBackupMetadata(metadata);
 
       this.updateStatistics();
-      this.emit('backupCompleted', job);
+      this.emit("backupCompleted", job);
 
       console.log(
-        `✅ Configuration backup completed: ${finalPath} (${this.formatSize(stats.size)})`
+        `✅ Configuration backup completed: ${finalPath} (${this.formatSize(stats.size)})`,
       );
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.errors = [error.message];
 
-      this.emit('backupFailed', job);
+      this.emit("backupFailed", job);
       console.error(`❌ Configuration backup failed:`, error);
       throw error;
     } finally {
@@ -837,45 +837,45 @@ export class BackupManager extends EventEmitter {
 
   async createApplicationStateBackup(scheduleId?: string): Promise<string> {
     if (!this.config.applicationState.enabled) {
-      throw new Error('Application state backup is disabled');
+      throw new Error("Application state backup is disabled");
     }
 
     const jobId = crypto.randomUUID();
     const job: BackupJob = {
       id: jobId,
-      scheduleId: scheduleId || 'manual',
-      type: 'application_state',
-      backupType: 'full',
-      status: 'pending',
+      scheduleId: scheduleId || "manual",
+      type: "application_state",
+      backupType: "full",
+      status: "pending",
       startTime: new Date(),
-      location: '',
+      location: "",
       metadata: {
         sourceSize: 0,
         encrypted: false,
-        checksum: '',
-        version: '1.0',
+        checksum: "",
+        version: "1.0",
       },
     };
 
     this.activeJobs.set(jobId, job);
-    this.emit('backupStarted', job);
+    this.emit("backupStarted", job);
 
     try {
-      job.status = 'running';
+      job.status = "running";
 
       // Generate backup filename
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
       const filename = `appstate_${timestamp}.tar.gz`;
       const backupPath = path.join(
         this.config.applicationState.backupPath,
-        filename
+        filename,
       );
 
       // Collect paths to backup
       const pathsToBackup = [...this.config.applicationState.statePaths];
 
       if (this.config.applicationState.logsBackup) {
-        pathsToBackup.push('./logs');
+        pathsToBackup.push("./logs");
       }
 
       // Create tar archive
@@ -888,7 +888,7 @@ export class BackupManager extends EventEmitter {
       const checksum = await this.calculateChecksum(backupPath);
 
       // Update job
-      job.status = 'completed';
+      job.status = "completed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.size = stats.size;
@@ -899,8 +899,8 @@ export class BackupManager extends EventEmitter {
       const metadata: BackupMetadata = {
         id: crypto.randomUUID(),
         timestamp: job.startTime,
-        type: 'application_state',
-        backupType: 'full',
+        type: "application_state",
+        backupType: "full",
         size: stats.size,
         compressed: true,
         encrypted: false,
@@ -908,7 +908,7 @@ export class BackupManager extends EventEmitter {
         location: backupPath,
         expiryDate: new Date(
           Date.now() +
-          this.config.applicationState.retentionDays * 24 * 60 * 60 * 1000
+            this.config.applicationState.retentionDays * 24 * 60 * 60 * 1000,
         ),
         dependencies: [],
         restoration: {
@@ -920,19 +920,19 @@ export class BackupManager extends EventEmitter {
       await this.saveBackupMetadata(metadata);
 
       this.updateStatistics();
-      this.emit('backupCompleted', job);
+      this.emit("backupCompleted", job);
 
       console.log(
-        `✅ Application state backup completed: ${backupPath} (${this.formatSize(stats.size)})`
+        `✅ Application state backup completed: ${backupPath} (${this.formatSize(stats.size)})`,
       );
       return jobId;
     } catch (error) {
-      job.status = 'failed';
+      job.status = "failed";
       job.endTime = new Date();
       job.duration = job.endTime.getTime() - job.startTime.getTime();
       job.errors = [error.message];
 
-      this.emit('backupFailed', job);
+      this.emit("backupFailed", job);
       console.error(`❌ Application state backup failed:`, error);
       throw error;
     } finally {
@@ -945,76 +945,107 @@ export class BackupManager extends EventEmitter {
   // ============================================
 
   private async compressFile(filePath: string): Promise<string> {
-    const compressedPath = filePath + '.gz';
+    const compressedPath = filePath + ".gz";
 
     return new Promise((resolve, reject) => {
-      const gzip = require('zlib').createGzip();
-      const readStream = require('fs').createReadStream(filePath);
-      const writeStream = require('fs').createWriteStream(compressedPath);
+      const gzip = require("zlib").createGzip();
+      const readStream = require("fs").createReadStream(filePath);
+      const writeStream = require("fs").createWriteStream(compressedPath);
 
       readStream
         .pipe(gzip)
         .pipe(writeStream)
-        .on('finish', () => resolve(compressedPath))
-        .on('error', reject);
+        .on("finish", () => resolve(compressedPath))
+        .on("error", (err: any) => {
+          try {
+            readStream.destroy(err);
+          } catch (_e) {
+            /* ignore */
+          }
+          try {
+            writeStream.destroy(err);
+          } catch (_e) {
+            /* ignore */
+          }
+          reject(err);
+        });
     });
   }
 
   private async encryptFile(filePath: string): Promise<string> {
-    const encryptedPath = filePath + '.enc';
+    const encryptedPath = filePath + ".enc";
 
     // Simple encryption using crypto (in production, use proper key management)
     const key = crypto.randomBytes(32);
 
-    const cipher = crypto.createCipher('aes-256-cbc', key);
-    const readStream = require('fs').createReadStream(filePath);
-    const writeStream = require('fs').createWriteStream(encryptedPath);
+    const cipher = crypto.createCipher("aes-256-cbc", key);
+    const readStream = require("fs").createReadStream(filePath);
+    const writeStream = require("fs").createWriteStream(encryptedPath);
 
     return new Promise((resolve, reject) => {
       readStream
         .pipe(cipher)
         .pipe(writeStream)
-        .on('finish', () => resolve(encryptedPath))
-        .on('error', reject);
+        .on("finish", () => resolve(encryptedPath))
+        .on("error", (err: any) => {
+          try {
+            readStream.destroy(err);
+          } catch (_e) {
+            /* ignore */
+          }
+          try {
+            writeStream.destroy(err);
+          } catch (_e) {
+            /* ignore */
+          }
+          reject(err);
+        });
     });
   }
 
   private async calculateChecksum(filePath: string): Promise<string> {
     return new Promise((resolve, reject) => {
-      const hash = crypto.createHash('sha256');
-      const stream = require('fs').createReadStream(filePath);
+      const hash = crypto.createHash("sha256");
+      const stream = require("fs").createReadStream(filePath);
 
-      stream.on('data', (data: any) => hash.update(data));
-      stream.on('end', () => resolve(hash.digest('hex')));
-      stream.on('error', reject);
+      stream.on("data", (data: any) => hash.update(data));
+      stream.on("end", () => resolve(hash.digest("hex")));
+      stream.on("error", (err: any) => {
+        try {
+          stream.destroy(err);
+        } catch (_e) {
+          /* ignore */
+        }
+        reject(err);
+      });
     });
   }
 
   private async createTarArchive(
     paths: string[],
     outputPath: string,
-    excludePatterns: string[] = []
+    excludePatterns: string[] = [],
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const args = ['-czf', outputPath];
+      const args = ["-czf", outputPath];
 
       // Add exclude patterns
       for (const pattern of excludePatterns) {
-        args.push('--exclude', pattern);
+        args.push("--exclude", pattern);
       }
 
       // Add paths
       args.push(...paths);
 
-      const tar = spawn('tar', args);
+      const tar = spawn("tar", args);
 
-      let errorOutput = '';
+      let errorOutput = "";
 
-      tar.stderr.on('data', data => {
+      tar.stderr.on("data", (data) => {
         errorOutput += data.toString();
       });
 
-      tar.on('close', code => {
+      tar.on("close", (code) => {
         if (code === 0) {
           resolve();
         } else {
@@ -1022,7 +1053,7 @@ export class BackupManager extends EventEmitter {
         }
       });
 
-      tar.on('error', error => {
+      tar.on("error", (error) => {
         reject(new Error(`Failed to start tar: ${error.message}`));
       });
     });
@@ -1030,10 +1061,10 @@ export class BackupManager extends EventEmitter {
 
   private getLastFullBackupIds(type: string): string[] {
     const fullBackups = Array.from(this.backupMetadata.values())
-      .filter(backup => backup.type === type && backup.backupType === 'full')
+      .filter((backup) => backup.type === type && backup.backupType === "full")
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 
-    return fullBackups.slice(0, 1).map(backup => backup.id);
+    return fullBackups.slice(0, 1).map((backup) => backup.id);
   }
 
   // ============================================
@@ -1045,17 +1076,17 @@ export class BackupManager extends EventEmitter {
     if (this.config.database.enabled) {
       for (const schedule of this.config.database.schedules) {
         if (schedule.enabled) {
-          this.scheduleJob(schedule, 'database');
+          this.scheduleJob(schedule, "database");
         }
       }
     }
 
-    console.log('📅 Backup jobs scheduled successfully');
+    console.log("📅 Backup jobs scheduled successfully");
   }
 
   private scheduleJob(
     schedule: BackupSchedule,
-    type: 'database' | 'filesystem' | 'configuration' | 'application_state'
+    type: "database" | "filesystem" | "configuration" | "application_state",
   ) {
     // For simplicity, we'll use setTimeout with calculated intervals
     const interval = this.calculateInterval(schedule);
@@ -1065,30 +1096,30 @@ export class BackupManager extends EventEmitter {
         console.log(`🔄 Running scheduled backup: ${schedule.name}`);
 
         switch (type) {
-          case 'database': {
+          case "database": {
             // Map differential to incremental for database backups
             const backupType =
-              schedule.type === 'differential' ? 'incremental' : schedule.type;
+              schedule.type === "differential" ? "incremental" : schedule.type;
             await this.createDatabaseBackup(
               schedule.id,
-              backupType as 'full' | 'incremental'
+              backupType as "full" | "incremental",
             );
             break;
           }
-          case 'filesystem':
+          case "filesystem":
             await this.createFilesystemBackup(schedule.id);
             break;
-          case 'configuration':
+          case "configuration":
             await this.createConfigurationBackup(schedule.id);
             break;
-          case 'application_state':
+          case "application_state":
             await this.createApplicationStateBackup(schedule.id);
             break;
         }
       } catch (error) {
         console.error(
           `Failed to run scheduled backup ${schedule.name}:`,
-          error
+          error,
         );
       }
     }, interval);
@@ -1096,31 +1127,15 @@ export class BackupManager extends EventEmitter {
     this.scheduledJobs.set(schedule.id, timeoutId);
   }
 
-  private convertToCron(schedule: BackupSchedule): string {
-    // Convert schedule to cron expression
-    switch (schedule.frequency) {
-      case 'hourly':
-        return `0 ${schedule.time} * * *`;
-      case 'daily':
-        return `0 ${schedule.time.split(':')[1]} ${schedule.time.split(':')[0]} * *`;
-      case 'weekly':
-        return `0 ${schedule.time.split(':')[1]} ${schedule.time.split(':')[0]} * ${schedule.daysOfWeek?.[0] || 0}`;
-      case 'monthly':
-        return `0 ${schedule.time.split(':')[1]} ${schedule.time.split(':')[0]} ${schedule.dayOfMonth || 1} *`;
-      default:
-        return '0 0 2 * *'; // Default: 2 AM daily
-    }
-  }
-
   private calculateInterval(schedule: BackupSchedule): number {
     switch (schedule.frequency) {
-      case 'hourly':
+      case "hourly":
         return 60 * 60 * 1000; // 1 hour
-      case 'daily':
+      case "daily":
         return 24 * 60 * 60 * 1000; // 1 day
-      case 'weekly':
+      case "weekly":
         return 7 * 24 * 60 * 60 * 1000; // 1 week
-      case 'monthly':
+      case "monthly":
         return 30 * 24 * 60 * 60 * 1000; // 1 month
       default:
         return 24 * 60 * 60 * 1000; // Default: 1 day
@@ -1139,7 +1154,7 @@ export class BackupManager extends EventEmitter {
       () => {
         this.performHealthCheck();
       },
-      5 * 60 * 1000
+      5 * 60 * 1000,
     );
   }
 
@@ -1149,7 +1164,7 @@ export class BackupManager extends EventEmitter {
       () => {
         this.cleanupExpiredBackups();
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000,
     );
   }
 
@@ -1160,24 +1175,27 @@ export class BackupManager extends EventEmitter {
 
       // Check for failed jobs
       const failedJobs = Array.from(this.activeJobs.values()).filter(
-        job => job.status === 'failed'
+        (job) => job.status === "failed",
       );
 
       if (failedJobs.length > 0 && this.config.monitoring.alertOnFailure) {
-        this.emit('healthCheckFailed', {
+        this.emit("healthCheckFailed", {
           failedJobs: failedJobs.length,
-          details: failedJobs.map(job => ({ id: job.id, errors: job.errors })),
+          details: failedJobs.map((job) => ({
+            id: job.id,
+            errors: job.errors,
+          })),
         });
       }
 
-      this.emit('healthCheckCompleted', {
-        status: failedJobs.length === 0 ? 'healthy' : 'warning',
+      this.emit("healthCheckCompleted", {
+        status: failedJobs.length === 0 ? "healthy" : "warning",
         activeJobs: this.activeJobs.size,
         failedJobs: failedJobs.length,
         storageUtilization: this.statistics.storageUtilization,
       });
     } catch (error) {
-      console.error('Health check failed:', error);
+      console.error("Health check failed:", error);
     }
   }
 
@@ -1200,7 +1218,7 @@ export class BackupManager extends EventEmitter {
 
     if (expiredBackups.length > 0) {
       this.updateStatistics();
-      this.emit('backupsCleanedUp', {
+      this.emit("backupsCleanedUp", {
         count: expiredBackups.length,
         backupIds: expiredBackups,
       });
@@ -1211,7 +1229,7 @@ export class BackupManager extends EventEmitter {
     try {
       const totalSize = Array.from(this.backupMetadata.values()).reduce(
         (sum, metadata) => sum + metadata.size,
-        0
+        0,
       );
 
       // Get available disk space
@@ -1224,7 +1242,7 @@ export class BackupManager extends EventEmitter {
         utilizationPercentage: (totalSize / availableSpace) * 100,
       };
     } catch (error) {
-      console.warn('Failed to update storage utilization:', error);
+      console.warn("Failed to update storage utilization:", error);
     }
   }
 
@@ -1239,27 +1257,27 @@ export class BackupManager extends EventEmitter {
     this.statistics.totalBackups = backups.length;
     this.statistics.totalSize = backups.reduce(
       (sum, backup) => sum + backup.size,
-      0
+      0,
     );
 
-    const completedJobs = jobs.filter(job => job.status === 'completed');
+    const completedJobs = jobs.filter((job) => job.status === "completed");
     this.statistics.successRate =
       jobs.length > 0 ? (completedJobs.length / jobs.length) * 100 : 0;
 
     const durations = completedJobs
-      .filter(job => job.duration)
-      .map(job => job.duration!);
+      .filter((job) => job.duration)
+      .map((job) => job.duration!);
     this.statistics.averageDuration =
       durations.length > 0
         ? durations.reduce((sum, duration) => sum + duration, 0) /
-        durations.length
+          durations.length
         : 0;
 
     this.statistics.lastBackupTime =
       backups.length > 0
         ? new Date(
-          Math.max(...backups.map(backup => backup.timestamp.getTime()))
-        )
+            Math.max(...backups.map((backup) => backup.timestamp.getTime())),
+          )
         : undefined;
 
     // Group by type
@@ -1268,7 +1286,7 @@ export class BackupManager extends EventEmitter {
         acc[backup.type] = (acc[backup.type] || 0) + 1;
         return acc;
       },
-      {}
+      {},
     );
 
     // Group by status (using jobs)
@@ -1277,25 +1295,25 @@ export class BackupManager extends EventEmitter {
         acc[job.status] = (acc[job.status] || 0) + 1;
         return acc;
       },
-      {}
+      {},
     );
   }
 
   private async saveBackupMetadata(metadata: BackupMetadata): Promise<void> {
-    const metadataPath = path.join('./backups/metadata', `${metadata.id}.json`);
+    const metadataPath = path.join("./backups/metadata", `${metadata.id}.json`);
     await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
   }
 
   private async loadBackupMetadata(): Promise<void> {
     try {
-      const metadataDir = './backups/metadata';
+      const metadataDir = "./backups/metadata";
       const files = await fs.readdir(metadataDir).catch(() => []);
 
       for (const file of files) {
-        if (file.endsWith('.json')) {
+        if (file.endsWith(".json")) {
           try {
             const filePath = path.join(metadataDir, file);
-            const data = await fs.readFile(filePath, 'utf8');
+            const data = await fs.readFile(filePath, "utf8");
             const metadata: BackupMetadata = JSON.parse(data);
             this.backupMetadata.set(metadata.id, metadata);
           } catch (error) {
@@ -1305,10 +1323,10 @@ export class BackupManager extends EventEmitter {
       }
 
       console.log(
-        `📂 Loaded ${this.backupMetadata.size} backup metadata records`
+        `📂 Loaded ${this.backupMetadata.size} backup metadata records`,
       );
     } catch (error) {
-      console.warn('Failed to load backup metadata:', error);
+      console.warn("Failed to load backup metadata:", error);
     }
   }
 
@@ -1318,28 +1336,28 @@ export class BackupManager extends EventEmitter {
 
   async createManualBackup(
     type:
-      | 'database'
-      | 'filesystem'
-      | 'configuration'
-      | 'application_state'
-      | 'all'
+      | "database"
+      | "filesystem"
+      | "configuration"
+      | "application_state"
+      | "all",
   ): Promise<string[]> {
     const jobIds: string[] = [];
 
     try {
-      if (type === 'database' || type === 'all') {
+      if (type === "database" || type === "all") {
         jobIds.push(await this.createDatabaseBackup());
       }
 
-      if (type === 'filesystem' || type === 'all') {
+      if (type === "filesystem" || type === "all") {
         jobIds.push(await this.createFilesystemBackup());
       }
 
-      if (type === 'configuration' || type === 'all') {
+      if (type === "configuration" || type === "all") {
         jobIds.push(await this.createConfigurationBackup());
       }
 
-      if (type === 'application_state' || type === 'all') {
+      if (type === "application_state" || type === "all") {
         jobIds.push(await this.createApplicationStateBackup());
       }
 
@@ -1366,7 +1384,7 @@ export class BackupManager extends EventEmitter {
   }
 
   private formatSize(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    const units = ["B", "KB", "MB", "GB", "TB"];
     let size = bytes;
     let unitIndex = 0;
 
@@ -1388,8 +1406,8 @@ export class BackupManager extends EventEmitter {
     this.scheduledJobs.clear();
     this.scheduleBackupJobs();
 
-    console.log('🔧 BackupManager configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 BackupManager configuration updated");
+    this.emit("configUpdated", this.config);
   }
 }
 

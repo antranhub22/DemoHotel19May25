@@ -3,9 +3,10 @@ process.env.NODE_OPTIONS = "--max-old-space-size=768 --expose-gc";
 
 // Force aggressive garbage collection every 30 seconds
 if (global.gc) {
+  const manualGc = global.gc;
   setInterval(() => {
     try {
-      global.gc();
+      manualGc();
       console.log(
         `🔄 [EMERGENCY] Forced GC - Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
       );
@@ -31,7 +32,7 @@ import { autoMigrateOnDeploy } from "@tools/scripts/maintenance/auto-migrate-on-
 import { seedProductionUsers } from "@tools/scripts/maintenance/seed-production-users";
 import cors from "cors";
 import "dotenv/config";
-import express, { NextFunction, type Request, Response } from "express";
+import express, { NextFunction, Response, type Request } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import http from "http";
@@ -409,6 +410,54 @@ app.use((req, res, next) => {
     setTimeout(() => {
       initializeMonitoringReminder();
     }, 1000);
+
+    // Graceful shutdown and cleanup to prevent leaks
+    const cleanup = () => {
+      try {
+        // Stop background systems if available
+        try {
+          const { createAPIGateway } = require("@server/shared/APIGateway");
+          const gateway = createAPIGateway({} as any);
+          if (gateway && typeof gateway.stopAnalytics === "function") {
+            gateway.stopAnalytics();
+          }
+        } catch (_e) {
+          void 0;
+        }
+
+        try {
+          const {
+            default: MonitoringDashboard,
+          } = require("@server/shared/MonitoringDashboard");
+          if (
+            MonitoringDashboard &&
+            typeof MonitoringDashboard.prototype.stop === "function"
+          ) {
+            // If an instance exists in your app, stop it here (placeholder)
+          }
+        } catch (_e) {
+          void 0;
+        }
+
+        // Attempt to free memory
+        if (global.gc) {
+          const gcNow = global.gc;
+          gcNow();
+        }
+      } catch (_e) {
+        void 0;
+      }
+    };
+
+    const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM", "SIGHUP"];
+    for (const sig of signals) {
+      if (process.listenerCount(sig) < 5) {
+        process.on(sig, () => {
+          cleanup();
+          server.close(() => process.exit(0));
+        });
+      }
+    }
   });
 })();
 

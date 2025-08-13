@@ -771,7 +771,7 @@ export class APIGateway extends EventEmitter {
 
   private validateJWT(
     req: Request,
-    config: any,
+    _config: any,
     context: RequestContext,
   ): { success: boolean; error?: string } {
     // Simplified JWT validation (would use proper JWT library)
@@ -796,7 +796,7 @@ export class APIGateway extends EventEmitter {
 
   private validateAPIKey(
     req: Request,
-    config: any,
+    _config: any,
     context: RequestContext,
   ): { success: boolean; error?: string } {
     const apiKey = req.get("X-API-Key") || (req.query.api_key as string);
@@ -914,7 +914,7 @@ export class APIGateway extends EventEmitter {
 
   private resolveRoute(
     req: Request,
-    context: RequestContext,
+    _context: RequestContext,
   ): RoutingRule | null {
     for (const [, rule] of this.routingTable) {
       const patternMatch = new RegExp(rule.pattern).test(req.path);
@@ -1133,6 +1133,17 @@ export class APIGateway extends EventEmitter {
     }, 60000); // Every minute
 
     logger.debug("📊 [APIGateway] Analytics started", "APIGateway");
+  }
+
+  /**
+   * Stop background analytics timers and listeners
+   */
+  public stopAnalytics(): void {
+    if (this.metricsInterval) {
+      clearInterval(this.metricsInterval);
+      this.metricsInterval = null as any;
+      logger.debug("🛑 [APIGateway] Analytics stopped", "APIGateway");
+    }
   }
 
   private startHealthChecks(): void {

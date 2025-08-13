@@ -5,6 +5,8 @@
 
 import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
+import * as path from "path";
+import * as v8 from "v8";
 import { emergencyCleanup } from "./emergencyCleanup";
 
 interface MemoryStats {
@@ -17,11 +19,14 @@ interface MemoryStats {
 
 class MemoryManager {
   private static instance: MemoryManager;
-  private readonly MEMORY_THRESHOLD = 0.5; // 🔥 RADICAL: 50% threshold for much earlier intervention
-  private readonly CRITICAL_THRESHOLD = 0.65; // 🔥 RADICAL: 65% critical to prevent 94% situations
+  // Thresholds are percentages (0-100)
+  private readonly MEMORY_THRESHOLD = 50; // Early intervention at 50%
+  private readonly CRITICAL_THRESHOLD = 65; // Critical at 65%
   private readonly CHECK_INTERVAL = 60000; // 🔥 OPTIMIZED: 60 seconds to reduce overhead
   private lastGC = 0;
   private gcInterval: NodeJS.Timeout | null = null;
+  private samples: Array<{ ts: number; heapUsed: number; rss: number }> = [];
+  private readonly MAX_SAMPLES = 120; // keep last 2h if CHECK_INTERVAL=60s
 
   constructor() {
     this.startMonitoring();
@@ -37,6 +42,7 @@ class MemoryManager {
   private startMonitoring(): void {
     this.gcInterval = setInterval(() => {
       this.checkMemoryUsage();
+      this.recordSample();
     }, this.CHECK_INTERVAL);
   }
 
@@ -54,6 +60,8 @@ class MemoryManager {
           rss: `${stats.rss}MB`,
         },
       );
+      // Generate heap snapshot for diagnostics (best-effort)
+      this.safeWriteHeapSnapshot("critical-threshold");
       this.performEmergencyCleanup();
     } else if (stats.usage > this.MEMORY_THRESHOLD) {
       logger.warn("⚠️ [MEMORY] High memory usage detected", "MemoryManager", {
@@ -61,6 +69,19 @@ class MemoryManager {
         heapUsed: `${stats.heapUsed}MB`,
       });
       this.performOptimization();
+    }
+  }
+
+  private recordSample(): void {
+    const usage = process.memoryUsage();
+    const sample = {
+      ts: Date.now(),
+      heapUsed: Math.round(usage.heapUsed / 1024 / 1024),
+      rss: Math.round(usage.rss / 1024 / 1024),
+    };
+    this.samples.push(sample);
+    if (this.samples.length > this.MAX_SAMPLES) {
+      this.samples.splice(0, this.samples.length - this.MAX_SAMPLES);
     }
   }
 
@@ -73,6 +94,22 @@ class MemoryManager {
       rss: Math.round(usage.rss / 1024 / 1024),
       usage: (usage.heapUsed / usage.heapTotal) * 100,
     };
+  }
+
+  private safeWriteHeapSnapshot(reason: string): void {
+    try {
+      const filename = `heap-${new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")}-${reason}.heapsnapshot`;
+      const outPath = path.join(process.cwd(), filename);
+      v8.writeHeapSnapshot(outPath);
+      logger.warn("🧠 [MEMORY] Heap snapshot written", "MemoryManager", {
+        file: outPath,
+        reason,
+      });
+    } catch (error) {
+      logger.debug("Heap snapshot failed (ignored)", "MemoryManager", error);
+    }
   }
 
   private performOptimization(): void {
@@ -248,25 +285,51 @@ export const memoryOptimizationMiddleware = (
     req.method === "POST";
 
   if (isHeavyEndpoint) {
-    // Add memory stats to request for debugging heavy operations only
-    const stats = memoryManager.getMemoryReport();
-    (req as any).memoryStats = stats;
+    // Pre-request sample
+    const before = memoryManager.getMemoryReport();
+    (req as any).memoryStats = before;
 
-    // Warn if memory is high before heavy processing
-    if (stats.usage > 70) {
-      // 🔥 AGGRESSIVE: 70% warning to prevent critical situations
-      logger.warn(
-        "⚠️ [MEMORY] High memory usage before request processing",
-        "MemoryOptimizationMiddleware",
-        {
-          endpoint: req.path,
-          method: req.method,
-          memoryUsage: `${stats.usage.toFixed(2)}%`,
-          heapUsed: `${stats.heapUsed}MB`,
-          rss: `${stats.rss}MB`,
-        },
-      );
-    }
+    // Long-running request watchdog
+    const watchdog = setTimeout(() => {
+      const current = memoryManager.getMemoryReport();
+      if (current.usage > memoryManager["CRITICAL_THRESHOLD"]) {
+        logger.error(
+          "⏱️ [MEMORY] Long-running request under high memory",
+          "MemoryOptimizationMiddleware",
+          {
+            endpoint: req.path,
+            method: req.method,
+            memoryUsage: `${current.usage.toFixed(2)}%`,
+            heapUsed: `${current.heapUsed}MB`,
+          },
+        );
+        // Best-effort emergency cleanup when critical during long requests
+        void emergencyCleanup.forceMemoryCleanup();
+      }
+    }, 15000); // 15s watchdog
+
+    // Finish hook to report deltas
+    const cleanup = () => {
+      clearTimeout(watchdog);
+      const after = memoryManager.getMemoryReport();
+      const delta = after.heapUsed - before.heapUsed;
+      if (delta > 25 || after.usage > 75) {
+        logger.warn(
+          "📈 [MEMORY] High-memory request detected",
+          "MemoryOptimizationMiddleware",
+          {
+            endpoint: req.path,
+            method: req.method,
+            heapDeltaMB: delta,
+            before: `${before.heapUsed}MB (${before.usage.toFixed(2)}%)`,
+            after: `${after.heapUsed}MB (${after.usage.toFixed(2)}%)`,
+          },
+        );
+      }
+    };
+
+    _res.on("finish", cleanup);
+    _res.on("close", cleanup);
   }
 
   next();

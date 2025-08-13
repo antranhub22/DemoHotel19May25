@@ -669,6 +669,23 @@ export class MonitoringDashboard extends EventEmitter {
     );
   }
 
+  /**
+   * Cleanup timers/listeners to avoid leaks
+   */
+  public stop(): void {
+    if (this.alertChecksInterval) {
+      clearInterval(this.alertChecksInterval);
+      this.alertChecksInterval = null as any;
+    }
+    if (this.updateInterval) {
+      clearInterval(this.updateInterval);
+      this.updateInterval = null as any;
+    }
+    this.removeAllListeners("alert");
+    this.removeAllListeners("metricsUpdate");
+    logger.debug("🛑 [MonitoringDashboard] Stopped", "MonitoringDashboard");
+  }
+
   private setupEventHandlers(): void {
     this.on("alert", (alert: Alert) => {
       // Handle alert logic
