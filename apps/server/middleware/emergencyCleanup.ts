@@ -160,12 +160,12 @@ class EmergencyCleanup {
       await new Promise((resolve) => setTimeout(resolve, 100));
       global.gc();
     } else {
-      // Alternative without manual GC
-      for (let i = 0; i < 10; i++) {
-        const temp = new Array(100000).fill(0);
-        temp.length = 0;
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
+      // ✅ CRITICAL FIX: Remove memory bomb - was creating 1M objects!
+      // Just wait for natural GC instead of forcing memory pressure
+      logger.debug(
+        "No manual GC available, relying on natural collection",
+        "EmergencyCleanup",
+      );
     }
   }
 
