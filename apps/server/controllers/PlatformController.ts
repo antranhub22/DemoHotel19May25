@@ -150,7 +150,7 @@ export class PlatformController {
       // Get detailed analytics data
       const analytics = await Promise.all([
         this.getTenantGrowth(startDate, endDate),
-        this.getRevenueAnalytics(startDate, endDate),
+        this.getDetailedRevenueAnalytics(startDate, endDate),
         this.getFeatureAdoptionStats(startDate, endDate),
         this.getGeographicDistribution(),
         this.getPerformanceMetrics(startDate, endDate),
@@ -240,15 +240,21 @@ export class PlatformController {
       const { page, limit, plan, status, sortBy, sortOrder } = validation.data;
       const offset = (page - 1) * limit;
 
-      // Build filter conditions
+      // ✅ SECURITY FIX: Use parameterized queries for all dynamic conditions
       let whereClause = "";
+      let whereParams: any[] = [];
       const conditions: string[] = [];
+      let paramIndex = 1;
 
       if (plan !== "all") {
-        conditions.push(`subscription_plan = '${plan}'`);
+        conditions.push(`subscription_plan = $${paramIndex}`);
+        whereParams.push(plan);
+        paramIndex++;
       }
       if (status !== "all") {
-        conditions.push(`subscription_status = '${status}'`);
+        conditions.push(`subscription_status = $${paramIndex}`);
+        whereParams.push(status);
+        paramIndex++;
       }
 
       if (conditions.length > 0) {
@@ -281,17 +287,20 @@ export class PlatformController {
           orderClause = `ORDER BY created_at ${sortOrder.toUpperCase()}`;
       }
 
-      // Get total count
-      const countResult = await this.prisma.$queryRawUnsafe<any[]>(`
+      // ✅ SECURITY FIX: Use parameterized query for count
+      const countSql = `
         SELECT COUNT(*) as total_count
         FROM tenants 
         ${whereClause}
-      `);
-
+      `;
+      const countResult = await this.prisma.$queryRawUnsafe<any[]>(
+        countSql,
+        ...whereParams,
+      );
       const totalCount = parseInt(countResult[0]?.total_count) || 0;
 
-      // Get tenants with detailed information
-      const tenants = await this.prisma.$queryRawUnsafe<any[]>(`
+      // ✅ SECURITY FIX: Use parameterized query for main data query
+      const baseSql = `
         SELECT 
           t.*,
           (SELECT COUNT(*) FROM api_usage WHERE tenant_id = t.id AND timestamp >= DATE_TRUNC('month', CURRENT_DATE)) as monthly_api_calls,
@@ -300,8 +309,15 @@ export class PlatformController {
         FROM tenants t
         ${whereClause}
         ${orderClause}
-        LIMIT ${limit} OFFSET ${offset}
-      `);
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+      `;
+
+      const tenants = await this.prisma.$queryRawUnsafe<any[]>(
+        baseSql,
+        ...whereParams,
+        limit,
+        offset,
+      );
 
       res.json({
         success: true,
@@ -339,10 +355,20 @@ export class PlatformController {
    */
   async getTenantDetails(req: Request, res: Response): Promise<void> {
     try {
-      const tenantId = req.params.tenantId;
+      const tenantIdParam = req.params.tenantId;
 
-      // Get comprehensive tenant details
-      const tenantDetails = await this.prisma.$queryRaw<any[]>`
+      // ✅ SECURITY FIX: Validate tenantId parameter
+      if (!tenantIdParam || !/^[a-zA-Z0-9\-_]+$/.test(tenantIdParam)) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid tenant ID format",
+        });
+        return;
+      }
+
+      // ✅ SECURITY FIX: Use parameterized query to prevent SQL injection
+      const tenantDetails = await this.prisma.$queryRawUnsafe<any[]>(
+        `
         SELECT 
           t.*,
           hp.research_data,
@@ -355,8 +381,10 @@ export class PlatformController {
           (SELECT COUNT(*) FROM api_usage WHERE tenant_id = t.id AND timestamp >= DATE_TRUNC('month', CURRENT_DATE)) as monthly_api_usage
         FROM tenants t
         LEFT JOIN hotel_profiles hp ON hp.tenant_id = t.id
-        WHERE t.id = ${tenantId}
-      `;
+        WHERE t.id = $1
+        `,
+        [tenantIdParam],
+      );
 
       if (tenantDetails.length === 0) {
         res.status(404).json({
@@ -368,18 +396,21 @@ export class PlatformController {
 
       const tenant = tenantDetails[0];
 
-      // Get usage trends for the last 30 days
-      const usageTrends = await this.prisma.$queryRaw<any[]>`
+      // ✅ SECURITY FIX: Get usage trends with parameterized query
+      const usageTrends = await this.prisma.$queryRawUnsafe<any[]>(
+        `
         SELECT 
           DATE(timestamp) as date,
           COUNT(*) as api_calls,
           COUNT(DISTINCT CASE WHEN endpoint LIKE '%/call%' THEN endpoint END) as voice_calls
         FROM api_usage 
-        WHERE tenant_id = ${tenantId}
+        WHERE tenant_id = $1
           AND timestamp >= CURRENT_DATE - INTERVAL '30 days'
         GROUP BY DATE(timestamp)
         ORDER BY date DESC
-      `;
+        `,
+        [tenantIdParam],
+      );
 
       res.json({
         success: true,
@@ -450,23 +481,30 @@ export class PlatformController {
 
       const { status, reason } = validation.data;
 
-      // Update tenant status
-      await this.prisma.$executeRaw`
+      // ✅ SECURITY FIX: Use parameterized queries for updates
+      const now = new Date();
+      await this.prisma.$executeRawUnsafe(
+        `
         UPDATE tenants 
-        SET subscription_status = ${status}, updated_at = ${new Date()}
-        WHERE id = ${tenantId}
-      `;
+        SET subscription_status = $1, updated_at = $2
+        WHERE id = $3
+        `,
+        [status, now, tenantId],
+      );
 
-      // Log the status change
-      await this.prisma.$executeRaw`
+      // ✅ SECURITY FIX: Log the status change with parameterized query
+      await this.prisma.$executeRawUnsafe(
+        `
         INSERT INTO tenant_status_changes (tenant_id, old_status, new_status, reason, changed_by, created_at)
-        VALUES (${tenantId}, 
-                (SELECT subscription_status FROM tenants WHERE id = ${tenantId}), 
-                ${status}, 
-                ${reason || ""}, 
-                ${req.user?.id || "system"}, 
-                ${new Date()})
-      `;
+        VALUES ($1, 
+                (SELECT subscription_status FROM tenants WHERE id = $1), 
+                $2, 
+                $3, 
+                $4, 
+                $5)
+        `,
+        [tenantId, status, reason || "", req.user?.id || "system", now],
+      );
 
       res.json({
         success: true,
@@ -526,17 +564,31 @@ export class PlatformController {
   async getUsageTrends(req: Request, res: Response): Promise<void> {
     try {
       const period = (req.query.period as string) || "last_30d";
-      const metric = (req.query.metric as string) || "api_calls";
+      const metricParam = (req.query.metric as string) || "api_calls";
       const { startDate, endDate } = this.getPeriodDates(period);
 
-      // Get daily usage trends
+      // ✅ SECURITY FIX: Validate metric parameter against allowed values
+      const allowedMetrics = ["api_calls", "voice_calls"];
+      const metric = allowedMetrics.includes(metricParam)
+        ? metricParam
+        : "api_calls";
+
+      // ✅ SECURITY FIX: Use safe table and column mapping
+      const tableMapping = {
+        api_calls: { table: "api_usage", column: "api_calls" },
+        voice_calls: { table: "call", column: "total_calls" },
+      };
+
+      const { table, column } = tableMapping[metric];
+
+      // Get daily usage trends with parameterized query
       const trends = await this.prisma.$queryRawUnsafe<any[]>(
         `
         SELECT 
           DATE(timestamp) as date,
-          COUNT(*) as ${metric === "api_calls" ? "api_calls" : "total_calls"},
+          COUNT(*) as ${column},
           COUNT(DISTINCT tenant_id) as active_tenants
-        FROM ${metric === "api_calls" ? "api_usage" : "call"} 
+        FROM ${table}
         WHERE timestamp >= $1 AND timestamp <= $2
         GROUP BY DATE(timestamp)
         ORDER BY date ASC
@@ -618,18 +670,22 @@ export class PlatformController {
         return;
       }
 
-      const featureUsage = await this.prisma.$queryRaw<any[]>`
+      // ✅ SECURITY FIX: Use parameterized query to prevent SQL injection
+      const featureUsage = await this.prisma.$queryRawUnsafe<any[]>(
+        `
         SELECT 
           DATE(timestamp) as date,
           COUNT(*) as usage_count,
           COUNT(DISTINCT tenant_id) as unique_tenants
         FROM feature_usage 
-        WHERE feature_id = ${feature}
-          AND timestamp >= ${startDate}
-          AND timestamp <= ${endDate}
+        WHERE feature_id = $1
+          AND timestamp >= $2
+          AND timestamp <= $3
         GROUP BY DATE(timestamp)
         ORDER BY date ASC
-      `;
+        `,
+        [feature, startDate, endDate],
+      );
 
       res.json({
         success: true,
@@ -656,7 +712,7 @@ export class PlatformController {
   /**
    * Get platform health status
    */
-  async getPlatformHealth(req: Request, res: Response): Promise<void> {
+  async getPlatformHealth(res: Response): Promise<void> {
     try {
       const health = await this.getSystemMetrics();
 
@@ -686,20 +742,43 @@ export class PlatformController {
    */
   async getPlatformAlerts(req: Request, res: Response): Promise<void> {
     try {
-      const severity = (req.query.severity as string) || "all";
-      const limit = parseInt(req.query.limit as string) || 50;
+      const severityParam = (req.query.severity as string) || "all";
+      const limit = Math.min(
+        Math.max(parseInt(req.query.limit as string) || 50, 1),
+        1000,
+      ); // ✅ Validate limit range
 
-      let whereClause = "";
+      // ✅ SECURITY FIX: Validate severity parameter against allowed values
+      const allowedSeverities = ["low", "medium", "high", "critical", "all"];
+      const severity = allowedSeverities.includes(severityParam)
+        ? severityParam
+        : "all";
+
+      // ✅ SECURITY FIX: Use parameterized query for all dynamic values
+      let baseSql: string;
+      let queryParams: any[];
+
       if (severity !== "all") {
-        whereClause = `WHERE severity = '${severity}'`;
+        baseSql = `
+          SELECT * FROM platform_alerts 
+          WHERE severity = $1
+          ORDER BY created_at DESC 
+          LIMIT $2
+        `;
+        queryParams = [severity, limit];
+      } else {
+        baseSql = `
+          SELECT * FROM platform_alerts 
+          ORDER BY created_at DESC 
+          LIMIT $1
+        `;
+        queryParams = [limit];
       }
 
-      const alerts = await this.prisma.$queryRawUnsafe<any[]>(`
-        SELECT * FROM platform_alerts 
-        ${whereClause}
-        ORDER BY created_at DESC 
-        LIMIT ${limit}
-      `);
+      const alerts = await this.prisma.$queryRawUnsafe<any[]>(
+        baseSql,
+        ...queryParams,
+      );
 
       res.json({
         success: true,
@@ -726,11 +805,22 @@ export class PlatformController {
     try {
       const { type, scheduledAt, duration, description } = req.body;
 
-      // Insert maintenance schedule
-      await this.prisma.$executeRaw`
+      // ✅ SECURITY FIX: Use parameterized query for maintenance schedule
+      const now = new Date();
+      await this.prisma.$executeRawUnsafe(
+        `
         INSERT INTO maintenance_schedule (type, scheduled_at, duration_minutes, description, created_by, created_at)
-        VALUES (${type}, ${new Date(scheduledAt)}, ${duration || 60}, ${description || ""}, ${req.user?.id}, ${new Date()})
-      `;
+        VALUES ($1, $2, $3, $4, $5, $6)
+        `,
+        [
+          type,
+          new Date(scheduledAt),
+          duration || 60,
+          description || "",
+          req.user?.id || "system",
+          now,
+        ],
+      );
 
       res.json({
         success: true,
@@ -762,7 +852,7 @@ export class PlatformController {
   /**
    * Get system status
    */
-  async getSystemStatus(req: Request, res: Response): Promise<void> {
+  async getSystemStatus(res: Response): Promise<void> {
     try {
       const systemStatus = await this.getDetailedSystemStatus();
 
@@ -928,16 +1018,20 @@ export class PlatformController {
   }
 
   private async getTotalTenants(startDate: Date, endDate: Date): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         COUNT(*) as total,
         COUNT(CASE WHEN subscription_plan = 'trial' THEN 1 END) as trial,
         COUNT(CASE WHEN subscription_plan = 'basic' THEN 1 END) as basic,
         COUNT(CASE WHEN subscription_plan = 'premium' THEN 1 END) as premium,
         COUNT(CASE WHEN subscription_plan = 'enterprise' THEN 1 END) as enterprise,
-        COUNT(CASE WHEN created_at >= ${startDate} AND created_at <= ${endDate} THEN 1 END) as new_in_period
+        COUNT(CASE WHEN created_at >= $1 AND created_at <= $2 THEN 1 END) as new_in_period
       FROM tenants
-    `;
+      `,
+      [startDate, endDate],
+    );
 
     return result[0] || {};
   }
@@ -964,14 +1058,18 @@ export class PlatformController {
   }
 
   private async getUsageMetrics(startDate: Date, endDate: Date): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         COUNT(*) as total_api_calls,
         COUNT(DISTINCT tenant_id) as active_tenants,
         AVG(response_time) as avg_response_time
       FROM api_usage 
-      WHERE timestamp >= ${startDate} AND timestamp <= ${endDate}
-    `;
+      WHERE timestamp >= $1 AND timestamp <= $2
+      `,
+      [startDate, endDate],
+    );
 
     return result[0] || {};
   }
@@ -980,13 +1078,17 @@ export class PlatformController {
     startDate: Date,
     endDate: Date,
   ): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         COUNT(CASE WHEN subscription_plan = 'trial' THEN 1 END) as trial_users,
-        COUNT(CASE WHEN subscription_plan != 'trial' AND created_at >= ${startDate} THEN 1 END) as conversions
+        COUNT(CASE WHEN subscription_plan != 'trial' AND created_at >= $1 THEN 1 END) as conversions
       FROM tenants
-      WHERE created_at >= ${startDate} AND created_at <= ${endDate}
-    `;
+      WHERE created_at >= $1 AND created_at <= $2
+      `,
+      [startDate, endDate],
+    );
 
     const data = result[0] || {};
     const conversionRate =
@@ -996,13 +1098,17 @@ export class PlatformController {
   }
 
   private async getChurnMetrics(startDate: Date, endDate: Date): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         COUNT(CASE WHEN subscription_status = 'cancelled' THEN 1 END) as churned,
         COUNT(*) as total
       FROM tenants
-      WHERE updated_at >= ${startDate} AND updated_at <= ${endDate}
-    `;
+      WHERE updated_at >= $1 AND updated_at <= $2
+      `,
+      [startDate, endDate],
+    );
 
     const data = result[0] || {};
     const churnRate = data.total > 0 ? (data.churned / data.total) * 100 : 0;
@@ -1032,37 +1138,42 @@ export class PlatformController {
     };
   }
 
-  private async getTenantGrowth(
-    _startDate: Date,
-    _endDate: Date,
-  ): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+  private async getTenantGrowth(startDate: Date, endDate: Date): Promise<any> {
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         DATE(created_at) as date,
         COUNT(*) as new_tenants
       FROM tenants 
-      WHERE created_at >= ${startDate} AND created_at <= ${endDate}
+      WHERE created_at >= $1 AND created_at <= $2
       GROUP BY DATE(created_at)
       ORDER BY date ASC
-    `;
+      `,
+      [startDate, endDate],
+    );
 
     return result;
   }
 
   private async getFeatureAdoptionStats(
-    _startDate: Date,
-    _endDate: Date,
+    startDate: Date,
+    endDate: Date,
   ): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         feature_id,
         COUNT(DISTINCT tenant_id) as unique_users,
         COUNT(*) as total_usage
       FROM feature_usage 
-      WHERE timestamp >= ${startDate} AND timestamp <= ${endDate}
+      WHERE timestamp >= $1 AND timestamp <= $2
       GROUP BY feature_id
       ORDER BY unique_users DESC
-    `;
+      `,
+      [startDate, endDate],
+    );
 
     return result;
   }
@@ -1073,10 +1184,12 @@ export class PlatformController {
   }
 
   private async getPerformanceMetrics(
-    _startDate: Date,
-    _endDate: Date,
+    startDate: Date,
+    endDate: Date,
   ): Promise<any> {
-    const result = await this.prisma.$queryRaw<any[]>`
+    // ✅ SECURITY FIX: Use parameterized query
+    const result = await this.prisma.$queryRawUnsafe<any[]>(
+      `
       SELECT 
         AVG(response_time) as avg_response_time,
         MIN(response_time) as min_response_time,
@@ -1084,8 +1197,10 @@ export class PlatformController {
         COUNT(*) as total_requests,
         COUNT(CASE WHEN status_code >= 200 AND status_code < 400 THEN 1 END) as successful_requests
       FROM api_usage 
-      WHERE timestamp >= ${startDate} AND timestamp <= ${endDate}
-    `;
+      WHERE timestamp >= $1 AND timestamp <= $2
+      `,
+      [startDate, endDate],
+    );
 
     const data = result[0] || {};
     const successRate =

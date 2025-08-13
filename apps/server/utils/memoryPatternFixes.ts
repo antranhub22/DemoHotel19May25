@@ -242,7 +242,9 @@ function fixStringOperations() {
  * Add memory monitoring to streams
  */
 function fixStreamOperations() {
-  const { Transform } = require("stream");
+  // Use dynamic import for ES modules compatibility
+  const stream = require("stream");
+  const { Transform } = stream;
 
   const originalTransform = Transform.prototype._transform;
   Transform.prototype._transform = function (
