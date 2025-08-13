@@ -41,11 +41,11 @@ import http from "http";
 import { FeatureFlags } from "@server/shared/FeatureFlags";
 FeatureFlags.initialize();
 
-// 🔥 RADICAL MEMORY FIX: Import process kill switch for emergency protection
-import "./middleware/processKillSwitch";
+// 🔥 CRITICAL FIX: Disable old process kill switch - conflicts with new optimized system
+// import "./middleware/processKillSwitch"; // DISABLED - using memoryOptimization.ts instead
 
-// 🚨 NUCLEAR MEMORY FIX: Ultimate memory protection (replaces processKillSwitch)
-import "./middleware/nuclearMemoryFix";
+// 🚨 CRITICAL FIX: Disable old nuclear memory fix - conflicts with new optimized system
+// import "./middleware/nuclearMemoryFix"; // DISABLED - using memoryOptimization.ts instead
 
 // ✅ Import middleware
 
@@ -247,9 +247,13 @@ import {
 // ✅ RESPONSE OPTIMIZATION: Add performance middleware
 import responseOptimization from "./middleware/responseOptimization.js";
 
+// ✅ MEMORY OPTIMIZATION: Use new unified memory management system
 app.use(memoryOptimizationMiddleware);
 app.use(responseCompressionMiddleware);
 app.use(responseOptimization.fullStack);
+
+// ✅ Enable process-level memory protection
+import "@tools/process/manager";
 
 // ✅ NEW v3.0: Advanced Caching Middleware
 // Automatic cache invalidation on data mutations
