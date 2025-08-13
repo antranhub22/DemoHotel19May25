@@ -1,64 +1,59 @@
-# 🚀 RENDER DEPLOYMENT CONFIGURATION - STANDARD PLAN OPTIMIZED
-# Configured for Render Standard Plan (2GB RAM) with optimized memory allocation
-# Complete database migration and deployment setup for Prisma + Auto-migration
-
+# 🚨 EMERGENCY RENDER CONFIGURATION - MEMORY OPTIMIZED
 services:
   - type: web
-    name: demohotel19may25
+    name: DemoHotel19May25
+    plan: starter_plus  # 🔥 UPGRADE: 1GB RAM (vs 512MB starter)
     env: node
-    region: oregon
-    plan: free
-    # ✅ FIXED: Simplified build command for stable deployment
-    buildCommand: |
-      export NODE_OPTIONS="--max-old-space-size=1536" &&
-      npm ci --only=production --no-optional --no-audit &&
-      npx prisma generate --no-engine &&
-      npx prisma migrate deploy &&
-      npm run build:production
-    startCommand: npm run start
-    healthCheckPath: /api/health
+    runtime: node
+    buildCommand: npm run build:production
+    # 🚨 CRITICAL: Node.js memory configuration
+    startCommand: node --max-old-space-size=768 --expose-gc --gc-interval=100 apps/server/index.js
+    
+    # 🔧 Environment variables for memory optimization
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_OPTIONS
-        value: "--max-old-space-size=1536"
-      - key: PORT
-        value: 10000
-      - key: AUTO_MIGRATE
-        value: "false"
-      - key: SEED_USERS
-        value: "false"
-      - key: AUTO_DB_FIX
-        value: "false"
-      # ✅ DATABASE_URL will be automatically provided by Render PostgreSQL
-      # ✅ Add other environment variables as needed
-      - fromGroup: demohotel-env-group
-    nodeVersion: 18.20.8
+        value: "--max-old-space-size=768 --expose-gc --gc-interval=100"
+      - key: MEMORY_OPTIMIZATION_MODE
+        value: "aggressive"
+      - key: DATABASE_POOL_MAX
+        value: "3"  # Reduce DB connections
+      - key: DATABASE_POOL_MIN  
+        value: "1"
+      - key: DATABASE_POOL_IDLE
+        value: "10000"  # Close idle connections after 10s
+        
+    # 🚨 Health check configuration
+    healthCheckPath: /api/health
+    
+    # 🔧 Auto-deploy settings
+    autoDeploy: true
+    
+    # 🚨 Build settings optimized for memory
     buildFilter:
       paths:
-      - apps/**
-      - packages/**
-      - prisma/**
-      - tools/**
-      - package.json
-      - package-lock.json
-      - tsconfig.json
+        - apps/**
+        - packages/**
+        - *.json
+        - *.js
+        - *.ts
       ignoredPaths:
-      - "**/*.test.ts"
-      - "**/*.spec.ts"
-      - tests/**
-      - docs/**
+        - docs/**
+        - archive/**
+        - tests/**
+        - "**/*.test.*"
+        - "**/*.spec.*"
 
-# ✅ ENVIRONMENT GROUP REFERENCE
-# Create an environment group named 'demohotel-env-group' in Render dashboard with:
-# - DATABASE_URL (automatically provided by PostgreSQL service)
-# - VITE_VAPI_ASSISTANT_ID
-# - JWT_SECRET
-# - Other production environment variables
-
-# ✅ DEPLOYMENT FEATURES:
-# - Automatic Prisma migration on each deploy
-# - Auto-migration script for schema fixes
-# - Health check endpoint monitoring
-# - Optimized build process
-# - Production-ready configuration
+# 🔥 Database configuration (if using Render database)
+databases:
+  - name: demohotel-db
+    plan: starter  # Free tier
+    region: oregon
+    
+# 🚨 CRITICAL NOTES:
+# 1. starter_plus provides 1GB RAM vs 512MB starter
+# 2. --max-old-space-size=768 reserves 256MB for system
+# 3. --expose-gc enables manual garbage collection
+# 4. --gc-interval=100 forces GC every 100ms allocation
+# 5. Reduced database pool to minimize connection overhead

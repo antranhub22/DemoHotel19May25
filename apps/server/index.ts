@@ -1,3 +1,24 @@
+// 🚨 EMERGENCY MEMORY CONFIGURATION - MUST BE FIRST
+process.env.NODE_OPTIONS = "--max-old-space-size=768 --expose-gc";
+
+// Force aggressive garbage collection every 30 seconds
+if (global.gc) {
+  setInterval(() => {
+    try {
+      global.gc();
+      console.log(
+        `🔄 [EMERGENCY] Forced GC - Memory: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB`,
+      );
+    } catch (error) {
+      console.warn("Emergency GC failed:", error);
+    }
+  }, 30000);
+} else {
+  console.warn(
+    "🚨 [EMERGENCY] global.gc not available - start with --expose-gc flag",
+  );
+}
+
 import router from "@server/routes/index";
 import { setupSocket } from "@server/socket";
 import { runAutoDbFix } from "@server/startup/auto-database-fix";
