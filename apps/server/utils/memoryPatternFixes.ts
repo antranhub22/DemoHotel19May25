@@ -11,7 +11,7 @@ import { logger } from "@shared/utils/logger";
 /**
  * Replace dangerous unbounded error arrays with safe bounded ones
  */
-export function fixErrorArrays() {
+function fixErrorArrays() {
   // Monkey patch common error accumulation patterns
   const originalConsoleMethods = {
     warn: console.warn,
@@ -71,7 +71,7 @@ export function fixErrorArrays() {
 /**
  * Replace dangerous Buffer.concat with bounded buffers
  */
-export function fixBufferOperations() {
+function fixBufferOperations() {
   const originalBufferConcat = Buffer.concat;
 
   Buffer.concat = function (
@@ -127,7 +127,7 @@ export function fixBufferOperations() {
 /**
  * Monitor and limit array growth
  */
-export function fixArrayOperations() {
+function fixArrayOperations() {
   const LARGE_ARRAY_THRESHOLD = 10000;
   const monitoredArrays = new WeakSet();
 
@@ -184,7 +184,7 @@ export function fixArrayOperations() {
 /**
  * Monitor dangerous string operations
  */
-export function fixStringOperations() {
+function fixStringOperations() {
   const LARGE_STRING_THRESHOLD = 1024 * 1024; // 1MB
 
   // Monitor string concatenation patterns
@@ -241,7 +241,7 @@ export function fixStringOperations() {
 /**
  * Add memory monitoring to streams
  */
-export function fixStreamOperations() {
+function fixStreamOperations() {
   const { Transform } = require("stream");
 
   const originalTransform = Transform.prototype._transform;
@@ -271,7 +271,7 @@ export function fixStreamOperations() {
 
 let memoryCheckInterval: NodeJS.Timeout | null = null;
 
-export function startGlobalMemoryMonitoring() {
+function startGlobalMemoryMonitoring() {
   if (memoryCheckInterval) {
     clearInterval(memoryCheckInterval);
   }
@@ -302,7 +302,7 @@ export function startGlobalMemoryMonitoring() {
   logger.info("🛡️ Global memory monitoring started", "MemoryPatternFixes");
 }
 
-export function stopGlobalMemoryMonitoring() {
+function stopGlobalMemoryMonitoring() {
   if (memoryCheckInterval) {
     clearInterval(memoryCheckInterval);
     memoryCheckInterval = null;
@@ -314,7 +314,7 @@ export function stopGlobalMemoryMonitoring() {
 // APPLY ALL FIXES
 // ============================================================================
 
-export function applyAllMemoryFixes() {
+function applyAllMemoryFixes() {
   logger.info("🛡️ Applying memory pattern fixes...", "MemoryPatternFixes");
 
   try {
@@ -350,6 +350,8 @@ process.on("beforeExit", stopGlobalMemoryMonitoring);
 // ============================================================================
 
 export {
+  // Apply all
+  applyAllMemoryFixes,
   fixArrayOperations,
   fixBufferOperations,
   // Individual fixes
