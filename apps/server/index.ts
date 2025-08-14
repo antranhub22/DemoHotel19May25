@@ -266,6 +266,13 @@ import responseOptimization from "./middleware/responseOptimization.js";
 import uploadLimiter from "./middleware/uploadLimiter";
 // ✅ STREAMING OPTIMIZATION: Handle large payloads efficiently
 import streamingOptimization from "./middleware/streamingOptimization";
+// ✅ EXTERNAL MEMORY MONITORING: Comprehensive external memory tracking
+import {
+  externalMemoryDashboard,
+  externalMemoryRoutes,
+} from "./monitoring/ExternalMemoryDashboard";
+import { externalMemoryLogger } from "./monitoring/ExternalMemoryLogger";
+import { externalMemoryMonitor } from "./monitoring/ExternalMemoryMonitor";
 
 // ✅ MEMORY OPTIMIZATION: Use new unified memory management system
 app.use(memoryOptimizationMiddleware);
@@ -279,6 +286,9 @@ app.use("/api/vapi", streamingOptimization);
 // ✅ UPLOAD PROTECTION: Apply upload limits to file upload routes
 app.use("/api/upload", uploadLimiter);
 app.use("/api/files", uploadLimiter);
+
+// ✅ EXTERNAL MEMORY MONITORING: Add monitoring routes
+app.use("/api/memory", externalMemoryRoutes);
 
 // ✅ Enable process-level memory protection
 import "@tools/process/manager";
@@ -475,6 +485,17 @@ app.use((req, res, next) => {
     console.log(`🔗 API available at: http://localhost:${port}/api`);
     console.log(`📊 Health check: http://localhost:${port}/api/health`);
     console.log(`🔌 WebSocket available at: ws://localhost:${port}/socket.io/`);
+    console.log(
+      `🔍 Memory dashboard: http://localhost:${port}/api/memory/dashboard`,
+    );
+
+    // ✅ Initialize external memory monitoring dashboard
+    externalMemoryDashboard.initialize(io);
+
+    // ✅ Start external memory monitoring
+    externalMemoryMonitor.startMonitoring();
+    externalMemoryLogger.startTracking();
+    console.log("📊 External memory monitoring started");
 
     // ✅ Show monitoring status and reminders after startup
     setTimeout(() => {
@@ -512,6 +533,15 @@ app.use((req, res, next) => {
         // Stop memory monitoring
         try {
           memoryMonitor.stopMonitoring();
+        } catch (_e) {
+          void 0;
+        }
+
+        // ✅ Stop external memory monitoring
+        try {
+          externalMemoryMonitor.stopMonitoring();
+          externalMemoryLogger.stopTracking();
+          externalMemoryDashboard.shutdown();
         } catch (_e) {
           void 0;
         }
