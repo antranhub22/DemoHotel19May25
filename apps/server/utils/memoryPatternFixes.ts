@@ -242,29 +242,39 @@ function fixStringOperations() {
  * Add memory monitoring to streams
  */
 function fixStreamOperations() {
-  // Use dynamic import for ES modules compatibility
-  const stream = require("stream");
-  const { Transform } = stream;
+  // ✅ FIX: Use import instead of require for ES modules
+  try {
+    const stream = eval("require")("stream");
+    const { Transform } = stream;
 
-  const originalTransform = Transform.prototype._transform;
-  Transform.prototype._transform = function (
-    chunk: any,
-    encoding: string,
-    callback: Function,
-  ) {
-    // Monitor chunk sizes
-    if (Buffer.isBuffer(chunk) && chunk.length > 1024 * 1024) {
-      // 1MB chunks
-      logger.warn("⚠️ Large stream chunk detected", "MemoryPatternFixes", {
-        chunkSize: `${(chunk.length / 1024).toFixed(1)}KB`,
-        encoding,
-      });
-    }
+    const originalTransform = Transform.prototype._transform;
+    Transform.prototype._transform = function (
+      chunk: any,
+      encoding: string,
+      callback: Function,
+    ) {
+      // Monitor chunk sizes
+      if (Buffer.isBuffer(chunk) && chunk.length > 1024 * 1024) {
+        // 1MB chunks
+        logger.warn("⚠️ Large stream chunk detected", "MemoryPatternFixes", {
+          chunkSize: `${(chunk.length / 1024).toFixed(1)}KB`,
+          encoding,
+        });
+      }
 
-    return originalTransform.call(this, chunk, encoding, callback);
-  };
+      return originalTransform.call(this, chunk, encoding, callback);
+    };
 
-  logger.info("🛡️ Stream operation protection enabled", "MemoryPatternFixes");
+    logger.info("🛡️ Stream operation protection enabled", "MemoryPatternFixes");
+  } catch (error) {
+    logger.warn(
+      "⚠️ Could not apply stream operation fixes",
+      "MemoryPatternFixes",
+      {
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+    );
+  }
 }
 
 // ============================================================================
