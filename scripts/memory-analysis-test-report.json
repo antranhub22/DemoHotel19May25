@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-08-14T10:30:53.961Z",
+  "duration": 5122,
+  "summary": {
+    "total": 8,
+    "passed": 6,
+    "failed": 2,
+    "successRate": 75
+  },
+  "tests": [
+    {
+      "name": "Basic Memory Monitoring",
+      "passed": true,
+      "details": "RSS grew 0.2MB, Heap grew 0.0MB",
+      "timestamp": "2025-08-14T10:30:49.842Z"
+    },
+    {
+      "name": "RSS vs Heap Divergence Detection",
+      "passed": false,
+      "details": "Divergence not detected as expected",
+      "timestamp": "2025-08-14T10:30:50.760Z"
+    },
+    {
+      "name": "External Memory Growth Pattern Detection",
+      "passed": true,
+      "details": "All pattern types detected correctly",
+      "timestamp": "2025-08-14T10:30:51.786Z"
+    },
+    {
+      "name": "Native Module Attribution",
+      "passed": true,
+      "details": "1 modules successfully attributed",
+      "timestamp": "2025-08-14T10:30:51.805Z"
+    },
+    {
+      "name": "Buffer Leak Detection",
+      "passed": false,
+      "details": "No buffer leaks detected",
+      "timestamp": "2025-08-14T10:30:52.314Z"
+    },
+    {
+      "name": "Automated Leak Reporting",
+      "passed": true,
+      "details": "Generated 3 leak reports with 10.3MB total growth",
+      "timestamp": "2025-08-14T10:30:53.849Z"
+    },
+    {
+      "name": "Memory Analysis Integration",
+      "passed": true,
+      "details": "All integration components available",
+      "timestamp": "2025-08-14T10:30:53.850Z"
+    },
+    {
+      "name": "Performance and Resource Usage",
+      "passed": true,
+      "details": "Performance within acceptable limits: 0.10ms avg capture time",
+      "timestamp": "2025-08-14T10:30:53.959Z"
+    }
+  ],
+  "environment": {
+    "nodeVersion": "v18.20.8",
+    "platform": "darwin",
+    "arch": "x64",
+    "memoryUsage": {
+      "rss": 66949120,
+      "heapTotal": 6930432,
+      "heapUsed": 5608088,
+      "external": 32258237,
+      "arrayBuffers": 31474622
+    }
+  }
+}
