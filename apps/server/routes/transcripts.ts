@@ -4,7 +4,10 @@ import {
   commonErrors,
   ErrorCodes,
 } from "@server/utils/apiHelpers";
-import { parseCompleteQuery } from "@server/utils/pagination";
+import {
+  parseCompleteQuery,
+  GUEST_JOURNEY_DEFAULTS,
+} from "@server/utils/pagination";
 // ✅ COMPLETED MIGRATION: Now using Prisma only
 import { logger } from "@shared/utils/logger";
 import express from "express";
