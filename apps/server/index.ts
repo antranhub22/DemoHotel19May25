@@ -288,11 +288,11 @@ applyAllMemoryFixes();
 
 // ✅ ADVANCED MEMORY TRACKING: Initialize comprehensive memory monitoring
 import memoryLoggingMiddleware from "./middleware/memoryLoggingMiddleware";
-import {
-  memorySpikeDetector,
-  integrateWithMemoryTracker,
-} from "./shared/MemorySpikeDetector";
 import { heapAnalyzer } from "./shared/HeapAnalyzer";
+import {
+  integrateWithMemoryTracker,
+  memorySpikeDetector,
+} from "./shared/MemorySpikeDetector";
 
 // Initialize memory spike detection
 integrateWithMemoryTracker();
@@ -302,10 +302,10 @@ app.use(memoryLoggingMiddleware);
 
 // Initialize memory monitoring components
 memorySpikeDetector.configure({
-  mediumThresholdMB: 20,
-  highThresholdMB: 50,
-  criticalThresholdMB: 100,
-  enableHeapSnapshots: process.env.NODE_ENV === "production",
+  mediumThresholdMB: 80, // ⬆️ Increase from 20MB to 80MB
+  highThresholdMB: 150, // ⬆️ Increase from 50MB to 150MB
+  criticalThresholdMB: 300, // ⬆️ Increase from 100MB to 300MB
+  enableHeapSnapshots: false, // ❌ DISABLE in development
 });
 
 heapAnalyzer.setEnabled(true);
