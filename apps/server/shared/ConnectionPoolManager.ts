@@ -634,6 +634,22 @@ export class ConnectionPoolManager extends EventEmitter {
             this.alerts = this.alerts.slice(-25);
           }
 
+          // ✅ MEMORY FIX: Cleanup connection leaks older than 1 hour
+          const oneHourAgo = Date.now() - 60 * 60 * 1000;
+          this.connectionLeaks = this.connectionLeaks.filter(
+            (leak) => leak.acquiredAt.getTime() > oneHourAgo,
+          );
+
+          // ✅ MEMORY FIX: Limit query cache size more aggressively
+          if (this.queryCache.size > 100) {
+            const entries = Array.from(this.queryCache.entries());
+            this.queryCache.clear();
+            // Keep only most recent 50 entries
+            entries.slice(-50).forEach(([key, value]) => {
+              this.queryCache.set(key, value);
+            });
+          }
+
           // Check for auto-scaling opportunities
           if (this.config.pool.enableAutoScaling) {
             await this.checkAutoScaling(metrics);

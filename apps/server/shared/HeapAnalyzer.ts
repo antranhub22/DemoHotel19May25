@@ -409,7 +409,10 @@ class HeapAnalyzer {
       );
     }
 
-    // Take snapshot every 10 minutes in development
+    // 🚨 MEMORY LEAK FIX: Disabled automatic heap snapshots
+    // Heap snapshots were consuming 370MB+ external memory
+    // Manual snapshots can be taken via API endpoint if needed
+    /*
     if (process.env.NODE_ENV === "development") {
       setInterval(
         () => {
@@ -418,6 +421,7 @@ class HeapAnalyzer {
         10 * 60 * 1000,
       );
     }
+    */
   }
 
   /**

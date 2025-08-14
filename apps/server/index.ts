@@ -34,6 +34,7 @@ if (global.gc) {
   );
 }
 
+import { memoryMonitor } from "@server/middleware/memoryMonitor";
 import router from "@server/routes/index";
 import { setupSocket } from "@server/socket";
 import { runAutoDbFix } from "@server/startup/auto-database-fix";
@@ -504,6 +505,13 @@ app.use((req, res, next) => {
           ) {
             // If an instance exists in your app, stop it here (placeholder)
           }
+        } catch (_e) {
+          void 0;
+        }
+
+        // Stop memory monitoring
+        try {
+          memoryMonitor.stopMonitoring();
         } catch (_e) {
           void 0;
         }

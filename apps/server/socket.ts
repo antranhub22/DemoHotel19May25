@@ -1,22 +1,22 @@
-import { dashboardWebSocket } from '@server/services/DashboardWebSocket';
-import { logger } from '@shared/utils/logger';
-import { Server as HTTPServer } from 'http';
-import { Socket, Server as SocketIOServer } from 'socket.io';
+import { dashboardWebSocket } from "@server/services/DashboardWebSocket";
+import { logger } from "@shared/utils/logger";
+import { Server as HTTPServer } from "http";
+import { Socket, Server as SocketIOServer } from "socket.io";
 
 export function setupSocket(server: HTTPServer) {
   // ✅ SECURITY FIX: Proper CORS configuration
   const allowedOrigins = [
-    'https://minhonmuine.talk2go.online',
-    'https://localhost:3000',
-    'https://localhost:5173',
-    'http://localhost:3000',
-    'http://localhost:5173',
+    "https://minhonmuine.talk2go.online",
+    "https://localhost:3000",
+    "https://localhost:5173",
+    "http://localhost:3000",
+    "http://localhost:5173",
     // ✅ FIX: Add production domains
-    'https://demohotel19may25.onrender.com',
-    'https://minhnhotelben.onrender.com',
+    "https://demohotel19may25.onrender.com",
+    "https://minhnhotelben.onrender.com",
     // ✅ ENHANCEMENT: Add more production domains
-    'https://*.onrender.com',
-    'https://*.talk2go.online',
+    "https://*.onrender.com",
+    "https://*.talk2go.online",
   ];
 
   const io = new SocketIOServer(server, {
@@ -26,29 +26,29 @@ export function setupSocket(server: HTTPServer) {
         if (!origin) return callback(null, true);
 
         // ✅ FIX: Allow all origins in development
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           return callback(null, true);
         }
 
         // ✅ FIX: Allow production domains with wildcard support
         const isAllowed =
           allowedOrigins.includes(origin) ||
-          origin.includes('talk2go.online') ||
-          origin.includes('onrender.com') ||
-          origin.includes('localhost') ||
-          origin.includes('127.0.0.1');
+          origin.includes("talk2go.online") ||
+          origin.includes("onrender.com") ||
+          origin.includes("localhost") ||
+          origin.includes("127.0.0.1");
 
         if (isAllowed) {
           return callback(null, true);
         }
 
-        logger.warn(`CORS blocked origin: ${origin}`, 'WebSocket');
-        return callback(new Error('Not allowed by CORS'), false);
+        logger.warn(`CORS blocked origin: ${origin}`, "WebSocket");
+        return callback(new Error("Not allowed by CORS"), false);
       },
-      methods: ['GET', 'POST'],
+      methods: ["GET", "POST"],
       credentials: true,
       // ✅ FIX: Add additional CORS headers
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     },
     // ✅ PERFORMANCE: Add connection limits
     maxHttpBufferSize: 1e6, // 1MB limit
@@ -56,11 +56,11 @@ export function setupSocket(server: HTTPServer) {
     pingInterval: 25000,
     // ✅ FIX: Add additional options to prevent conflicts
     allowEIO3: true,
-    transports: ['websocket', 'polling'],
+    transports: ["websocket", "polling"],
     // ✅ FIX: Add path to avoid conflicts
-    path: '/socket.io/',
+    path: "/socket.io/",
     // ✅ FIX: Add namespace to avoid conflicts
-    namespace: '/',
+    namespace: "/",
   });
 
   // ✅ FIX: Share Socket.IO instance with Dashboard WebSocket service
@@ -69,19 +69,19 @@ export function setupSocket(server: HTTPServer) {
     // Pass the io instance to dashboard service instead of creating new server
     dashboardWebSocket.setSocketIO(io);
     logger.info(
-      '✅ [Socket] Dashboard WebSocket service connected to main Socket.IO',
-      'WebSocket'
+      "✅ [Socket] Dashboard WebSocket service connected to main Socket.IO",
+      "WebSocket",
     );
   } catch (error) {
     logger.error(
-      '❌ [Socket] Dashboard WebSocket connection failed',
-      'WebSocket',
-      error
+      "❌ [Socket] Dashboard WebSocket connection failed",
+      "WebSocket",
+      error,
     );
     // Continue with order WebSocket setup - dashboard will use polling fallback
     logger.info(
-      '🔄 [Socket] Dashboard will use polling fallback mode',
-      'WebSocket'
+      "🔄 [Socket] Dashboard will use polling fallback mode",
+      "WebSocket",
     );
   }
 
@@ -89,13 +89,31 @@ export function setupSocket(server: HTTPServer) {
   const connectionCounts = new Map<string, number>();
   const MAX_CONNECTIONS_PER_IP = 10;
 
-  io.on('connection', (socket: Socket) => {
+  // ✅ MEMORY FIX: Periodic cleanup of connection tracking
+  setInterval(
+    () => {
+      // Clean up connection counts for IPs with 0 connections
+      for (const [ip, count] of connectionCounts.entries()) {
+        if (count <= 0) {
+          connectionCounts.delete(ip);
+        }
+      }
+      // Log memory status
+      logger.debug(
+        `WebSocket connection tracking: ${connectionCounts.size} IPs`,
+        "WebSocket",
+      );
+    },
+    5 * 60 * 1000,
+  ); // Every 5 minutes
+
+  io.on("connection", (socket: Socket) => {
     const clientIP = socket.handshake.address;
 
     // ✅ RATE LIMITING: Check connection limit
     const currentConnections = connectionCounts.get(clientIP) || 0;
     if (currentConnections >= MAX_CONNECTIONS_PER_IP) {
-      logger.warn(`Connection limit exceeded for IP: ${clientIP}`, 'WebSocket');
+      logger.warn(`Connection limit exceeded for IP: ${clientIP}`, "WebSocket");
       socket.disconnect(true);
       return;
     }
@@ -106,27 +124,27 @@ export function setupSocket(server: HTTPServer) {
     // ✅ LOGGING FIX: Proper template literals
     logger.debug(
       `Socket connected: ${socket.id} from ${clientIP}`,
-      'WebSocket'
+      "WebSocket",
     );
 
     // ✅ ERROR HANDLING: Wrap all event handlers in try-catch
-    socket.on('join_room', (orderId: string) => {
+    socket.on("join_room", (orderId: string) => {
       try {
-        if (!orderId || typeof orderId !== 'string') {
+        if (!orderId || typeof orderId !== "string") {
           logger.warn(
             `Invalid orderId from ${socket.id}: ${orderId}`,
-            'WebSocket'
+            "WebSocket",
           );
           return;
         }
 
         socket.join(orderId);
-        logger.debug(`Socket ${socket.id} joined room ${orderId}`, 'WebSocket');
+        logger.debug(`Socket ${socket.id} joined room ${orderId}`, "WebSocket");
       } catch (error) {
         logger.error(
           `Error in join_room for ${socket.id}:`,
-          'WebSocket',
-          error
+          "WebSocket",
+          error,
         );
       }
     });
@@ -136,14 +154,14 @@ export function setupSocket(server: HTTPServer) {
     const UPDATE_RATE_LIMIT = 1000; // 1 second between updates
 
     socket.on(
-      'update_order_status',
+      "update_order_status",
       (data: { orderId: string; status: string }) => {
         try {
           const now = Date.now();
           if (now - lastUpdateTime < UPDATE_RATE_LIMIT) {
             logger.warn(
               `Rate limit exceeded for order updates from ${socket.id}`,
-              'WebSocket'
+              "WebSocket",
             );
             return;
           }
@@ -155,36 +173,36 @@ export function setupSocket(server: HTTPServer) {
           if (
             !orderId ||
             !status ||
-            typeof orderId !== 'string' ||
-            typeof status !== 'string'
+            typeof orderId !== "string" ||
+            typeof status !== "string"
           ) {
             logger.warn(
               `Invalid order update data from ${socket.id}:`,
-              'WebSocket',
-              data
+              "WebSocket",
+              data,
             );
             return;
           }
 
           logger.debug(
             `Received status update for order ${orderId}: ${status} from ${socket.id}`,
-            'WebSocket'
+            "WebSocket",
           );
 
           // Broadcast to clients in that room
-          io.to(orderId).emit('order_status_update', { orderId, status });
+          io.to(orderId).emit("order_status_update", { orderId, status });
         } catch (error) {
           logger.error(
             `Error in update_order_status for ${socket.id}:`,
-            'WebSocket',
-            error
+            "WebSocket",
+            error,
           );
         }
-      }
+      },
     );
 
     // ✅ ENHANCED: Better disconnect handling with cleanup
-    socket.on('disconnect', reason => {
+    socket.on("disconnect", (reason) => {
       try {
         // ✅ CLEANUP: Reduce connection count
         const currentCount = connectionCounts.get(clientIP) || 0;
@@ -196,31 +214,31 @@ export function setupSocket(server: HTTPServer) {
 
         logger.debug(
           `Socket disconnected: ${socket.id} from ${clientIP}, reason: ${reason}`,
-          'WebSocket'
+          "WebSocket",
         );
       } catch (error) {
         logger.error(
           `Error in disconnect handler for ${socket.id}:`,
-          'WebSocket',
-          error
+          "WebSocket",
+          error,
         );
       }
     });
 
     // ✅ NEW: Handle connection errors
-    socket.on('error', error => {
-      logger.error(`Socket error for ${socket.id}:`, 'WebSocket', error);
+    socket.on("error", (error) => {
+      logger.error(`Socket error for ${socket.id}:`, "WebSocket", error);
     });
 
     // ✅ NEW: Add init message handler for better debugging
-    socket.on('init', data => {
+    socket.on("init", (data) => {
       try {
-        logger.debug(`Init message from ${socket.id}:`, 'WebSocket', data);
+        logger.debug(`Init message from ${socket.id}:`, "WebSocket", data);
       } catch (error) {
         logger.error(
           `Error in init handler for ${socket.id}:`,
-          'WebSocket',
-          error
+          "WebSocket",
+          error,
         );
       }
     });
@@ -230,11 +248,11 @@ export function setupSocket(server: HTTPServer) {
   setInterval(() => {
     const totalConnections = Array.from(connectionCounts.values()).reduce(
       (sum, count) => sum + count,
-      0
+      0,
     );
     logger.debug(
       `WebSocket connections: ${totalConnections}, unique IPs: ${connectionCounts.size}`,
-      'WebSocket'
+      "WebSocket",
     );
   }, 30000); // Log every 30 seconds
 
