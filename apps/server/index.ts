@@ -516,6 +516,18 @@ app.use((req, res, next) => {
           void 0;
         }
 
+        // 🚨 CRITICAL FIX: Disconnect Prisma client to prevent connection leaks
+        try {
+          const {
+            PrismaConnectionManager,
+          } = require("@shared/db/PrismaConnectionManager");
+          const prismaManager = PrismaConnectionManager.getInstance();
+          await prismaManager.disconnect();
+          console.log("✅ Prisma connections closed");
+        } catch (_e) {
+          console.warn("⚠️ Error closing Prisma connections:", _e);
+        }
+
         // Attempt to free memory
         if (global.gc) {
           const gcNow = global.gc;

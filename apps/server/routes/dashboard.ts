@@ -1,10 +1,4 @@
 import { authenticateJWT } from "@auth/middleware/auth.middleware";
-import { PrismaClient } from "@prisma/client";
-import {
-  getHourlyActivity,
-  getOverview,
-  getServiceDistribution,
-} from "@server/analytics";
 import { TenantMiddleware } from "@server/middleware/tenant";
 import { HotelResearchService } from "@server/services/hotelResearch";
 import { KnowledgeBaseGenerator } from "@server/services/knowledgeBaseGenerator";
@@ -19,8 +13,9 @@ import { z } from "zod";
 import { hotelProfileMapper } from "@shared/db/transformers";
 import { logger } from "@shared/utils/logger";
 
-// ✅ MIGRATED: Initialize Prisma client for 100% Prisma system
-const prisma = new PrismaClient();
+// ✅ MEMORY LEAK FIX: Use singleton Prisma client instead of creating new instances
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+const prisma = PrismaConnectionManager.getInstance().getClient();
 // ============================================
 // Router Setup
 // ============================================

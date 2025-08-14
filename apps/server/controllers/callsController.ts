@@ -1,6 +1,3 @@
-import { PrismaClient } from "@prisma/client";
-import { Request, Response } from "express";
-
 // ✅ ENHANCED v2.0: Import modular architecture components
 import { CallService } from "@server/services/callService";
 // ✅ MIGRATED: Use PrismaTenantService instead of old TenantService
@@ -11,8 +8,9 @@ import {
 import { storage } from "@server/storage";
 import { insertTranscriptSchema } from "@shared/schema";
 import { logger } from "@shared/utils/logger";
-// ✅ MIGRATED: Use Prisma client instead of Drizzle
-const prisma = new PrismaClient();
+// ✅ MEMORY LEAK FIX: Use singleton Prisma client instead of creating new instances
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+const prisma = PrismaConnectionManager.getInstance().getClient();
 
 /**
  * Enhanced Calls Controller v2.0 - Modular Architecture

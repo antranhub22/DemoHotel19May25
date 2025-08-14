@@ -1,10 +1,9 @@
 // ✅ COMPLETED MIGRATION: Now using Prisma only
-import { PrismaClient } from "@prisma/client";
-import { AuthUserCamelCase, authUserMapper } from "@shared/db/transformers";
 import { logger } from "@shared/utils/logger";
 
-// ✅ PRISMA ONLY: Migration completed successfully
-const prisma = new PrismaClient();
+// ✅ MEMORY LEAK FIX: Use singleton Prisma client instead of creating new instances
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+const prisma = PrismaConnectionManager.getInstance().getClient();
 
 // ✅ Import missing types from shared/db
 
