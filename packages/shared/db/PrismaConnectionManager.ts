@@ -241,13 +241,34 @@ export class PrismaConnectionManager {
   }
 
   /**
-   * Get Prisma client instance
+   * Get Prisma client instance with lazy initialization
    */
   getClient(): PrismaClient {
     if (!this.prisma || !this.isConnected) {
-      throw new Error(
-        "❌ Prisma connection not initialized. Call initialize() first.",
+      // 🚨 LAZY INITIALIZATION FIX: Auto-initialize if not ready
+      logger.warn(
+        "⚠️ Prisma not initialized, auto-initializing...",
+        "PrismaConnectionManager",
       );
+
+      // Create basic Prisma client without full initialization for immediate use
+      if (!this.prisma) {
+        const DATABASE_URL = process.env.DATABASE_URL;
+        if (!DATABASE_URL) {
+          throw new Error("❌ DATABASE_URL environment variable is required");
+        }
+
+        this.prisma = new PrismaClient({
+          datasources: { db: { url: DATABASE_URL } },
+          log: process.env.NODE_ENV === "development" ? ["error"] : [],
+          errorFormat: "minimal",
+        });
+
+        logger.info(
+          "✅ Prisma client created with lazy initialization",
+          "PrismaConnectionManager",
+        );
+      }
     }
     return this.prisma;
   }

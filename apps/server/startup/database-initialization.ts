@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
-import { getDatabaseMetrics, initializeDatabase } from '@shared/db';
-import { logger } from '@shared/utils/logger';
+import { getDatabaseMetrics, initializeDatabase } from "@shared/db";
+import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
+import { logger } from "@shared/utils/logger";
 
 /**
  * Database Initialization Script
@@ -16,18 +17,26 @@ import { logger } from '@shared/utils/logger';
  * Initialize database connection on application startup
  */
 export async function initializeDatabaseOnStartup(): Promise<void> {
-  console.log('🚀 Starting database initialization...');
+  console.log("🚀 Starting database initialization...");
 
   try {
     // Set connection timeout for startup
     const initTimeout = setTimeout(() => {
-      throw new Error('Database initialization timeout (30 seconds)');
+      throw new Error("Database initialization timeout (30 seconds)");
     }, 30000);
 
-    // Initialize database connection with advanced pooling
+    // 🚨 CRITICAL FIX: Initialize PrismaConnectionManager first
     const startTime = Date.now();
+
+    logger.info("🔄 Initializing Prisma Connection Manager...", "Database");
+    const prismaManager = PrismaConnectionManager.getInstance();
+    await prismaManager.initialize();
+
+    // Then initialize other database components
     await initializeDatabase();
     clearTimeout(initTimeout);
+
+    logger.success("✅ Prisma Connection Manager initialized", "Database");
 
     const initTime = Date.now() - startTime;
 
@@ -35,11 +44,11 @@ export async function initializeDatabaseOnStartup(): Promise<void> {
     const metrics = getDatabaseMetrics();
 
     // Log successful initialization
-    logger.success('✅ Database initialized successfully', 'Database', {
+    logger.success("✅ Database initialized successfully", "Database", {
       initializationTime: initTime,
-      connectionType: process.env.DATABASE_URL?.startsWith('sqlite://')
-        ? 'SQLite'
-        : 'PostgreSQL',
+      connectionType: process.env.DATABASE_URL?.startsWith("sqlite://")
+        ? "SQLite"
+        : "PostgreSQL",
       environment: process.env.NODE_ENV,
       poolConnections: metrics.totalConnections,
       activeConnections: metrics.activeConnections,
@@ -47,7 +56,7 @@ export async function initializeDatabaseOnStartup(): Promise<void> {
 
     // Display pool configuration
     if (metrics.totalConnections > 0) {
-      console.log('📊 Connection Pool Status:');
+      console.log("📊 Connection Pool Status:");
       console.log(`   • Total Connections: ${metrics.totalConnections}`);
       console.log(`   • Idle Connections: ${metrics.idleConnections}`);
       console.log(`   • Active Connections: ${metrics.activeConnections}`);
@@ -61,27 +70,27 @@ export async function initializeDatabaseOnStartup(): Promise<void> {
     // Setup periodic health logging for startup phase
     setupStartupHealthMonitoring();
   } catch (error) {
-    logger.error('❌ Database initialization failed', 'Database', error);
+    logger.error("❌ Database initialization failed", "Database", error);
 
-    console.error('\n🚨 Database Initialization Failed:');
+    console.error("\n🚨 Database Initialization Failed:");
     console.error(
-      `   Error: ${error instanceof Error ? (error as any)?.message || String(error) : 'Unknown error'}`
+      `   Error: ${error instanceof Error ? (error as any)?.message || String(error) : "Unknown error"}`,
     );
-    console.error('\n💡 Troubleshooting Steps:');
-    console.error('   1. Check DATABASE_URL environment variable');
-    console.error('   2. Verify database server is running');
-    console.error('   3. Confirm network connectivity');
-    console.error('   4. Review database permissions');
+    console.error("\n💡 Troubleshooting Steps:");
+    console.error("   1. Check DATABASE_URL environment variable");
+    console.error("   2. Verify database server is running");
+    console.error("   3. Confirm network connectivity");
+    console.error("   4. Review database permissions");
 
     // In production, fail fast. In development, provide guidance
-    if (process.env.NODE_ENV === 'production') {
-      console.error('\n🔥 Production startup failed. Exiting...');
+    if (process.env.NODE_ENV === "production") {
+      console.error("\n🔥 Production startup failed. Exiting...");
       process.exit(1);
     } else {
       console.error(
-        '\n🛠️ Development Mode: Consider using SQLite for local development'
+        "\n🛠️ Development Mode: Consider using SQLite for local development",
       );
-      console.error('   Set DATABASE_URL=sqlite://./apps/dev.db');
+      console.error("   Set DATABASE_URL=sqlite://./apps/dev.db");
     }
 
     throw error;
@@ -100,7 +109,7 @@ function setupStartupHealthMonitoring(): void {
       const metrics = getDatabaseMetrics();
       healthCheckCount++;
 
-      logger.debug('📊 Startup Health Check', 'Database', {
+      logger.debug("📊 Startup Health Check", "Database", {
         checkNumber: healthCheckCount,
         totalConnections: metrics.totalConnections,
         activeConnections: metrics.activeConnections,
@@ -110,10 +119,10 @@ function setupStartupHealthMonitoring(): void {
       // Stop monitoring after successful checks or max attempts
       if (healthCheckCount >= maxStartupChecks) {
         clearInterval(startupHealthInterval);
-        console.log('✅ Database startup health monitoring completed');
+        console.log("✅ Database startup health monitoring completed");
       }
     } catch (error) {
-      logger.error('❌ Startup health check failed', 'Database', error);
+      logger.error("❌ Startup health check failed", "Database", error);
       clearInterval(startupHealthInterval);
     }
   }, 5000); // Check every 5 seconds during startup
@@ -129,26 +138,26 @@ export function validateDatabaseConfiguration(): {
   const errors: string[] = [];
 
   // Check DATABASE_URL
-  if (!process.env.DATABASE_URL && process.env.NODE_ENV !== 'development') {
+  if (!process.env.DATABASE_URL && process.env.NODE_ENV !== "development") {
     errors.push(
-      'DATABASE_URL environment variable is required for non-development environments'
+      "DATABASE_URL environment variable is required for non-development environments",
     );
   }
 
   // Check for SQLite in production
   if (
-    process.env.NODE_ENV === 'production' &&
-    process.env.DATABASE_URL?.startsWith('sqlite://')
+    process.env.NODE_ENV === "production" &&
+    process.env.DATABASE_URL?.startsWith("sqlite://")
   ) {
     errors.push(
-      'SQLite is not recommended for production use. Please use PostgreSQL.'
+      "SQLite is not recommended for production use. Please use PostgreSQL.",
     );
   }
 
   // Check JWT_SECRET for authentication
   if (!process.env.JWT_SECRET) {
     errors.push(
-      'JWT_SECRET environment variable is required for authentication'
+      "JWT_SECRET environment variable is required for authentication",
     );
   }
 
@@ -162,28 +171,28 @@ export function validateDatabaseConfiguration(): {
  * Pre-startup database environment validation
  */
 export function performPreStartupValidation(): void {
-  console.log('🔍 Performing pre-startup validation...');
+  console.log("🔍 Performing pre-startup validation...");
 
   const validation = validateDatabaseConfiguration();
 
   if (!validation.isValid) {
-    console.error('\n❌ Pre-startup validation failed:');
+    console.error("\n❌ Pre-startup validation failed:");
     validation.errors.forEach((error, index) => {
       console.error(`   ${index + 1}. ${error}`);
     });
 
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       console.error(
-        '\n🔥 Production startup aborted due to validation errors.'
+        "\n🔥 Production startup aborted due to validation errors.",
       );
       process.exit(1);
     } else {
       console.warn(
-        '\n⚠️ Development mode: Some validations failed but continuing...'
+        "\n⚠️ Development mode: Some validations failed but continuing...",
       );
     }
   } else {
-    console.log('✅ Pre-startup validation passed');
+    console.log("✅ Pre-startup validation passed");
   }
 }
 
@@ -191,8 +200,8 @@ export function performPreStartupValidation(): void {
  * Complete database startup sequence
  */
 export async function startupDatabaseSequence(): Promise<void> {
-  console.log('\n🏨 Hotel Voice Assistant - Database Startup Sequence');
-  console.log('================================================');
+  console.log("\n🏨 Hotel Voice Assistant - Database Startup Sequence");
+  console.log("================================================");
 
   try {
     // Step 1: Pre-startup validation
@@ -202,10 +211,10 @@ export async function startupDatabaseSequence(): Promise<void> {
     await initializeDatabaseOnStartup();
 
     // Step 3: Ready for application startup
-    console.log('\n🎉 Database startup sequence completed successfully!');
-    console.log('🚀 Application ready to start...\n');
+    console.log("\n🎉 Database startup sequence completed successfully!");
+    console.log("🚀 Application ready to start...\n");
   } catch (error) {
-    console.error('\n💥 Database startup sequence failed!');
+    console.error("\n💥 Database startup sequence failed!");
     throw error;
   }
 }
@@ -215,11 +224,11 @@ const isMainModule = import.meta.url === `file://${process.argv[1]}`;
 if (isMainModule) {
   startupDatabaseSequence()
     .then(() => {
-      console.log('✨ Startup script completed successfully');
+      console.log("✨ Startup script completed successfully");
       process.exit(0);
     })
-    .catch(error => {
-      console.error('💥 Startup script failed:', error);
+    .catch((error) => {
+      console.error("💥 Startup script failed:", error);
       process.exit(1);
     });
 }
