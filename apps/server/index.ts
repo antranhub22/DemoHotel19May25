@@ -286,6 +286,36 @@ import "@tools/process/manager";
 import { applyAllMemoryFixes } from "./utils/memoryPatternFixes";
 applyAllMemoryFixes();
 
+// ✅ ADVANCED MEMORY TRACKING: Initialize comprehensive memory monitoring
+import memoryLoggingMiddleware from "./middleware/memoryLoggingMiddleware";
+import {
+  memorySpikeDetector,
+  integrateWithMemoryTracker,
+} from "./shared/MemorySpikeDetector";
+import { heapAnalyzer } from "./shared/HeapAnalyzer";
+
+// Initialize memory spike detection
+integrateWithMemoryTracker();
+
+// Apply memory logging middleware globally (before routes)
+app.use(memoryLoggingMiddleware);
+
+// Initialize memory monitoring components
+memorySpikeDetector.configure({
+  mediumThresholdMB: 20,
+  highThresholdMB: 50,
+  criticalThresholdMB: 100,
+  enableHeapSnapshots: process.env.NODE_ENV === "production",
+});
+
+heapAnalyzer.setEnabled(true);
+
+logger.info("🔍 Advanced memory tracking initialized", "MemoryTracking", {
+  spikeDetection: true,
+  heapAnalysis: true,
+  requestLogging: true,
+});
+
 // ✅ NEW v3.0: Advanced Caching Middleware
 // Automatic cache invalidation on data mutations
 app.use(cacheInvalidationMiddleware());
@@ -296,6 +326,10 @@ app.use("/api/analytics", analyticsCacheMiddleware({ ttl: 120 })); // 2 minutes
 app.use("/api/config", staticDataCacheMiddleware({ ttl: 3600 })); // 1 hour
 app.use("/api/features", staticDataCacheMiddleware({ ttl: 1800 })); // 30 minutes
 app.use("/api/health", staticDataCacheMiddleware({ ttl: 60 })); // 1 minute
+
+// ✅ MEMORY MONITORING ROUTES (before other routes for priority)
+import memoryMonitoringRoutes from "./routes/memory-monitoring";
+app.use("/api/memory", memoryMonitoringRoutes);
 
 // General API response caching (fallback)
 app.use(
