@@ -5,14 +5,14 @@ import {
   ErrorCodes,
 } from "@server/utils/apiHelpers";
 import {
-  parseCompleteQuery,
   GUEST_JOURNEY_DEFAULTS,
+  parseCompleteQuery,
 } from "@server/utils/pagination";
 // ✅ COMPLETED MIGRATION: Now using Prisma only
+import { PrismaClient } from "@prisma/client";
 import { logger } from "@shared/utils/logger";
 import express from "express";
 import { z } from "zod";
-import { PrismaClient } from "@prisma/client";
 
 const router = express.Router();
 
