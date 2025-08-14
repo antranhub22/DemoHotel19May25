@@ -482,7 +482,7 @@ app.use((req, res, next) => {
     }, 1000);
 
     // Graceful shutdown and cleanup to prevent leaks
-    const cleanup = () => {
+    const cleanup = async () => {
       try {
         // Stop background systems if available
         try {
@@ -541,8 +541,8 @@ app.use((req, res, next) => {
     const signals: NodeJS.Signals[] = ["SIGINT", "SIGTERM", "SIGHUP"];
     for (const sig of signals) {
       if (process.listenerCount(sig) < 5) {
-        process.on(sig, () => {
-          cleanup();
+        process.on(sig, async () => {
+          await cleanup();
           server.close(() => process.exit(0));
         });
       }
