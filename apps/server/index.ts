@@ -494,12 +494,13 @@ app.use((req, res, next) => {
     // ✅ Initialize external memory monitoring dashboard
     externalMemoryDashboard.initialize(io);
 
-    // 🚨 MEMORY FIX: Start monitoring with LIMITED data retention
+    // 🚨 NUCLEAR OPTION: DISABLE ALL MONITORING to isolate real leak source
     try {
-      externalMemoryMonitor.startMonitoring();
-      // Disable detailed tracking to reduce memory usage
+      // externalMemoryMonitor.startMonitoring();
       // externalMemoryLogger.startTracking();
-      console.log("📊 External memory monitoring started (LIMITED MODE)");
+      console.log(
+        "🚫 ALL EXTERNAL MEMORY MONITORING DISABLED - Testing for non-monitoring leaks",
+      );
     } catch (error) {
       console.log("⚠️ External memory monitoring failed to start:", error);
     }
@@ -537,18 +538,15 @@ app.use((req, res, next) => {
       void 0;
     }
 
-    // 🚨 MEMORY FIX: Start external memory system with REDUCED retention
+    // 🚨 NUCLEAR OPTION: DISABLE ExternalMemorySystem to isolate leak source
     try {
-      const externalMemorySystem = getExternalMemorySystem();
-      await externalMemorySystem.initialize(io);
+      // const externalMemorySystem = getExternalMemorySystem();
+      // await externalMemorySystem.initialize(io);
       console.log(
-        "🚨 Real-time external memory leak detection active (REDUCED MODE)",
-      );
-      console.log(
-        `🎯 External memory leak API: http://localhost:${port}/api/external-memory/status`,
+        "🚫 ExternalMemorySystem DISABLED - Testing for application-level leaks",
       );
       logger.info(
-        "✅ External Memory Leak Detection started with reduced retention",
+        "🧪 NUCLEAR TEST: All external memory monitoring disabled to isolate real leak sources",
         "Server",
       );
     } catch (error) {
