@@ -271,6 +271,7 @@ import {
   externalMemoryDashboard,
   externalMemoryRoutes,
 } from "./monitoring/ExternalMemoryDashboard";
+import { getExternalMemorySystem } from "./monitoring/ExternalMemoryIntegration";
 import { externalMemoryLogger } from "./monitoring/ExternalMemoryLogger";
 import { externalMemoryMonitor } from "./monitoring/ExternalMemoryMonitor";
 
@@ -289,6 +290,7 @@ app.use("/api/files", uploadLimiter);
 
 // ✅ EXTERNAL MEMORY MONITORING: Add monitoring routes
 app.use("/api/memory", externalMemoryRoutes);
+app.use("/api/external-memory", getExternalMemorySystem().getAPIRouter());
 
 // ✅ Enable process-level memory protection
 import "@tools/process/manager";
@@ -479,7 +481,7 @@ app.use((req, res, next) => {
   // ✅ FIX: serveStatic already called above for production
 
   const port = process.env.PORT || 10000;
-  server.listen(port, () => {
+  server.listen(port, async () => {
     logger.debug(`Server is running on port ${port}`, "Component");
     console.log(`🚀 Server started successfully on port ${port}`);
     console.log(`🔗 API available at: http://localhost:${port}/api`);
@@ -496,6 +498,21 @@ app.use((req, res, next) => {
     externalMemoryMonitor.startMonitoring();
     externalMemoryLogger.startTracking();
     console.log("📊 External memory monitoring started");
+
+    // 🚨 Initialize Real-Time External Memory Leak Detection System
+    try {
+      const externalMemorySystem = getExternalMemorySystem();
+      await externalMemorySystem.initialize(io);
+      console.log("🚨 Real-time external memory leak detection active");
+      console.log(
+        `🎯 External memory leak API: http://localhost:${port}/api/external-memory/status`,
+      );
+    } catch (error) {
+      console.error(
+        "❌ Failed to initialize external memory leak detection:",
+        error,
+      );
+    }
 
     // ✅ Show monitoring status and reminders after startup
     setTimeout(() => {
@@ -542,6 +559,14 @@ app.use((req, res, next) => {
           externalMemoryMonitor.stopMonitoring();
           externalMemoryLogger.stopTracking();
           externalMemoryDashboard.shutdown();
+        } catch (_e) {
+          void 0;
+        }
+
+        // 🚨 Stop real-time external memory leak detection
+        try {
+          const externalMemorySystem = getExternalMemorySystem();
+          await externalMemorySystem.shutdown();
         } catch (_e) {
           void 0;
         }

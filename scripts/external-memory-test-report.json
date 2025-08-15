@@ -1,0 +1,297 @@
+{
+  "timestamp": "2025-08-15T02:57:28.858Z",
+  "duration": 17,
+  "summary": {
+    "totalTests": 25,
+    "passedTests": 24,
+    "failedTests": 1,
+    "successRate": 0.96
+  },
+  "capabilities": {
+    "Real-time monitoring": true,
+    "Pattern detection": true,
+    "Alerting system": true,
+    "Cleanup system": true,
+    "API endpoints": true,
+    "WebSocket integration": true,
+    "Performance": true
+  },
+  "details": {
+    "monitoringTests": [
+      {
+        "testName": "Basic Snapshot Generation",
+        "passed": 1,
+        "message": "Snapshot contains all required fields",
+        "details": {
+          "snapshot": {
+            "external": "50.0MB",
+            "ratio": "1.00"
+          }
+        },
+        "timestamp": "2025-08-15T02:57:28.840Z"
+      },
+      {
+        "testName": "RSS vs Heap Calculation",
+        "passed": false,
+        "message": "External memory calculation is incorrect",
+        "details": {
+          "expected": 104857600,
+          "calculated": 52428800,
+          "difference": 52428800
+        },
+        "timestamp": "2025-08-15T02:57:28.840Z"
+      },
+      {
+        "testName": "Growth Rate Tracking",
+        "passed": true,
+        "message": "Growth rate tracking working correctly",
+        "details": {
+          "snapshots": 3,
+          "growthRates": [0, 0.1, 0.1]
+        },
+        "timestamp": "2025-08-15T02:57:28.843Z"
+      },
+      {
+        "testName": "Resource Attribution",
+        "passed": true,
+        "message": "Resource attribution is working",
+        "details": {
+          "sourcesCount": 3,
+          "totalAttributed": "58.8MB"
+        },
+        "timestamp": "2025-08-15T02:57:28.843Z"
+      },
+      {
+        "testName": "Linear Growth Detection",
+        "passed": true,
+        "message": "Linear growth pattern detected correctly",
+        "details": {
+          "slope": "2.000",
+          "expectedSlope": 2,
+          "data": [50, 52, 54, 56, 58]
+        },
+        "timestamp": "2025-08-15T02:57:28.845Z"
+      },
+      {
+        "testName": "Exponential Growth Detection",
+        "passed": true,
+        "message": "Exponential growth pattern detected correctly",
+        "details": {
+          "avgRatio": "1.200",
+          "expectedRatio": 1.2,
+          "dataPoints": 8
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      },
+      {
+        "testName": "Spike Pattern Detection",
+        "passed": true,
+        "message": "Memory spikes detected correctly",
+        "details": {
+          "spikesFound": 2,
+          "expectedSpikes": 2,
+          "spikes": [80, 85]
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      }
+    ],
+    "alertingTests": [
+      {
+        "testName": "Size Threshold Alert",
+        "passed": true,
+        "message": "Size threshold alert should trigger",
+        "details": {
+          "externalMB": "200.0",
+          "threshold": 150
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      },
+      {
+        "testName": "Ratio Threshold Alert",
+        "passed": true,
+        "message": "Ratio threshold alert should trigger",
+        "details": {
+          "ratio": "6.00",
+          "threshold": 4
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      },
+      {
+        "testName": "Growth Rate Alert",
+        "passed": true,
+        "message": "Growth rate alert should trigger",
+        "details": {
+          "growthRate": "2.0MB/s",
+          "threshold": "1.0MB/s"
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      },
+      {
+        "testName": "Emergency Alert",
+        "passed": true,
+        "message": "Emergency alert should trigger",
+        "details": {
+          "externalMB": "700.0",
+          "emergencyThreshold": 600
+        },
+        "timestamp": "2025-08-15T02:57:28.846Z"
+      }
+    ],
+    "cleanupTests": [
+      {
+        "testName": "GC Cleanup Effectiveness",
+        "passed": true,
+        "message": "GC cleanup reduced memory usage",
+        "details": {
+          "beforeMB": "120.0",
+          "afterMB": "100.0",
+          "reducedMB": "20.0"
+        },
+        "timestamp": "2025-08-15T02:57:28.847Z"
+      },
+      {
+        "testName": "Connection Cleanup",
+        "passed": true,
+        "message": "Connection cleanup reduced database memory",
+        "details": {
+          "beforeConnMB": "40.0",
+          "afterConnMB": "20.0"
+        },
+        "timestamp": "2025-08-15T02:57:28.847Z"
+      },
+      {
+        "testName": "Comprehensive Cleanup",
+        "passed": true,
+        "message": "Comprehensive cleanup achieved significant reduction",
+        "details": {
+          "beforeMB": "200.0",
+          "afterMB": "150.0",
+          "reductionMB": "50.0",
+          "expectedMinReduction": 40
+        },
+        "timestamp": "2025-08-15T02:57:28.847Z"
+      },
+      {
+        "testName": "Auto Cleanup Trigger",
+        "passed": true,
+        "message": "Auto cleanup should trigger",
+        "details": {
+          "externalMB": "250.0",
+          "threshold": 200
+        },
+        "timestamp": "2025-08-15T02:57:28.847Z"
+      }
+    ],
+    "apiTests": [
+      {
+        "testName": "Status Endpoint Structure",
+        "passed": true,
+        "message": "Status endpoint returns valid structure",
+        "details": {
+          "hasCurrentMemory": true
+        },
+        "timestamp": "2025-08-15T02:57:28.848Z"
+      },
+      {
+        "testName": "Attribution Endpoint Structure",
+        "passed": true,
+        "message": "Attribution endpoint returns valid structure",
+        "details": {
+          "sources": 3
+        },
+        "timestamp": "2025-08-15T02:57:28.848Z"
+      },
+      {
+        "testName": "Cleanup Endpoint Structure",
+        "passed": true,
+        "message": "Cleanup endpoint returns valid structure",
+        "details": {
+          "cleanupSuccess": true,
+          "duration": 145
+        },
+        "timestamp": "2025-08-15T02:57:28.848Z"
+      },
+      {
+        "testName": "Health Check Endpoint",
+        "passed": true,
+        "message": "Health check endpoint working correctly",
+        "details": {
+          "status": "healthy",
+          "monitoring": true
+        },
+        "timestamp": "2025-08-15T02:57:28.848Z"
+      }
+    ],
+    "integrationTests": [
+      {
+        "testName": "End-to-End Monitoring Flow",
+        "passed": true,
+        "message": "Monitoring -> Alert -> Cleanup flow working",
+        "details": {
+          "initial": "50.0MB",
+          "peak": "120.0MB",
+          "afterCleanup": "80.0MB"
+        },
+        "timestamp": "2025-08-15T02:57:28.849Z"
+      },
+      {
+        "testName": "WebSocket Integration",
+        "passed": true,
+        "message": "WebSocket events properly formatted",
+        "details": {
+          "eventsCount": 3
+        },
+        "timestamp": "2025-08-15T02:57:28.849Z"
+      },
+      {
+        "testName": "Resource Attribution Consistency",
+        "passed": true,
+        "message": "Resource attribution covers expected memory range",
+        "details": {
+          "totalAttributed": "77.8MB",
+          "totalExternal": "150.0MB",
+          "coverage": "51.8%"
+        },
+        "timestamp": "2025-08-15T02:57:28.849Z"
+      }
+    ],
+    "performanceTests": [
+      {
+        "testName": "Snapshot Capture Performance",
+        "passed": true,
+        "message": "Snapshot capture is performant",
+        "details": {
+          "duration": "0.57ms",
+          "snapshots": 100,
+          "threshold": "100ms"
+        },
+        "timestamp": "2025-08-15T02:57:28.850Z"
+      },
+      {
+        "testName": "Monitoring Memory Efficiency",
+        "passed": true,
+        "message": "Monitoring system memory efficient",
+        "details": {
+          "memoryIncrease": "0.51MB",
+          "snapshots": 1000,
+          "threshold": "10MB"
+        },
+        "timestamp": "2025-08-15T02:57:28.857Z"
+      },
+      {
+        "testName": "Pattern Detection Performance",
+        "passed": true,
+        "message": "Pattern detection is performant",
+        "details": {
+          "duration": "0.086ms",
+          "dataPoints": 50,
+          "threshold": "10ms"
+        },
+        "timestamp": "2025-08-15T02:57:28.857Z"
+      }
+    ],
+    "totalTests": 25,
+    "passedTests": 24,
+    "failedTests": 1
+  }
+}
