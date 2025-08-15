@@ -1,4 +1,5 @@
 import { dashboardWebSocket } from "@server/services/DashboardWebSocket";
+import { TimerManager } from "@server/utils/TimerManager";
 import { logger } from "@shared/utils/logger";
 import { Server as HTTPServer } from "http";
 import { Socket, Server as SocketIOServer } from "socket.io";
@@ -90,7 +91,7 @@ export function setupSocket(server: HTTPServer) {
   const MAX_CONNECTIONS_PER_IP = 10;
 
   // ✅ MEMORY FIX: More aggressive periodic cleanup of connection tracking
-  setInterval(
+  TimerManager.setInterval(
     () => {
       // Clean up connection counts for IPs with 0 connections
       for (const [ip, count] of connectionCounts.entries()) {
@@ -120,6 +121,7 @@ export function setupSocket(server: HTTPServer) {
       );
     },
     2 * 60 * 1000,
+    "socket-connection-cleanup",
   ); // ✅ MEMORY FIX: Every 2 minutes (more frequent cleanup)
 
   io.on("connection", (socket: Socket) => {
@@ -260,16 +262,20 @@ export function setupSocket(server: HTTPServer) {
   });
 
   // ✅ MONITORING: Log server metrics periodically
-  setInterval(() => {
-    const totalConnections = Array.from(connectionCounts.values()).reduce(
-      (sum, count) => sum + count,
-      0,
-    );
-    logger.debug(
-      `WebSocket connections: ${totalConnections}, unique IPs: ${connectionCounts.size}`,
-      "WebSocket",
-    );
-  }, 30000); // Log every 30 seconds
+  TimerManager.setInterval(
+    () => {
+      const totalConnections = Array.from(connectionCounts.values()).reduce(
+        (sum, count) => sum + count,
+        0,
+      );
+      logger.debug(
+        `WebSocket connections: ${totalConnections}, unique IPs: ${connectionCounts.size}`,
+        "WebSocket",
+      );
+    },
+    30000,
+    "socket-metrics-logging",
+  ); // Log every 30 seconds
 
   return io;
 }

@@ -16,6 +16,7 @@
 
 import { EventEmitter } from "events";
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // INTERFACES AND TYPES
@@ -237,8 +238,7 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       "ExternalMemoryMonitor",
     );
 
-    // ✅ MEMORY FIX: Use TimerManager for tracked intervals
-    const { TimerManager } = require("../utils/TimerManager");
+    // ✅ MEMORY FIX: Use TimerManager for tracked intervals (already imported)
 
     // Start memory sampling
     this.samplingInterval = TimerManager.setInterval(
@@ -286,8 +286,7 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
 
     this.isRunning = false;
 
-    // ✅ MEMORY FIX: Use TimerManager for cleanup
-    const { TimerManager } = require("../utils/TimerManager");
+    // ✅ MEMORY FIX: Use TimerManager for cleanup (already imported)
 
     // Clear all intervals
     if (this.samplingInterval) {

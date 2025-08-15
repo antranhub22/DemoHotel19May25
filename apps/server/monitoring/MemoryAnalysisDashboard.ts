@@ -207,9 +207,16 @@ export class MemoryAnalysisDashboard extends EventEmitter {
       clearInterval(this.realtimeInterval);
     }
 
-    this.realtimeInterval = setInterval(() => {
-      this.broadcastRealtimeUpdate();
-    }, this.config.updateInterval);
+    // ✅ MEMORY FIX: Use TimerManager for tracked intervals
+    const { TimerManager } = require("../utils/TimerManager");
+
+    this.realtimeInterval = TimerManager.setInterval(
+      () => {
+        this.broadcastRealtimeUpdate();
+      },
+      this.config.updateInterval,
+      "memory-analysis-dashboard-realtime",
+    );
 
     logger.debug(
       "Started real-time memory analysis updates",

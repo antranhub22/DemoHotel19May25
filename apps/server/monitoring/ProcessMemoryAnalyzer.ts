@@ -197,15 +197,26 @@ export class ProcessMemoryAnalyzer extends EventEmitter {
     logger.info("🔍 Starting Process Memory Analysis", "ProcessMemoryAnalyzer");
 
     // Start continuous memory sampling
-    this.analysisInterval = setInterval(() => {
-      this.captureMemorySnapshot();
-    }, this.config.samplingInterval);
+    // ✅ MEMORY FIX: Use TimerManager for tracked intervals
+    const { TimerManager } = require("../utils/TimerManager");
+
+    this.analysisInterval = TimerManager.setInterval(
+      () => {
+        this.captureMemorySnapshot();
+      },
+      this.config.samplingInterval,
+      "process-memory-analyzer-analysis",
+    );
 
     // Start automated reporting
     if (this.config.autoReporting) {
-      this.reportingInterval = setInterval(() => {
-        this.generateAutomatedReport();
-      }, this.config.reportingInterval);
+      this.reportingInterval = TimerManager.setInterval(
+        () => {
+          this.generateAutomatedReport();
+        },
+        this.config.reportingInterval,
+        "process-memory-analyzer-reporting",
+      );
     }
 
     // Initial snapshot
