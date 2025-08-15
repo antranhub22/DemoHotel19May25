@@ -147,7 +147,15 @@ export class ConnectionPoolManager extends EventEmitter {
   private isInitialized = false;
   private isShuttingDown = false; // ✅ MEMORY FIX: Track shutdown state
   private metricsInterval?: NodeJS.Timeout;
+  private cleanupInterval?: NodeJS.Timeout;
   private lastScalingAction = new Date();
+
+  // ✅ MEMORY FIX: Add bounded collection limits
+  private readonly MAX_METRICS = 50;
+  private readonly MAX_ALERTS = 20;
+  private readonly MAX_EVENTS = 25;
+  private readonly MAX_CACHE_SIZE = 100;
+  private readonly MAX_CONNECTION_LEAKS = 30;
 
   private constructor(config: PoolConfiguration) {
     super();
@@ -208,6 +216,9 @@ export class ConnectionPoolManager extends EventEmitter {
 
       // Setup event listeners
       this.setupEventHandlers();
+
+      // ✅ MEMORY FIX: Start periodic cleanup
+      this.startPeriodicCleanup();
 
       this.isInitialized = true;
       logger.success(
@@ -652,6 +663,9 @@ export class ConnectionPoolManager extends EventEmitter {
           const metrics = await this.collectMetrics();
           this.metrics.push(metrics);
 
+          // ✅ MEMORY FIX: Maintain array bounds after adding metrics
+          this.maintainArrayBounds();
+
           // ✅ MEMORY FIX: Even more aggressive cleanup to prevent unbounded growth
           if (this.metrics.length > 200) {
             this.metrics = this.metrics.slice(-100); // Keep only last 100 entries
@@ -727,14 +741,52 @@ export class ConnectionPoolManager extends EventEmitter {
     logger.debug("🏥 [ConnectionPool] Health checks started", "ConnectionPool");
   }
 
+  /**
+   * ✅ MEMORY FIX: Start periodic cleanup to prevent memory leaks
+   */
+  private startPeriodicCleanup(): void {
+    // Run cleanup every 5 minutes (300,000ms)
+    this.cleanupInterval = setInterval(() => {
+      try {
+        this.maintainArrayBounds();
+        logger.debug(
+          "[ConnectionPool] Periodic cleanup completed",
+          "ConnectionPool",
+          {
+            metricsCount: this.metrics.length,
+            alertsCount: this.alerts.length,
+            eventsCount: this.autoScalingEvents.length,
+            cacheSize: this.queryCache.size,
+            leaksCount: this.connectionLeaks.length,
+          },
+        );
+      } catch (error) {
+        logger.warn("Periodic cleanup failed", "ConnectionPool", error);
+      }
+    }, 300000); // 5 minutes
+
+    logger.debug(
+      "[ConnectionPool] Periodic cleanup started (every 5 minutes)",
+      "ConnectionPool",
+    );
+  }
+
   private setupEventHandlers(): void {
     this.on("connectionLeak", (leak: ConnectionLeak) => {
       this.connectionLeaks.push(leak);
+
+      // ✅ MEMORY FIX: Maintain array bounds after adding leak
+      this.maintainArrayBounds();
+
       this.emitAlert("warning", "resource", "Connection leak detected", leak);
     });
 
     this.on("autoScaling", (event: AutoScalingEvent) => {
       this.autoScalingEvents.push(event);
+
+      // ✅ MEMORY FIX: Maintain array bounds after adding event
+      this.maintainArrayBounds();
+
       logger.info(
         `📈 [ConnectionPool] Auto-scaling: ${event.action}`,
         "ConnectionPool",
@@ -970,14 +1022,73 @@ export class ConnectionPoolManager extends EventEmitter {
 
     this.alerts.push(alert);
 
-    // Keep only recent alerts
-    if (this.alerts.length > 500) {
-      this.alerts = this.alerts.slice(-500);
-    }
+    // ✅ MEMORY FIX: Maintain array bounds after adding alert
+    this.maintainArrayBounds();
 
     logger.warn(`🚨 [ConnectionPool] Alert: ${message}`, "ConnectionPool", {
       alert,
     });
+  }
+
+  /**
+   * ✅ MEMORY FIX: Maintain bounded collections to prevent memory leaks
+   */
+  private maintainArrayBounds(): void {
+    try {
+      // Maintain metrics array bounds
+      if (this.metrics.length > this.MAX_METRICS) {
+        this.metrics = this.metrics.slice(-this.MAX_METRICS);
+        logger.debug(
+          `[ConnectionPool] Trimmed metrics array to ${this.MAX_METRICS} entries`,
+          "ConnectionPool",
+        );
+      }
+
+      // Maintain alerts array bounds
+      if (this.alerts.length > this.MAX_ALERTS) {
+        this.alerts = this.alerts.slice(-this.MAX_ALERTS);
+        logger.debug(
+          `[ConnectionPool] Trimmed alerts array to ${this.MAX_ALERTS} entries`,
+          "ConnectionPool",
+        );
+      }
+
+      // Maintain events array bounds
+      if (this.autoScalingEvents.length > this.MAX_EVENTS) {
+        this.autoScalingEvents = this.autoScalingEvents.slice(-this.MAX_EVENTS);
+        logger.debug(
+          `[ConnectionPool] Trimmed events array to ${this.MAX_EVENTS} entries`,
+          "ConnectionPool",
+        );
+      }
+
+      // Maintain connection leaks array bounds
+      if (this.connectionLeaks.length > this.MAX_CONNECTION_LEAKS) {
+        this.connectionLeaks = this.connectionLeaks.slice(
+          -this.MAX_CONNECTION_LEAKS,
+        );
+        logger.debug(
+          `[ConnectionPool] Trimmed connection leaks array to ${this.MAX_CONNECTION_LEAKS} entries`,
+          "ConnectionPool",
+        );
+      }
+
+      // Maintain query cache bounds
+      if (this.queryCache.size > this.MAX_CACHE_SIZE) {
+        const entries = Array.from(this.queryCache.entries());
+        this.queryCache.clear();
+        const recentEntries = entries.slice(-this.MAX_CACHE_SIZE);
+        recentEntries.forEach(([key, value]) => {
+          this.queryCache.set(key, value);
+        });
+        logger.debug(
+          `[ConnectionPool] Trimmed query cache to ${this.MAX_CACHE_SIZE} entries`,
+          "ConnectionPool",
+        );
+      }
+    } catch (error) {
+      logger.warn("Failed to maintain array bounds", "ConnectionPool", error);
+    }
   }
 
   /**
@@ -999,6 +1110,11 @@ export class ConnectionPoolManager extends EventEmitter {
       if (this.metricsInterval) {
         clearInterval(this.metricsInterval);
         this.metricsInterval = undefined;
+      }
+
+      if (this.cleanupInterval) {
+        clearInterval(this.cleanupInterval);
+        this.cleanupInterval = undefined;
       }
 
       // Cleanup all connections

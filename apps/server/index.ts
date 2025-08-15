@@ -554,6 +554,14 @@ app.use((req, res, next) => {
           void 0;
         }
 
+        // ✅ MEMORY FIX: Cleanup VAPI connections
+        try {
+          const { cleanupVapi } = require("@server/vapi");
+          await cleanupVapi();
+        } catch (_e) {
+          void 0;
+        }
+
         // ✅ Stop external memory monitoring
         try {
           externalMemoryMonitor.stopMonitoring();

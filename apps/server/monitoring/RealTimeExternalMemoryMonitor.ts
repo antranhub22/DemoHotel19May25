@@ -14,8 +14,8 @@
  * - Resource attribution and source identification
  */
 
-import { logger } from "../../../packages/shared/utils/logger";
 import { EventEmitter } from "events";
+import { logger } from "../../../packages/shared/utils/logger";
 
 // ============================================
 // INTERFACES AND TYPES
@@ -203,10 +203,10 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       enableEmergencyAlerts: true,
       emergencyThreshold: 300, // 300MB (reduced for earlier emergency response)
 
-      // Data Retention - Optimized for memory
-      maxSnapshots: 500, // Reduced from 1000 to save memory
-      maxPatterns: 25, // Reduced from 50 to save memory
-      maxAlerts: 50, // Reduced from 100 to save memory
+      // Data Retention - Aggressively optimized for memory
+      maxSnapshots: 50, // ✅ MEMORY FIX: Reduced from 500 to 50 (90% reduction)
+      maxPatterns: 10, // ✅ MEMORY FIX: Reduced from 25 to 10 (60% reduction)
+      maxAlerts: 20, // ✅ MEMORY FIX: Reduced from 50 to 20 (60% reduction)
 
       // Integration
       enableDashboardIntegration: true,
@@ -360,10 +360,8 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       // Add to snapshots
       this.snapshots.push(snapshot);
 
-      // Maintain snapshot limit
-      if (this.snapshots.length > this.config.maxSnapshots) {
-        this.snapshots = this.snapshots.slice(-this.config.maxSnapshots);
-      }
+      // ✅ MEMORY FIX: Aggressive snapshot cleanup
+      this.maintainMemoryBounds();
 
       // Emit snapshot event
       this.emit("snapshotCaptured", snapshot);
@@ -540,6 +538,60 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
     }
   }
 
+  /**
+   * ✅ MEMORY FIX: Aggressive memory bounds maintenance
+   */
+  private maintainMemoryBounds(): void {
+    try {
+      // Aggressive snapshot cleanup (remove 50% when limit hit)
+      if (this.snapshots.length > this.config.maxSnapshots) {
+        const removeCount = Math.floor(this.snapshots.length * 0.5);
+        this.snapshots.splice(0, removeCount);
+        logger.debug(
+          `[ExternalMemoryMonitor] Aggressively trimmed snapshots: removed ${removeCount}, kept ${this.snapshots.length}`,
+          "ExternalMemoryMonitor",
+        );
+      }
+
+      // Aggressive patterns cleanup
+      if (this.growthPatterns.length > this.config.maxPatterns) {
+        const removeCount = Math.floor(this.growthPatterns.length * 0.5);
+        this.growthPatterns.splice(0, removeCount);
+        logger.debug(
+          `[ExternalMemoryMonitor] Aggressively trimmed patterns: removed ${removeCount}, kept ${this.growthPatterns.length}`,
+          "ExternalMemoryMonitor",
+        );
+      }
+
+      // Aggressive alerts cleanup
+      if (this.alerts.length > this.config.maxAlerts) {
+        const removeCount = Math.floor(this.alerts.length * 0.5);
+        this.alerts.splice(0, removeCount);
+        logger.debug(
+          `[ExternalMemoryMonitor] Aggressively trimmed alerts: removed ${removeCount}, kept ${this.alerts.length}`,
+          "ExternalMemoryMonitor",
+        );
+      }
+
+      // Aggressive cleanup actions cleanup
+      const maxCleanupActions = 20; // Hardcoded limit
+      if (this.cleanupActions.length > maxCleanupActions) {
+        const removeCount = Math.floor(this.cleanupActions.length * 0.5);
+        this.cleanupActions.splice(0, removeCount);
+        logger.debug(
+          `[ExternalMemoryMonitor] Aggressively trimmed cleanup actions: removed ${removeCount}, kept ${this.cleanupActions.length}`,
+          "ExternalMemoryMonitor",
+        );
+      }
+    } catch (error) {
+      logger.warn(
+        "Failed to maintain memory bounds",
+        "ExternalMemoryMonitor",
+        error,
+      );
+    }
+  }
+
   // ============================================
   // GROWTH PATTERN ANALYSIS
   // ============================================
@@ -589,10 +641,8 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       }
     });
 
-    // Maintain pattern limit
-    if (this.growthPatterns.length > this.config.maxPatterns) {
-      this.growthPatterns = this.growthPatterns.slice(-this.config.maxPatterns);
-    }
+    // ✅ MEMORY FIX: Maintain pattern limit with aggressive cleanup
+    this.maintainMemoryBounds();
   }
 
   private detectLinearGrowthPattern(
@@ -1108,10 +1158,8 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
   private addAlert(alert: ExternalMemoryAlert): void {
     this.alerts.push(alert);
 
-    // Maintain alert limit
-    if (this.alerts.length > this.config.maxAlerts) {
-      this.alerts = this.alerts.slice(-this.config.maxAlerts);
-    }
+    // ✅ MEMORY FIX: Maintain alert limit with aggressive cleanup
+    this.maintainMemoryBounds();
 
     // Emit alert event
     this.emit("alertGenerated", alert);
