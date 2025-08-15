@@ -4,7 +4,8 @@
 // Shows monitoring status and reminders during app startup
 // Helps ensure monitoring is not forgotten after deployment
 
-import { logger } from "@shared/utils/logger";
+import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 export function showMonitoringReminder(): void {
   // Check if we're in a production-like environment
@@ -19,14 +20,22 @@ export function showMonitoringReminder(): void {
       "MonitoringReminder",
     );
 
-    setTimeout(() => {
-      checkAndShowReminder();
-    }, 3000); // Show after app startup
+    TimerManager.setTimeout(
+      () => {
+        checkAndShowReminder();
+      },
+      3000,
+      "monitoring-reminder-production",
+    ); // Show after app startup
   } else {
     // In development, show immediate reminder
-    setTimeout(() => {
-      checkAndShowReminder();
-    }, 1000);
+    TimerManager.setTimeout(
+      () => {
+        checkAndShowReminder();
+      },
+      1000,
+      "monitoring-reminder-development",
+    );
   }
 }
 
@@ -94,7 +103,7 @@ function showDisabledReminder(): void {
 
   // Schedule periodic reminders (every 30 minutes in development)
   if (!isProduction) {
-    setInterval(
+    TimerManager.setInterval(
       () => {
         logger.info(
           "💡 Reminder: Enhanced Logging & Metrics v2.0 is disabled. Enable with: npm run enable-monitoring",
@@ -102,6 +111,7 @@ function showDisabledReminder(): void {
         );
       },
       30 * 60 * 1000,
+      "monitoring-disabled-reminder",
     ); // 30 minutes
   }
 }
@@ -117,9 +127,13 @@ function showEnabledStatus(): void {
   );
 
   // Test if monitoring is actually responding
-  setTimeout(() => {
-    testMonitoringEndpoints();
-  }, 5000);
+  TimerManager.setTimeout(
+    () => {
+      testMonitoringEndpoints();
+    },
+    5000,
+    "monitoring-endpoint-test",
+  );
 }
 
 function testMonitoringEndpoints(): void {
@@ -180,11 +194,15 @@ export function initializeMonitoringReminder(): void {
   const reminderInterval =
     process.env.NODE_ENV === "production" ? 6 * 60 * 60 * 1000 : 60 * 60 * 1000; // 6 hours prod, 1 hour dev
 
-  setInterval(() => {
-    if (process.env.SHOW_MONITORING_REMINDERS !== "false") {
-      checkAndShowReminder();
-    }
-  }, reminderInterval);
+  TimerManager.setInterval(
+    () => {
+      if (process.env.SHOW_MONITORING_REMINDERS !== "false") {
+        checkAndShowReminder();
+      }
+    },
+    reminderInterval,
+    "periodic-monitoring-reminder",
+  );
 }
 
 // Environment-based reminder settings

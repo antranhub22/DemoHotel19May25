@@ -296,10 +296,34 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       totalCleanups: this.cleanupActions.length,
     });
 
+    // ✅ MEMORY FIX: Clean up all event listeners
+    this.cleanupListeners();
+
     logger.info(
       "🛑 Real-Time External Memory Monitoring Stopped",
       "ExternalMemoryMonitor",
     );
+  }
+
+  /**
+   * ✅ MEMORY FIX: Cleanup all event listeners to prevent memory leaks
+   */
+  private cleanupListeners(): void {
+    try {
+      // Remove all listeners to prevent memory leaks
+      this.removeAllListeners();
+
+      // Reset max listeners to 0 to prevent further listeners
+      this.setMaxListeners(0);
+
+      logger.debug("Event listeners cleaned up", "ExternalMemoryMonitor");
+    } catch (error) {
+      logger.warn(
+        "Failed to cleanup event listeners",
+        "ExternalMemoryMonitor",
+        error,
+      );
+    }
   }
 
   // ============================================

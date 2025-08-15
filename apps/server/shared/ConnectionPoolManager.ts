@@ -6,6 +6,7 @@
 
 import { EventEmitter } from "events";
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 import { recordPerformanceMetrics } from "./AdvancedMetricsCollector";
 
 // Connection pool interfaces
@@ -626,10 +627,14 @@ export class ConnectionPoolManager extends EventEmitter {
         }
       };
 
-      const timeout = setTimeout(() => {
-        this.removeListener("connectionAvailable", onConnectionAvailable);
-        reject(new Error("Connection acquire timeout"));
-      }, this.config.pool.maxQueueWaitMs); // ✅ Use maxQueueWaitMs instead of acquireTimeoutMs
+      const timeout = TimerManager.setTimeout(
+        () => {
+          this.removeListener("connectionAvailable", onConnectionAvailable);
+          reject(new Error("Connection acquire timeout"));
+        },
+        this.config.pool.maxQueueWaitMs,
+        "connection-acquire-timeout",
+      ); // ✅ Use maxQueueWaitMs instead of acquireTimeoutMs
 
       this.on("connectionAvailable", onConnectionAvailable);
     });
@@ -657,7 +662,7 @@ export class ConnectionPoolManager extends EventEmitter {
   }
 
   private startMetricsCollection(): void {
-    this.metricsInterval = setInterval(
+    this.metricsInterval = TimerManager.setInterval(
       async () => {
         try {
           const metrics = await this.collectMetrics();
@@ -729,6 +734,7 @@ export class ConnectionPoolManager extends EventEmitter {
         }
       },
       Math.max(this.config.monitoring.metricsInterval, 60000),
+      "connection-pool-metrics",
     ); // ✅ Minimum 60s interval
 
     logger.debug(
@@ -746,24 +752,28 @@ export class ConnectionPoolManager extends EventEmitter {
    */
   private startPeriodicCleanup(): void {
     // Run cleanup every 5 minutes (300,000ms)
-    this.cleanupInterval = setInterval(() => {
-      try {
-        this.maintainArrayBounds();
-        logger.debug(
-          "[ConnectionPool] Periodic cleanup completed",
-          "ConnectionPool",
-          {
-            metricsCount: this.metrics.length,
-            alertsCount: this.alerts.length,
-            eventsCount: this.autoScalingEvents.length,
-            cacheSize: this.queryCache.size,
-            leaksCount: this.connectionLeaks.length,
-          },
-        );
-      } catch (error) {
-        logger.warn("Periodic cleanup failed", "ConnectionPool", error);
-      }
-    }, 300000); // 5 minutes
+    this.cleanupInterval = TimerManager.setInterval(
+      () => {
+        try {
+          this.maintainArrayBounds();
+          logger.debug(
+            "[ConnectionPool] Periodic cleanup completed",
+            "ConnectionPool",
+            {
+              metricsCount: this.metrics.length,
+              alertsCount: this.alerts.length,
+              eventsCount: this.autoScalingEvents.length,
+              cacheSize: this.queryCache.size,
+              leaksCount: this.connectionLeaks.length,
+            },
+          );
+        } catch (error) {
+          logger.warn("Periodic cleanup failed", "ConnectionPool", error);
+        }
+      },
+      300000,
+      "connection-pool-cleanup",
+    ); // 5 minutes
 
     logger.debug(
       "[ConnectionPool] Periodic cleanup started (every 5 minutes)",
@@ -1106,14 +1116,14 @@ export class ConnectionPoolManager extends EventEmitter {
     );
 
     try {
-      // Clear all timers and intervals
+      // ✅ MEMORY FIX: Clear all timers and intervals with TimerManager
       if (this.metricsInterval) {
-        clearInterval(this.metricsInterval);
+        TimerManager.clearInterval(this.metricsInterval);
         this.metricsInterval = undefined;
       }
 
       if (this.cleanupInterval) {
-        clearInterval(this.cleanupInterval);
+        TimerManager.clearInterval(this.cleanupInterval);
         this.cleanupInterval = undefined;
       }
 
@@ -1132,8 +1142,8 @@ export class ConnectionPoolManager extends EventEmitter {
       this.autoScalingEvents.length = 0;
       this.queryCache.clear();
 
-      // Remove all event listeners
-      this.removeAllListeners();
+      // ✅ MEMORY FIX: Clean up all event listeners
+      this.cleanupListeners();
 
       logger.success(
         "✅ [ConnectionPool] Graceful shutdown completed",
@@ -1146,6 +1156,23 @@ export class ConnectionPoolManager extends EventEmitter {
         error,
       );
       throw error;
+    }
+  }
+
+  /**
+   * ✅ MEMORY FIX: Cleanup all event listeners to prevent memory leaks
+   */
+  private cleanupListeners(): void {
+    try {
+      // Remove all listeners to prevent memory leaks
+      this.removeAllListeners();
+
+      // Reset max listeners to 0 to prevent further listeners
+      this.setMaxListeners(0);
+
+      logger.debug("Event listeners cleaned up", "ConnectionPool");
+    } catch (error) {
+      logger.warn("Failed to cleanup event listeners", "ConnectionPool", error);
     }
   }
 
@@ -1241,7 +1268,13 @@ export class ConnectionPoolManager extends EventEmitter {
     const executionTime = Math.round(baseTime * variance);
 
     // Simulate async execution with memory tracking
-    await new Promise((resolve) => setTimeout(resolve, executionTime));
+    await new Promise((resolve) =>
+      TimerManager.setTimeout(
+        () => resolve(undefined),
+        executionTime,
+        "async-execution-delay",
+      ),
+    );
 
     // Calculate actual memory impact
     const endMemory = process.memoryUsage();

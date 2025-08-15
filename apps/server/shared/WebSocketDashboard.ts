@@ -4,14 +4,14 @@
 // WebSocket integration for real-time monitoring dashboard with live metrics streaming,
 // alert notifications, and interactive dashboard updates
 
-import { EventEmitter } from 'events';
-import { WebSocket, WebSocketServer } from 'ws';
-import { logger } from '@shared/utils/logger';
-import { MonitoringDashboard } from './MonitoringDashboard';
+import { EventEmitter } from "events";
+import { WebSocket, WebSocketServer } from "ws";
+import { logger } from "../../packages/shared/utils/logger";
+import { MonitoringDashboard } from "./MonitoringDashboard";
 
 // WebSocket interfaces
 export interface WebSocketMessage {
-  type: 'subscribe' | 'unsubscribe' | 'ping' | 'alert_action' | 'config_update';
+  type: "subscribe" | "unsubscribe" | "ping" | "alert_action" | "config_update";
   data?: any;
   timestamp: string;
   messageId: string;
@@ -19,12 +19,12 @@ export interface WebSocketMessage {
 
 export interface WebSocketResponse {
   type:
-    | 'metrics'
-    | 'alert'
-    | 'status'
-    | 'error'
-    | 'pong'
-    | 'subscription_confirmed';
+    | "metrics"
+    | "alert"
+    | "status"
+    | "error"
+    | "pong"
+    | "subscription_confirmed";
   data?: any;
   timestamp: string;
   messageId?: string;
@@ -32,14 +32,14 @@ export interface WebSocketResponse {
 
 export interface WebSocketSubscription {
   type:
-    | 'metrics'
-    | 'alerts'
-    | 'performance'
-    | 'system'
-    | 'database'
-    | 'application'
-    | 'business'
-    | 'all';
+    | "metrics"
+    | "alerts"
+    | "performance"
+    | "system"
+    | "database"
+    | "application"
+    | "business"
+    | "all";
   frequency?: number; // seconds
   filters?: {
     category?: string;
@@ -88,8 +88,8 @@ export class WebSocketDashboard extends EventEmitter {
   async initialize(port: number = 8080): Promise<void> {
     try {
       logger.info(
-        '🔌 [WebSocketDashboard] Initializing WebSocket dashboard server',
-        'WebSocketDashboard'
+        "🔌 [WebSocketDashboard] Initializing WebSocket dashboard server",
+        "WebSocketDashboard",
       );
 
       // Initialize WebSocket server
@@ -116,13 +116,13 @@ export class WebSocketDashboard extends EventEmitter {
       this.isInitialized = true;
       logger.success(
         `✅ [WebSocketDashboard] WebSocket dashboard server started on port ${port}`,
-        'WebSocketDashboard'
+        "WebSocketDashboard",
       );
     } catch (error) {
       logger.error(
-        '❌ [WebSocketDashboard] Failed to initialize WebSocket dashboard',
-        'WebSocketDashboard',
-        error
+        "❌ [WebSocketDashboard] Failed to initialize WebSocket dashboard",
+        "WebSocketDashboard",
+        error,
       );
       throw error;
     }
@@ -146,12 +146,12 @@ export class WebSocketDashboard extends EventEmitter {
             client.lastActivity = new Date();
           } catch (error) {
             logger.error(
-              '❌ [WebSocketDashboard] Failed to send message to client',
-              'WebSocketDashboard',
+              "❌ [WebSocketDashboard] Failed to send message to client",
+              "WebSocketDashboard",
               {
                 clientId,
                 error: (error as Error).message,
-              }
+              },
             );
             this.removeClient(clientId);
           }
@@ -171,12 +171,12 @@ export class WebSocketDashboard extends EventEmitter {
         client.lastActivity = new Date();
       } catch (error) {
         logger.error(
-          '❌ [WebSocketDashboard] Failed to send message to specific client',
-          'WebSocketDashboard',
+          "❌ [WebSocketDashboard] Failed to send message to specific client",
+          "WebSocketDashboard",
           {
             clientId,
             error: (error as Error).message,
-          }
+          },
         );
         this.removeClient(clientId);
       }
@@ -201,12 +201,12 @@ export class WebSocketDashboard extends EventEmitter {
 
     for (const client of this.clients.values()) {
       // Count subscriptions
-      client.subscriptions.forEach(sub => {
+      client.subscriptions.forEach((sub) => {
         bySubscription[sub.type] = (bySubscription[sub.type] || 0) + 1;
       });
 
       // Count permissions
-      client.permissions.forEach(permission => {
+      client.permissions.forEach((permission) => {
         byPermission[permission] = (byPermission[permission] || 0) + 1;
       });
 
@@ -238,27 +238,115 @@ export class WebSocketDashboard extends EventEmitter {
     };
   }
 
+  /**
+   * ✅ MEMORY FIX: Comprehensive shutdown with cleanup
+   */
+  async shutdown(): Promise<void> {
+    try {
+      logger.info(
+        "🔄 [WebSocketDashboard] Starting graceful shutdown",
+        "WebSocketDashboard",
+      );
+
+      // Stop heartbeat interval
+      if (this.heartbeatInterval) {
+        clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = undefined;
+      }
+
+      // Stop metrics interval
+      if (this.metricsInterval) {
+        clearInterval(this.metricsInterval);
+        this.metricsInterval = undefined;
+      }
+
+      // Close all client connections
+      if (this.wss) {
+        this.wss.clients.forEach((client) => {
+          try {
+            client.removeAllListeners();
+            client.close();
+          } catch (error) {
+            logger.warn(
+              "Error closing client connection",
+              "WebSocketDashboard",
+              error,
+            );
+          }
+        });
+
+        // Close WebSocket server
+        await new Promise<void>((resolve) => {
+          this.wss!.close(() => resolve());
+        });
+
+        this.wss = undefined;
+      }
+
+      // Clear client tracking
+      this.clients.clear();
+
+      // ✅ MEMORY FIX: Clean up all event listeners
+      this.cleanupListeners();
+
+      this.isInitialized = false;
+
+      logger.success(
+        "✅ [WebSocketDashboard] Graceful shutdown completed",
+        "WebSocketDashboard",
+      );
+    } catch (error) {
+      logger.error(
+        "❌ [WebSocketDashboard] Shutdown failed",
+        "WebSocketDashboard",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * ✅ MEMORY FIX: Cleanup all event listeners to prevent memory leaks
+   */
+  private cleanupListeners(): void {
+    try {
+      // Remove all listeners to prevent memory leaks
+      this.removeAllListeners();
+
+      // Reset max listeners to 0 to prevent further listeners
+      this.setMaxListeners(0);
+
+      logger.debug("Event listeners cleaned up", "WebSocketDashboard");
+    } catch (error) {
+      logger.warn(
+        "Failed to cleanup event listeners",
+        "WebSocketDashboard",
+        error,
+      );
+    }
+  }
+
   // Private methods
 
   private setupWebSocketHandlers(): void {
     if (!this.wss) return;
 
-    this.wss.on('connection', (ws: WebSocket, request) => {
+    this.wss.on("connection", (ws: WebSocket, request) => {
       const clientId = this.generateClientId();
       const clientIP = request.socket.remoteAddress;
 
       logger.info(
-        '🔌 [WebSocketDashboard] New client connected',
-        'WebSocketDashboard',
+        "🔌 [WebSocketDashboard] New client connected",
+        "WebSocketDashboard",
         {
           clientId,
           clientIP,
-        }
+        },
       );
 
       const client: WebSocketClient = {
         id: clientId,
-        permissions: ['read'], // Default permissions
+        permissions: ["read"], // Default permissions
         subscriptions: [],
         lastActivity: new Date(),
         connection: ws,
@@ -272,53 +360,53 @@ export class WebSocketDashboard extends EventEmitter {
         this.monitoringDashboard.registerWebSocketConnection({
           id: clientId,
           permissions: client.permissions,
-          subscriptions: client.subscriptions.map(s => s.type),
+          subscriptions: client.subscriptions.map((s) => s.type),
         });
       }
 
       // Setup client message handlers
-      ws.on('message', (data: Buffer) => {
+      ws.on("message", (data: Buffer) => {
         try {
           const message: WebSocketMessage = JSON.parse(data.toString());
           this.handleClientMessage(clientId, message);
         } catch (error) {
           logger.error(
-            '❌ [WebSocketDashboard] Invalid message from client',
-            'WebSocketDashboard',
+            "❌ [WebSocketDashboard] Invalid message from client",
+            "WebSocketDashboard",
             {
               clientId,
               error: (error as Error).message,
-            }
+            },
           );
           this.sendToClient(clientId, {
-            type: 'error',
-            data: { message: 'Invalid message format' },
+            type: "error",
+            data: { message: "Invalid message format" },
             timestamp: new Date().toISOString(),
           });
         }
       });
 
       // Handle client disconnect
-      ws.on('close', () => {
+      ws.on("close", () => {
         logger.info(
-          '🔌 [WebSocketDashboard] Client disconnected',
-          'WebSocketDashboard',
-          { clientId }
+          "🔌 [WebSocketDashboard] Client disconnected",
+          "WebSocketDashboard",
+          { clientId },
         );
         this.removeClient(clientId);
       });
 
       // Handle ping/pong for heartbeat
-      ws.on('pong', () => {
+      ws.on("pong", () => {
         client.isAlive = true;
         client.lastActivity = new Date();
       });
 
       // Send welcome message
       this.sendToClient(clientId, {
-        type: 'status',
+        type: "status",
         data: {
-          message: 'Connected to monitoring dashboard',
+          message: "Connected to monitoring dashboard",
           clientId,
           serverTime: new Date().toISOString(),
         },
@@ -326,18 +414,18 @@ export class WebSocketDashboard extends EventEmitter {
       });
     });
 
-    this.wss.on('error', error => {
+    this.wss.on("error", (error) => {
       logger.error(
-        '❌ [WebSocketDashboard] WebSocket server error',
-        'WebSocketDashboard',
-        error
+        "❌ [WebSocketDashboard] WebSocket server error",
+        "WebSocketDashboard",
+        error,
       );
     });
   }
 
   private handleClientMessage(
     clientId: string,
-    message: WebSocketMessage
+    message: WebSocketMessage,
   ): void {
     const client = this.clients.get(clientId);
     if (!client) return;
@@ -350,33 +438,33 @@ export class WebSocketDashboard extends EventEmitter {
     }
 
     switch (message.type) {
-      case 'subscribe':
+      case "subscribe":
         this.handleSubscription(clientId, message.data);
         break;
 
-      case 'unsubscribe':
+      case "unsubscribe":
         this.handleUnsubscription(clientId, message.data);
         break;
 
-      case 'ping':
+      case "ping":
         this.sendToClient(clientId, {
-          type: 'pong',
+          type: "pong",
           timestamp: new Date().toISOString(),
           messageId: message.messageId,
         });
         break;
 
-      case 'alert_action':
+      case "alert_action":
         this.handleAlertAction(clientId, message.data);
         break;
 
-      case 'config_update':
+      case "config_update":
         this.handleConfigUpdate(clientId, message.data);
         break;
 
       default:
         this.sendToClient(clientId, {
-          type: 'error',
+          type: "error",
           data: { message: `Unknown message type: ${message.type}` },
           timestamp: new Date().toISOString(),
           messageId: message.messageId,
@@ -386,7 +474,7 @@ export class WebSocketDashboard extends EventEmitter {
 
   private handleSubscription(
     clientId: string,
-    subscriptionData: WebSocketSubscription
+    subscriptionData: WebSocketSubscription,
   ): void {
     const client = this.clients.get(clientId);
     if (!client) return;
@@ -394,8 +482,8 @@ export class WebSocketDashboard extends EventEmitter {
     // Validate subscription
     if (!subscriptionData.type) {
       this.sendToClient(clientId, {
-        type: 'error',
-        data: { message: 'Subscription type is required' },
+        type: "error",
+        data: { message: "Subscription type is required" },
         timestamp: new Date().toISOString(),
       });
       return;
@@ -410,12 +498,12 @@ export class WebSocketDashboard extends EventEmitter {
         id: clientId,
         userId: client.userId,
         permissions: client.permissions,
-        subscriptions: client.subscriptions.map(s => s.type),
+        subscriptions: client.subscriptions.map((s) => s.type),
       });
     }
 
     this.sendToClient(clientId, {
-      type: 'subscription_confirmed',
+      type: "subscription_confirmed",
       data: {
         subscription: subscriptionData,
         message: `Subscribed to ${subscriptionData.type}`,
@@ -424,29 +512,29 @@ export class WebSocketDashboard extends EventEmitter {
     });
 
     logger.debug(
-      '📋 [WebSocketDashboard] Client subscribed',
-      'WebSocketDashboard',
+      "📋 [WebSocketDashboard] Client subscribed",
+      "WebSocketDashboard",
       {
         clientId,
         subscriptionType: subscriptionData.type,
-      }
+      },
     );
   }
 
   private handleUnsubscription(
     clientId: string,
-    subscriptionType: string
+    subscriptionType: string,
   ): void {
     const client = this.clients.get(clientId);
     if (!client) return;
 
     // Remove subscription
     client.subscriptions = client.subscriptions.filter(
-      s => s.type !== subscriptionType
+      (s) => s.type !== subscriptionType,
     );
 
     this.sendToClient(clientId, {
-      type: 'subscription_confirmed',
+      type: "subscription_confirmed",
       data: {
         message: `Unsubscribed from ${subscriptionType}`,
       },
@@ -454,12 +542,12 @@ export class WebSocketDashboard extends EventEmitter {
     });
 
     logger.debug(
-      '📋 [WebSocketDashboard] Client unsubscribed',
-      'WebSocketDashboard',
+      "📋 [WebSocketDashboard] Client unsubscribed",
+      "WebSocketDashboard",
       {
         clientId,
         subscriptionType,
-      }
+      },
     );
   }
 
@@ -469,12 +557,12 @@ export class WebSocketDashboard extends EventEmitter {
 
     // Check permissions
     if (
-      !client.permissions.includes('admin') &&
-      !client.permissions.includes('alert_management')
+      !client.permissions.includes("admin") &&
+      !client.permissions.includes("alert_management")
     ) {
       this.sendToClient(clientId, {
-        type: 'error',
-        data: { message: 'Insufficient permissions for alert actions' },
+        type: "error",
+        data: { message: "Insufficient permissions for alert actions" },
         timestamp: new Date().toISOString(),
       });
       return;
@@ -485,21 +573,21 @@ export class WebSocketDashboard extends EventEmitter {
       let success = false;
 
       switch (action) {
-        case 'acknowledge':
+        case "acknowledge":
           success = this.monitoringDashboard.acknowledgeAlert(
             alertId,
-            client.userId
+            client.userId,
           );
           break;
-        case 'resolve':
+        case "resolve":
           success = this.monitoringDashboard.resolveAlert(
             alertId,
-            client.userId
+            client.userId,
           );
           break;
         default:
           this.sendToClient(clientId, {
-            type: 'error',
+            type: "error",
             data: { message: `Unknown alert action: ${action}` },
             timestamp: new Date().toISOString(),
           });
@@ -508,7 +596,7 @@ export class WebSocketDashboard extends EventEmitter {
 
       if (success) {
         this.sendToClient(clientId, {
-          type: 'status',
+          type: "status",
           data: {
             message: `Alert ${action} successful`,
             alertId,
@@ -518,16 +606,16 @@ export class WebSocketDashboard extends EventEmitter {
         });
       } else {
         this.sendToClient(clientId, {
-          type: 'error',
+          type: "error",
           data: { message: `Alert ${action} failed - alert not found` },
           timestamp: new Date().toISOString(),
         });
       }
     } catch (error) {
       this.sendToClient(clientId, {
-        type: 'error',
+        type: "error",
         data: {
-          message: 'Alert action failed',
+          message: "Alert action failed",
           details: (error as Error).message,
         },
         timestamp: new Date().toISOString(),
@@ -540,10 +628,10 @@ export class WebSocketDashboard extends EventEmitter {
     if (!client) return;
 
     // Check permissions
-    if (!client.permissions.includes('admin')) {
+    if (!client.permissions.includes("admin")) {
       this.sendToClient(clientId, {
-        type: 'error',
-        data: { message: 'Insufficient permissions for configuration updates' },
+        type: "error",
+        data: { message: "Insufficient permissions for configuration updates" },
         timestamp: new Date().toISOString(),
       });
       return;
@@ -551,21 +639,21 @@ export class WebSocketDashboard extends EventEmitter {
 
     // Handle configuration updates (would implement actual config changes)
     this.sendToClient(clientId, {
-      type: 'status',
+      type: "status",
       data: {
-        message: 'Configuration update received',
+        message: "Configuration update received",
         config: configData,
       },
       timestamp: new Date().toISOString(),
     });
 
     logger.info(
-      '⚙️ [WebSocketDashboard] Configuration update',
-      'WebSocketDashboard',
+      "⚙️ [WebSocketDashboard] Configuration update",
+      "WebSocketDashboard",
       {
         clientId,
         configUpdate: configData,
-      }
+      },
     );
   }
 
@@ -580,10 +668,10 @@ export class WebSocketDashboard extends EventEmitter {
 
   private isClientSubscribed(
     client: WebSocketClient,
-    subscriptionType: string
+    subscriptionType: string,
   ): boolean {
     return client.subscriptions.some(
-      sub => sub.type === subscriptionType || sub.type === 'all'
+      (sub) => sub.type === subscriptionType || sub.type === "all",
     );
   }
 
@@ -592,9 +680,9 @@ export class WebSocketDashboard extends EventEmitter {
       for (const [clientId, client] of this.clients) {
         if (!client.isAlive) {
           logger.debug(
-            '💔 [WebSocketDashboard] Removing inactive client',
-            'WebSocketDashboard',
-            { clientId }
+            "💔 [WebSocketDashboard] Removing inactive client",
+            "WebSocketDashboard",
+            { clientId },
           );
           client.connection.terminate();
           this.removeClient(clientId);
@@ -617,17 +705,17 @@ export class WebSocketDashboard extends EventEmitter {
 
         this.broadcast(
           {
-            type: 'metrics',
+            type: "metrics",
             data: metrics,
             timestamp: new Date().toISOString(),
           },
-          'metrics'
+          "metrics",
         );
       } catch (error) {
         logger.error(
-          '❌ [WebSocketDashboard] Metrics streaming failed',
-          'WebSocketDashboard',
-          error
+          "❌ [WebSocketDashboard] Metrics streaming failed",
+          "WebSocketDashboard",
+          error,
         );
       }
     }, 30000); // 30 seconds
@@ -637,36 +725,36 @@ export class WebSocketDashboard extends EventEmitter {
     if (!this.monitoringDashboard) return;
 
     // Listen for alert events
-    this.monitoringDashboard.on('alert', alert => {
+    this.monitoringDashboard.on("alert", (alert) => {
       this.broadcast(
         {
-          type: 'alert',
-          data: { action: 'created', alert },
+          type: "alert",
+          data: { action: "created", alert },
           timestamp: new Date().toISOString(),
         },
-        'alerts'
+        "alerts",
       );
     });
 
-    this.monitoringDashboard.on('alertAcknowledged', alert => {
+    this.monitoringDashboard.on("alertAcknowledged", (alert) => {
       this.broadcast(
         {
-          type: 'alert',
-          data: { action: 'acknowledged', alert },
+          type: "alert",
+          data: { action: "acknowledged", alert },
           timestamp: new Date().toISOString(),
         },
-        'alerts'
+        "alerts",
       );
     });
 
-    this.monitoringDashboard.on('alertResolved', alert => {
+    this.monitoringDashboard.on("alertResolved", (alert) => {
       this.broadcast(
         {
-          type: 'alert',
-          data: { action: 'resolved', alert },
+          type: "alert",
+          data: { action: "resolved", alert },
           timestamp: new Date().toISOString(),
         },
-        'alerts'
+        "alerts",
       );
     });
   }
@@ -684,7 +772,7 @@ export const initializeWebSocketDashboard = (port?: number) =>
   webSocketDashboard.initialize(port);
 export const broadcastDashboardUpdate = (
   message: WebSocketResponse,
-  subscriptionType?: string
+  subscriptionType?: string,
 ) => webSocketDashboard.broadcast(message, subscriptionType);
 export const getWebSocketClientStats = () =>
   webSocketDashboard.getClientStats();

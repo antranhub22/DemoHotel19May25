@@ -562,6 +562,14 @@ app.use((req, res, next) => {
           void 0;
         }
 
+        // ✅ MEMORY FIX: Clear all tracked timers
+        try {
+          const { TimerManager } = require("@server/utils/TimerManager");
+          TimerManager.clearAll();
+        } catch (_e) {
+          void 0;
+        }
+
         // ✅ Stop external memory monitoring
         try {
           externalMemoryMonitor.stopMonitoring();
