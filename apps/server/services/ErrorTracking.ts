@@ -3,7 +3,7 @@
  * Centralized error handling and monitoring for dashboard operations
  */
 
-import { logger } from '@shared/utils/logger';
+import { logger } from "../../../packages/shared/utils/logger";
 
 export interface ErrorReport {
   id: string;
@@ -12,7 +12,7 @@ export interface ErrorReport {
   error: string;
   stack?: string;
   context?: any;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   timestamp: string;
   userId?: string;
   tenantId?: string;
@@ -47,7 +47,7 @@ class ErrorTrackingService {
     operation: string,
     error: Error | string,
     context?: any,
-    severity?: 'low' | 'medium' | 'high' | 'critical'
+    severity?: "low" | "medium" | "high" | "critical",
   ): string {
     try {
       const errorMessage = error instanceof Error ? error.message : error;
@@ -86,17 +86,17 @@ class ErrorTrackingService {
     } catch (trackingError) {
       // Error tracking itself failed - use fallback logging
       logger.error(
-        '❌ [ErrorTracking] Failed to report error',
-        'ErrorTracking',
+        "❌ [ErrorTracking] Failed to report error",
+        "ErrorTracking",
         {
           originalError: error instanceof Error ? error.message : error,
           trackingError:
             trackingError instanceof Error
               ? trackingError.message
               : trackingError,
-        }
+        },
       );
-      return 'tracking-failed';
+      return "tracking-failed";
     }
   }
 
@@ -112,17 +112,17 @@ class ErrorTrackingService {
       userId?: string;
       responseTime?: number;
       dataSize?: number;
-    }
+    },
   ): string {
     return this.reportError(
-      'Dashboard',
+      "Dashboard",
       operation,
       error,
       {
         ...context,
-        category: 'dashboard',
+        category: "dashboard",
       },
-      this.categorizeDashboardError(error)
+      this.categorizeDashboardError(error),
     );
   }
 
@@ -136,17 +136,17 @@ class ErrorTrackingService {
       socketId?: string;
       tenantId?: string;
       connectionCount?: number;
-    }
+    },
   ): string {
     return this.reportError(
-      'WebSocket',
+      "WebSocket",
       operation,
       error,
       {
         ...context,
-        category: 'websocket',
+        category: "websocket",
       },
-      'medium' // WebSocket errors are generally medium severity
+      "medium", // WebSocket errors are generally medium severity
     );
   }
 
@@ -160,17 +160,17 @@ class ErrorTrackingService {
       query?: string;
       tenantId?: string;
       executionTime?: number;
-    }
+    },
   ): string {
     return this.reportError(
-      'Database',
+      "Database",
       operation,
       error,
       {
         ...context,
-        category: 'database',
+        category: "database",
       },
-      'high' // Database errors are generally high severity
+      "high", // Database errors are generally high severity
     );
   }
 
@@ -179,7 +179,7 @@ class ErrorTrackingService {
    */
   resolveError(errorId: string, resolvedBy?: string): boolean {
     try {
-      const error = this.errors.find(e => e.id === errorId);
+      const error = this.errors.find((e) => e.id === errorId);
       if (error) {
         error.resolved = true;
         error.context = {
@@ -188,7 +188,7 @@ class ErrorTrackingService {
           resolvedBy,
         };
 
-        logger.info('✅ [ErrorTracking] Error resolved', 'ErrorTracking', {
+        logger.info("✅ [ErrorTracking] Error resolved", "ErrorTracking", {
           errorId,
           component: error.component,
           operation: error.operation,
@@ -200,9 +200,9 @@ class ErrorTrackingService {
       return false;
     } catch (error) {
       logger.error(
-        '❌ [ErrorTracking] Failed to resolve error',
-        'ErrorTracking',
-        error
+        "❌ [ErrorTracking] Failed to resolve error",
+        "ErrorTracking",
+        error,
       );
       return false;
     }
@@ -215,19 +215,19 @@ class ErrorTrackingService {
     try {
       const cutoff = new Date(Date.now() - timeRangeHours * 60 * 60 * 1000);
       const recentErrors = this.errors.filter(
-        error => new Date(error.timestamp) > cutoff && !error.resolved
+        (error) => new Date(error.timestamp) > cutoff && !error.resolved,
       );
 
       // Count errors by component
       const errorsByComponent: Record<string, number> = {};
-      recentErrors.forEach(error => {
+      recentErrors.forEach((error) => {
         errorsByComponent[error.component] =
           (errorsByComponent[error.component] || 0) + 1;
       });
 
       // Count errors by severity
       const errorsBySeverity: Record<string, number> = {};
-      recentErrors.forEach(error => {
+      recentErrors.forEach((error) => {
         errorsBySeverity[error.severity] =
           (errorsBySeverity[error.severity] || 0) + 1;
       });
@@ -237,7 +237,7 @@ class ErrorTrackingService {
         string,
         { count: number; lastSeen: string }
       >();
-      recentErrors.forEach(error => {
+      recentErrors.forEach((error) => {
         const key = `${error.component}:${error.operation}:${error.error}`;
         const existing = errorCounts.get(key) || {
           count: 0,
@@ -267,9 +267,9 @@ class ErrorTrackingService {
       };
     } catch (error) {
       logger.error(
-        '❌ [ErrorTracking] Failed to get error stats',
-        'ErrorTracking',
-        error
+        "❌ [ErrorTracking] Failed to get error stats",
+        "ErrorTracking",
+        error,
       );
       return {
         totalErrors: 0,
@@ -286,7 +286,7 @@ class ErrorTrackingService {
    * Get health status based on error rates
    */
   getHealthStatus(): {
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
     details: any;
   } {
     try {
@@ -296,12 +296,12 @@ class ErrorTrackingService {
       const highErrors = stats.errorsBySeverity.high || 0;
       const mediumErrors = stats.errorsBySeverity.medium || 0;
 
-      let status: 'healthy' | 'warning' | 'critical' = 'healthy';
+      let status: "healthy" | "warning" | "critical" = "healthy";
 
       if (criticalErrors > 0) {
-        status = 'critical';
+        status = "critical";
       } else if (highErrors >= 5 || mediumErrors >= 15) {
-        status = 'warning';
+        status = "warning";
       }
 
       return {
@@ -311,19 +311,19 @@ class ErrorTrackingService {
           criticalErrors,
           highErrors,
           mediumErrors,
-          topComponent: Object.keys(stats.errorsByComponent)[0] || 'none',
+          topComponent: Object.keys(stats.errorsByComponent)[0] || "none",
           lastErrorTime: stats.recentErrors[0]?.timestamp || null,
         },
       };
     } catch (error) {
       logger.error(
-        '❌ [ErrorTracking] Failed to get health status',
-        'ErrorTracking',
-        error
+        "❌ [ErrorTracking] Failed to get health status",
+        "ErrorTracking",
+        error,
       );
       return {
-        status: 'warning',
-        details: { error: 'Health check failed' },
+        status: "warning",
+        details: { error: "Health check failed" },
       };
     }
   }
@@ -337,7 +337,7 @@ class ErrorTrackingService {
       const initialCount = this.errors.length;
 
       this.errors = this.errors.filter(
-        error => new Date(error.timestamp) > cutoff
+        (error) => new Date(error.timestamp) > cutoff,
       );
 
       const clearedCount = initialCount - this.errors.length;
@@ -345,16 +345,16 @@ class ErrorTrackingService {
       if (clearedCount > 0) {
         logger.info(
           `🧹 [ErrorTracking] Cleared ${clearedCount} old errors`,
-          'ErrorTracking'
+          "ErrorTracking",
         );
       }
 
       return clearedCount;
     } catch (error) {
       logger.error(
-        '❌ [ErrorTracking] Failed to clear old errors',
-        'ErrorTracking',
-        error
+        "❌ [ErrorTracking] Failed to clear old errors",
+        "ErrorTracking",
+        error,
       );
       return 0;
     }
@@ -365,70 +365,70 @@ class ErrorTrackingService {
    */
   private detectSeverity(
     errorMessage: string,
-    component: string
-  ): 'low' | 'medium' | 'high' | 'critical' {
+    component: string,
+  ): "low" | "medium" | "high" | "critical" {
     const message = errorMessage.toLowerCase();
 
     // Critical patterns
     if (
-      message.includes('database connection') ||
-      message.includes('out of memory') ||
-      message.includes('server crash') ||
-      message.includes('authentication failed') ||
-      message.includes('permission denied')
+      message.includes("database connection") ||
+      message.includes("out of memory") ||
+      message.includes("server crash") ||
+      message.includes("authentication failed") ||
+      message.includes("permission denied")
     ) {
-      return 'critical';
+      return "critical";
     }
 
     // High severity patterns
     if (
-      message.includes('timeout') ||
-      message.includes('query failed') ||
-      message.includes('connection refused') ||
-      message.includes('internal server error') ||
-      component === 'Database'
+      message.includes("timeout") ||
+      message.includes("query failed") ||
+      message.includes("connection refused") ||
+      message.includes("internal server error") ||
+      component === "Database"
     ) {
-      return 'high';
+      return "high";
     }
 
     // Medium severity patterns
     if (
-      message.includes('validation') ||
-      message.includes('not found') ||
-      message.includes('invalid') ||
-      message.includes('websocket') ||
-      component === 'WebSocket'
+      message.includes("validation") ||
+      message.includes("not found") ||
+      message.includes("invalid") ||
+      message.includes("websocket") ||
+      component === "WebSocket"
     ) {
-      return 'medium';
+      return "medium";
     }
 
     // Default to low
-    return 'low';
+    return "low";
   }
 
   /**
    * Categorize dashboard-specific errors
    */
   private categorizeDashboardError(
-    error: Error | string
-  ): 'low' | 'medium' | 'high' | 'critical' {
+    error: Error | string,
+  ): "low" | "medium" | "high" | "critical" {
     const message = (
       error instanceof Error ? error.message : error
     ).toLowerCase();
 
-    if (message.includes('cache') || message.includes('websocket')) {
-      return 'low'; // Cache/WebSocket errors don't break core functionality
+    if (message.includes("cache") || message.includes("websocket")) {
+      return "low"; // Cache/WebSocket errors don't break core functionality
     }
 
-    if (message.includes('api') || message.includes('fetch')) {
-      return 'medium'; // API errors affect user experience
+    if (message.includes("api") || message.includes("fetch")) {
+      return "medium"; // API errors affect user experience
     }
 
-    if (message.includes('database') || message.includes('query')) {
-      return 'high'; // Database errors are serious
+    if (message.includes("database") || message.includes("query")) {
+      return "high"; // Database errors are serious
     }
 
-    return 'low'; // Default for dashboard errors
+    return "low"; // Default for dashboard errors
   }
 
   /**
@@ -445,32 +445,32 @@ class ErrorTrackingService {
     };
 
     switch (errorReport.severity) {
-      case 'critical':
+      case "critical":
         logger.error(
           `💥 [${errorReport.component}] CRITICAL: ${errorReport.error}`,
-          'ErrorTracking',
-          logData
+          "ErrorTracking",
+          logData,
         );
         break;
-      case 'high':
+      case "high":
         logger.error(
           `🔥 [${errorReport.component}] HIGH: ${errorReport.error}`,
-          'ErrorTracking',
-          logData
+          "ErrorTracking",
+          logData,
         );
         break;
-      case 'medium':
+      case "medium":
         logger.warn(
           `⚠️ [${errorReport.component}] MEDIUM: ${errorReport.error}`,
-          'ErrorTracking',
-          logData
+          "ErrorTracking",
+          logData,
         );
         break;
-      case 'low':
+      case "low":
         logger.debug(
           `ℹ️ [${errorReport.component}] LOW: ${errorReport.error}`,
-          'ErrorTracking',
-          logData
+          "ErrorTracking",
+          logData,
         );
         break;
     }
@@ -489,20 +489,20 @@ class ErrorTrackingService {
       if (count >= threshold) {
         logger.warn(
           `🚨 [ErrorTracking] Alert threshold exceeded`,
-          'ErrorTracking',
+          "ErrorTracking",
           {
             severity,
             count,
             threshold,
-            timeframe: '1 hour',
-          }
+            timeframe: "1 hour",
+          },
         );
       }
     } catch (error) {
       logger.error(
-        '❌ [ErrorTracking] Alert threshold check failed',
-        'ErrorTracking',
-        error
+        "❌ [ErrorTracking] Alert threshold check failed",
+        "ErrorTracking",
+        error,
       );
     }
   }
@@ -528,7 +528,7 @@ class ErrorTrackingService {
 export const errorTracking = new ErrorTrackingService();
 
 // Export for debugging in development
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === "development") {
   (global as any).errorTracking = errorTracking;
 }
 

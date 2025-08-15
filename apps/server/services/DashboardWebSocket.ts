@@ -3,11 +3,11 @@
  * Real-time dashboard updates with automatic fallback to polling
  */
 
-import { CacheKeys, dashboardCache } from "@server/services/DashboardCache";
-import { errorTracking } from "@server/services/ErrorTracking";
-import { logger } from "@shared/utils/logger";
 import { Server as HttpServer } from "http";
 import { Socket, Server as SocketIOServer } from "socket.io";
+import { logger } from "../../../packages/shared/utils/logger";
+import { CacheKeys, dashboardCache } from "./DashboardCache";
+import { errorTracking } from "./ErrorTracking";
 
 export interface DashboardUpdate {
   type: "request_update" | "call_update" | "system_update" | "cache_update";
@@ -108,8 +108,7 @@ class DashboardWebSocketService {
           ? error
           : new Error("WebSocket initialization failed"),
         {
-          enabled: this.config.enableWebSocket,
-          maxConnections: this.config.maxConnections,
+          connectionCount: this.connections.size,
         },
       );
 
@@ -542,10 +541,10 @@ class DashboardWebSocketService {
       this.stats = {
         totalConnections: 0,
         activeConnections: 0,
-        messagesReceived: 0,
+        messagesPublished: 0,
         messagesSent: 0,
         errors: 0,
-        lastActivity: new Date(),
+        lastError: null,
       };
 
       logger.success(

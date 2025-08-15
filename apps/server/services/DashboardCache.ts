@@ -3,8 +3,8 @@
  * Transparent caching layer with automatic fallback to original data sources
  */
 
-import { errorTracking } from "@server/services/ErrorTracking";
-import { logger } from "@shared/utils/logger";
+import { logger } from "../../../packages/shared/utils/logger";
+import { errorTracking } from "./ErrorTracking";
 
 export interface CacheEntry<T> {
   data: T;
@@ -300,6 +300,51 @@ class DashboardCache {
     this.cleanupTimer = setInterval(() => {
       this.cleanup();
     }, this.config.cleanupInterval);
+  }
+
+  /**
+   * Estimate size of data in bytes
+   */
+  private estimateSize(data: any): number {
+    try {
+      return JSON.stringify(data).length * 2; // Rough estimate: 2 bytes per character
+    } catch {
+      return 1024; // Default 1KB if can't stringify
+    }
+  }
+
+  /**
+   * Evict entries based on configured policy
+   */
+  private evictByPolicy(): void {
+    if (this.cache.size === 0) return;
+
+    // LRU eviction: remove least recently accessed
+    let oldestEntry: { key: string; lastAccessed: number } | null = null;
+
+    for (const [key, entry] of this.cache.entries()) {
+      if (
+        !oldestEntry ||
+        (entry.lastAccessed || 0) < oldestEntry.lastAccessed
+      ) {
+        oldestEntry = { key, lastAccessed: entry.lastAccessed || 0 };
+      }
+    }
+
+    if (oldestEntry) {
+      const entry = this.cache.get(oldestEntry.key);
+      if (entry) {
+        this.totalMemoryUsage -= entry.size || 0;
+        this.cache.delete(oldestEntry.key);
+        this.stats.evictions++;
+
+        logger.debug("🗑️ [DashboardCache] Evicted entry", "Cache", {
+          key: oldestEntry.key,
+          remainingEntries: this.cache.size,
+          memoryUsageMB: (this.totalMemoryUsage / (1024 * 1024)).toFixed(1),
+        });
+      }
+    }
   }
 
   /**
