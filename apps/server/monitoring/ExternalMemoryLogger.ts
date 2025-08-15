@@ -5,9 +5,9 @@
  * Tracks allocations, native modules, and memory-intensive operations
  */
 
-import { logger } from "@shared/utils/logger";
 import * as fs from "fs";
 import * as path from "path";
+import { logger } from "../../../packages/shared/utils/logger";
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -212,11 +212,11 @@ export class ExternalMemoryLogger {
   /**
    * Stop memory consumer tracking
    */
-  stopTracking(): void {
+  async stopTracking(): Promise<void> {
     if (!this.isTracking) return;
 
     this.isTracking = false;
-    this.restoreOriginalFunctions();
+    await this.restoreOriginalFunctions();
 
     // Save final state
     if (this.config.storage.persistToDisk) {
@@ -336,7 +336,7 @@ export class ExternalMemoryLogger {
   private patchCryptoOperations(): void {
     try {
       // Use dynamic import for crypto in ESM
-      import("crypto")
+      import("node:crypto")
         .then((crypto) => {
           const originalRandomBytes = crypto.randomBytes;
           const originalCreateHash = crypto.createHash;
@@ -852,14 +852,14 @@ export class ExternalMemoryLogger {
   /**
    * Restore original functions
    */
-  private restoreOriginalFunctions(): void {
+  private async restoreOriginalFunctions(): Promise<void> {
     try {
       for (const [name, originalFunction] of this.originalFunctions) {
         if (name.startsWith("Buffer.")) {
           const method = name.split(".")[1];
           (Buffer as any)[method] = originalFunction;
         } else if (name.startsWith("crypto.")) {
-          const crypto = require("crypto");
+          const crypto = await import("node:crypto");
           const method = name.split(".")[1];
           crypto[method] = originalFunction;
         }

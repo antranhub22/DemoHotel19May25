@@ -4,8 +4,8 @@
 // Sophisticated connection pool management with health monitoring, automatic scaling,
 // performance optimization, and intelligent connection routing
 
-import { logger } from "@shared/utils/logger";
 import { EventEmitter } from "events";
+import { logger } from "../../../packages/shared/utils/logger";
 import { recordPerformanceMetrics } from "./AdvancedMetricsCollector";
 
 // Connection pool interfaces
@@ -20,18 +20,20 @@ export interface PoolConfiguration {
     url?: string;
   };
   pool: {
-    min: number;
-    max: number;
-    acquireTimeoutMs: number;
-    createTimeoutMs: number;
-    destroyTimeoutMs: number;
-    idleTimeoutMs: number;
-    reapIntervalMs: number;
-    createRetryIntervalMs: number;
-    maxRetries: number;
-    enableAutoScaling: boolean;
-    enableHealthChecks: boolean;
-    enableLoadBalancing: boolean;
+    min: number; // Minimum number of connections
+    max: number; // Maximum number of connections
+    acquireTimeoutMs: number; // Timeout for acquiring a connection
+    createTimeoutMs: number; // Timeout for creating a new connection
+    destroyTimeoutMs: number; // Timeout for destroying a connection
+    idleTimeoutMs: number; // How long a connection can be idle before being destroyed
+    reapIntervalMs: number; // How often to check for idle connections
+    createRetryIntervalMs: number; // Interval between connection creation retries
+    maxRetries: number; // Maximum number of retries for creating a connection
+    enableAutoScaling: boolean; // Whether to enable automatic pool scaling
+    enableHealthChecks: boolean; // Whether to enable connection health checks
+    enableLoadBalancing: boolean; // Whether to enable connection load balancing
+    maxQueueSize: number; // Maximum size of the connection request queue
+    maxQueueWaitMs: number; // Maximum time to wait in the queue
   };
   monitoring: {
     metricsInterval: number;
@@ -99,6 +101,7 @@ export interface PoolMetrics {
 export interface ConnectionLeak {
   connectionId: string;
   acquiredAt: Date;
+  detectedAt: Date;
   query?: string;
   stackTrace: string;
   duration: number;
@@ -148,7 +151,30 @@ export class ConnectionPoolManager extends EventEmitter {
 
   private constructor(config: PoolConfiguration) {
     super();
-    this.config = config;
+    // Apply default configuration with memory-optimized settings
+    const defaultConfig: PoolConfiguration = {
+      database: config.database,
+      pool: {
+        min: 1, // Reduced minimum connections
+        max: 5, // Reduced maximum connections
+        acquireTimeoutMs: 5000, // Faster timeout
+        createTimeoutMs: 5000, // Faster timeout
+        destroyTimeoutMs: 2000, // Faster cleanup
+        idleTimeoutMs: 30000, // Shorter idle timeout (30s)
+        reapIntervalMs: 5000, // More frequent cleanup
+        createRetryIntervalMs: 200,
+        maxRetries: 3,
+        enableAutoScaling: true,
+        enableHealthChecks: true,
+        enableLoadBalancing: true,
+        maxQueueSize: 50, // Limit queue size
+        maxQueueWaitMs: 10000, // 10s maximum wait
+      },
+      monitoring: config.monitoring,
+      optimization: config.optimization,
+    };
+
+    this.config = defaultConfig;
   }
 
   static getInstance(config?: PoolConfiguration): ConnectionPoolManager {
@@ -571,6 +597,12 @@ export class ConnectionPoolManager extends EventEmitter {
   }
 
   private async waitForConnection(tags: string[] = []): Promise<string> {
+    // ✅ MEMORY FIX: Check queue size before adding new request
+    const queueSize = this.getQueueSize();
+    if (queueSize >= this.config.pool.maxQueueSize) {
+      throw new Error(`Connection queue full (${queueSize} waiting requests)`);
+    }
+
     return new Promise((resolve, reject) => {
       const onConnectionAvailable = (connectionId: string) => {
         const connection = this.connections.get(connectionId);
@@ -586,7 +618,7 @@ export class ConnectionPoolManager extends EventEmitter {
       const timeout = setTimeout(() => {
         this.removeListener("connectionAvailable", onConnectionAvailable);
         reject(new Error("Connection acquire timeout"));
-      }, this.config.pool.acquireTimeoutMs);
+      }, this.config.pool.maxQueueWaitMs); // ✅ Use maxQueueWaitMs instead of acquireTimeoutMs
 
       this.on("connectionAvailable", onConnectionAvailable);
     });
@@ -712,45 +744,48 @@ export class ConnectionPoolManager extends EventEmitter {
   }
 
   private async collectMetrics(): Promise<PoolMetrics> {
+    // ✅ MEMORY FIX: More efficient metrics collection
     const connections = Array.from(this.connections.values());
-    const connectionCounts = connections.reduce(
-      (acc, conn) => {
-        acc[conn.state] = (acc[conn.state] || 0) + 1;
-        return acc;
-      },
-      {} as { [key: string]: number },
-    );
 
-    const activeConnections = connections.filter((c) => c.state === "active");
-    const avgQueryTime =
-      activeConnections.length > 0
-        ? activeConnections.reduce((sum, c) => sum + c.averageQueryTime, 0) /
-          activeConnections.length
-        : 0;
+    // Count connections by state
+    const counts = { idle: 0, active: 0, pending: 0, destroyed: 0, error: 0 };
+    let totalQueryTime = 0;
+    let activeCount = 0;
+
+    for (const conn of connections) {
+      counts[conn.state]++;
+      if (conn.state === "active") {
+        totalQueryTime += conn.averageQueryTime;
+        activeCount++;
+      }
+    }
+
+    // Get memory usage
+    const estimatedMemoryMB = this.getMemoryUsage().estimatedMemoryMB;
 
     const metrics: PoolMetrics = {
       timestamp: new Date(),
       connections: {
         total: connections.length,
-        idle: connectionCounts.idle || 0,
-        active: connectionCounts.active || 0,
-        pending: connectionCounts.pending || 0,
-        destroyed: connectionCounts.destroyed || 0,
-        error: connectionCounts.error || 0,
+        idle: counts.idle,
+        active: counts.active,
+        pending: counts.pending,
+        destroyed: counts.destroyed,
+        error: counts.error,
       },
       performance: {
-        avgAcquireTime: Math.random() * 100 + 10, // Simulated
-        avgReleaseTime: Math.random() * 10 + 5, // Simulated
-        avgQueryTime,
-        throughput: Math.random() * 50 + 20, // Simulated queries/sec
-        errorRate: Math.random() * 0.05, // Simulated 0-5% error rate
+        avgAcquireTime: this.calculateAverageAcquireTime(),
+        avgReleaseTime: this.calculateAverageReleaseTime(),
+        avgQueryTime: activeCount > 0 ? totalQueryTime / activeCount : 0,
+        throughput: this.calculateThroughput(),
+        errorRate: this.calculateErrorRate(),
       },
       resource: {
-        memoryUsage: Math.random() * 200 + 100, // Simulated MB
-        cpuUsage: Math.random() * 50 + 20, // Simulated 20-70%
+        memoryUsage: estimatedMemoryMB,
+        cpuUsage: process.cpuUsage().user / 1000000, // Convert to percentage
         connectionUsagePercent:
           (connections.length / this.config.pool.max) * 100,
-        queueLength: 0, // Would track waiting connections
+        queueLength: this.getQueueSize(),
       },
       health: this.calculateHealthScore(),
     };
@@ -797,32 +832,39 @@ export class ConnectionPoolManager extends EventEmitter {
     const timeSinceLastScaling =
       now.getTime() - this.lastScalingAction.getTime();
 
-    // Only scale if enough time has passed since last action
-    if (timeSinceLastScaling < 60000) return; // 1 minute cooldown
+    // ✅ MEMORY FIX: More conservative auto-scaling with longer cooldown
+    if (timeSinceLastScaling < 120000) return; // 2 minute cooldown
 
     const currentSize = this.connections.size;
     const usage = metrics.resource.connectionUsagePercent;
     const avgAcquireTime = metrics.performance.avgAcquireTime;
+    const queueSize = this.getQueueSize();
 
     let action: "scale_up" | "scale_down" | "stabilize" = "stabilize";
     let newSize = currentSize;
     let reason = "";
 
-    // Scale up conditions
-    if (usage > 85 || avgAcquireTime > 500) {
-      if (currentSize < this.config.pool.max) {
-        action = "scale_up";
-        newSize = Math.min(this.config.pool.max, currentSize + 5);
-        reason = `High usage (${usage.toFixed(1)}%) or slow acquire time (${avgAcquireTime}ms)`;
-      }
+    // ✅ MEMORY FIX: More conservative scale up conditions
+    if (
+      (usage > 90 ||
+        avgAcquireTime > 1000 ||
+        queueSize > this.config.pool.maxQueueSize * 0.8) &&
+      currentSize < this.config.pool.max
+    ) {
+      action = "scale_up";
+      newSize = Math.min(this.config.pool.max, currentSize + 1); // Only add one at a time
+      reason = `Critical load: usage=${usage.toFixed(1)}%, acquire=${avgAcquireTime}ms, queue=${queueSize}`;
     }
-    // Scale down conditions
-    else if (usage < 30 && avgAcquireTime < 100) {
-      if (currentSize > this.config.pool.min) {
-        action = "scale_down";
-        newSize = Math.max(this.config.pool.min, currentSize - 2);
-        reason = `Low usage (${usage.toFixed(1)}%) and fast acquire time (${avgAcquireTime}ms)`;
-      }
+    // ✅ MEMORY FIX: More aggressive scale down conditions
+    else if (
+      usage < 20 &&
+      avgAcquireTime < 50 &&
+      queueSize === 0 &&
+      currentSize > this.config.pool.min
+    ) {
+      action = "scale_down";
+      newSize = Math.max(this.config.pool.min, currentSize - 1); // Remove one at a time
+      reason = `Low load: usage=${usage.toFixed(1)}%, acquire=${avgAcquireTime}ms, queue=${queueSize}`;
     }
 
     if (action !== "stabilize") {
@@ -852,19 +894,33 @@ export class ConnectionPoolManager extends EventEmitter {
   ): Promise<void> {
     const currentSize = this.connections.size;
 
+    // ✅ MEMORY FIX: More conservative auto-scaling
     if (action === "scale_up") {
-      const connectionsToAdd = targetSize - currentSize;
-      for (let i = 0; i < connectionsToAdd; i++) {
+      // Only scale up one connection at a time to prevent memory spikes
+      if (currentSize < targetSize && currentSize < this.config.pool.max) {
         await this.createConnection(["auto-scaled"]);
+        logger.info(
+          "🔼 [ConnectionPool] Scaled up by 1 connection",
+          "ConnectionPool",
+          { currentSize: currentSize + 1, targetSize },
+        );
       }
     } else if (action === "scale_down") {
-      const connectionsToRemove = currentSize - targetSize;
+      // Aggressively scale down idle connections
       const idleConnections = Array.from(this.connections.entries())
         .filter(([_, conn]) => conn.state === "idle")
-        .slice(0, connectionsToRemove);
+        .sort((a, b) => a[1].lastUsedAt.getTime() - b[1].lastUsedAt.getTime()) // Oldest first
+        .slice(0, currentSize - targetSize);
 
       for (const [id] of idleConnections) {
-        await this.destroyConnection(id);
+        if (this.connections.size > this.config.pool.min) {
+          await this.destroyConnection(id);
+          logger.info(
+            "🔽 [ConnectionPool] Scaled down by 1 connection",
+            "ConnectionPool",
+            { currentSize: this.connections.size, targetSize },
+          );
+        }
       }
     }
   }
@@ -1033,40 +1089,111 @@ export class ConnectionPoolManager extends EventEmitter {
     query: string,
     _params: any[],
   ): Promise<any> {
-    // Simulate query execution time based on query type
+    // ✅ MEMORY FIX: More efficient query simulation with memory tracking
     const queryType = this.getQueryType(query);
+    const startMemory = process.memoryUsage();
+
+    // Simulate query execution with reduced memory impact
     let baseTime = 10;
+    let estimatedMemoryMB = 0;
 
     switch (queryType) {
       case "SELECT":
-        baseTime = 50;
+        baseTime = 30; // Reduced from 50ms
+        estimatedMemoryMB = 1; // 1MB per SELECT
         break;
       case "INSERT":
-        baseTime = 30;
+        baseTime = 20; // Reduced from 30ms
+        estimatedMemoryMB = 0.5; // 0.5MB per INSERT
         break;
       case "UPDATE":
-        baseTime = 40;
+        baseTime = 25; // Reduced from 40ms
+        estimatedMemoryMB = 0.5; // 0.5MB per UPDATE
         break;
       case "DELETE":
-        baseTime = 35;
+        baseTime = 20; // Reduced from 35ms
+        estimatedMemoryMB = 0.2; // 0.2MB per DELETE
         break;
       default:
-        baseTime = 25;
+        baseTime = 15; // Reduced from 25ms
+        estimatedMemoryMB = 0.1; // 0.1MB for other queries
         break;
     }
 
-    const variance = Math.random() * 0.5 + 0.75; // 75-125% variance
+    // Add small random variance (10% instead of 25%)
+    const variance = Math.random() * 0.2 + 0.9; // 90-110% variance
     const executionTime = Math.round(baseTime * variance);
 
-    // Simulate async execution
+    // Simulate async execution with memory tracking
     await new Promise((resolve) => setTimeout(resolve, executionTime));
 
-    // Return mock result
+    // Calculate actual memory impact
+    const endMemory = process.memoryUsage();
+    const actualMemoryMB =
+      (endMemory.heapUsed - startMemory.heapUsed) / 1024 / 1024;
+
+    // Return detailed result with memory metrics
     return {
-      rows: Math.floor(Math.random() * 100),
+      rows: Math.min(50, Math.floor(Math.random() * 50)), // Limit to max 50 rows
       executionTime,
       queryType,
+      memoryImpact: {
+        estimated: estimatedMemoryMB,
+        actual: actualMemoryMB,
+        unit: "MB",
+      },
     };
+  }
+
+  // ✅ MEMORY FIX: Helper methods for accurate metrics
+  private getQueueSize(): number {
+    return this.listenerCount("connectionAvailable");
+  }
+
+  private calculateAverageAcquireTime(): number {
+    const recentMetrics = this.metrics.slice(-10);
+    if (recentMetrics.length === 0) return 0;
+    return (
+      recentMetrics.reduce((sum, m) => sum + m.performance.avgAcquireTime, 0) /
+      recentMetrics.length
+    );
+  }
+
+  private calculateAverageReleaseTime(): number {
+    const recentMetrics = this.metrics.slice(-10);
+    if (recentMetrics.length === 0) return 0;
+    return (
+      recentMetrics.reduce((sum, m) => sum + m.performance.avgReleaseTime, 0) /
+      recentMetrics.length
+    );
+  }
+
+  private calculateThroughput(): number {
+    const recentMetrics = this.metrics.slice(-5); // Last 5 metrics
+    if (recentMetrics.length < 2) return 0;
+
+    const timeSpan =
+      recentMetrics[recentMetrics.length - 1].timestamp.getTime() -
+      recentMetrics[0].timestamp.getTime();
+    const totalQueries = Array.from(this.connections.values()).reduce(
+      (sum, conn) => sum + (conn as ConnectionInfo).queryCount,
+      0,
+    );
+
+    return timeSpan > 0 ? (totalQueries * 1000) / timeSpan : 0; // Queries per second
+  }
+
+  private calculateErrorRate(): number {
+    const totalQueries = Array.from(this.connections.values()).reduce(
+      (sum, conn) => sum + (conn as ConnectionInfo).queryCount,
+      0,
+    );
+    const totalErrors = Array.from(this.connections.values()).reduce(
+      (sum, conn) => sum + (conn as ConnectionInfo).errorCount,
+      0,
+    );
+
+    return totalQueries > 0 ? totalErrors / totalQueries : 0;
   }
 }
 

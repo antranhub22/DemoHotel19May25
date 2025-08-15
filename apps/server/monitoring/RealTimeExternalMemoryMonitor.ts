@@ -180,33 +180,33 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       alertCheckInterval: 5000, // 5 seconds
       cleanupCheckInterval: 30000, // 30 seconds
 
-      // Thresholds
-      externalMemoryThreshold: 100, // 100MB
-      externalRatioThreshold: 3.0, // 3:1 ratio
-      growthRateThreshold: 0.5, // 500KB/s
-      sustainedGrowthDuration: 300000, // 5 minutes
+      // Thresholds - Adjusted for better memory management
+      externalMemoryThreshold: 150, // 150MB (increased to prevent false positives)
+      externalRatioThreshold: 2.0, // 2:1 ratio (reduced to catch issues earlier)
+      growthRateThreshold: 0.25, // 250KB/s (reduced to be more sensitive)
+      sustainedGrowthDuration: 180000, // 3 minutes (reduced for faster detection)
 
       // Pattern Detection
       patternDetectionWindow: 600000, // 10 minutes
       minimumSamplesForPattern: 10,
       patternConfidenceThreshold: 0.7,
 
-      // Automatic Cleanup
+      // Automatic Cleanup - More aggressive settings
       enableAutoCleanup: true,
-      autoCleanupThreshold: 150, // 150MB
-      maxAutoCleanupFrequency: 300000, // 5 minutes
-      aggressiveCleanupThreshold: 300, // 300MB
+      autoCleanupThreshold: 100, // 100MB (reduced to clean earlier)
+      maxAutoCleanupFrequency: 120000, // 2 minutes (more frequent cleanup)
+      aggressiveCleanupThreshold: 200, // 200MB (reduced for earlier intervention)
 
-      // Alerting
+      // Alerting - Adjusted thresholds
       enableRealTimeAlerts: true,
-      alertCooldownPeriod: 60000, // 1 minute
+      alertCooldownPeriod: 30000, // 30 seconds (reduced for faster alerts)
       enableEmergencyAlerts: true,
-      emergencyThreshold: 500, // 500MB
+      emergencyThreshold: 300, // 300MB (reduced for earlier emergency response)
 
-      // Data Retention
-      maxSnapshots: 1000,
-      maxPatterns: 50,
-      maxAlerts: 100,
+      // Data Retention - Optimized for memory
+      maxSnapshots: 500, // Reduced from 1000 to save memory
+      maxPatterns: 25, // Reduced from 50 to save memory
+      maxAlerts: 50, // Reduced from 100 to save memory
 
       // Integration
       enableDashboardIntegration: true,
@@ -1419,8 +1419,6 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
         ConnectionPoolManager,
       } = require("../shared/ConnectionPoolManager");
       if (ConnectionPoolManager.instance) {
-        const memoryBefore = ConnectionPoolManager.instance.getMemoryUsage();
-
         if (aggressive) {
           // Force connection pool cleanup (would implement in production)
           logger.info(
