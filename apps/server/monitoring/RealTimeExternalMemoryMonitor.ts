@@ -14,7 +14,7 @@
  * - Resource attribution and source identification
  */
 
-import { logger } from "@shared/utils/logger";
+import { logger } from "../../../packages/shared/utils/logger";
 import { EventEmitter } from "events";
 
 // ============================================
@@ -180,22 +180,22 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       alertCheckInterval: 5000, // 5 seconds
       cleanupCheckInterval: 30000, // 30 seconds
 
-      // Thresholds - Adjusted for better memory management
-      externalMemoryThreshold: 150, // 150MB (increased to prevent false positives)
-      externalRatioThreshold: 2.0, // 2:1 ratio (reduced to catch issues earlier)
-      growthRateThreshold: 0.25, // 250KB/s (reduced to be more sensitive)
-      sustainedGrowthDuration: 180000, // 3 minutes (reduced for faster detection)
+      // Thresholds - Adjusted to prevent unnecessary restarts
+      externalMemoryThreshold: 250, // 250MB (increased significantly)
+      externalRatioThreshold: 4.0, // 4:1 ratio (increased to reduce false positives)
+      growthRateThreshold: 1.0, // 1MB/s (increased to allow normal fluctuations)
+      sustainedGrowthDuration: 300000, // 5 minutes (increased to prevent premature alerts)
 
       // Pattern Detection
       patternDetectionWindow: 600000, // 10 minutes
       minimumSamplesForPattern: 10,
       patternConfidenceThreshold: 0.7,
 
-      // Automatic Cleanup - More aggressive settings
+      // Automatic Cleanup - Less aggressive to prevent disruption
       enableAutoCleanup: true,
-      autoCleanupThreshold: 100, // 100MB (reduced to clean earlier)
-      maxAutoCleanupFrequency: 120000, // 2 minutes (more frequent cleanup)
-      aggressiveCleanupThreshold: 200, // 200MB (reduced for earlier intervention)
+      autoCleanupThreshold: 200, // 200MB
+      maxAutoCleanupFrequency: 300000, // 5 minutes (reduced frequency)
+      aggressiveCleanupThreshold: 400, // 400MB (increased to prevent premature aggressive cleanup)
 
       // Alerting - Adjusted thresholds
       enableRealTimeAlerts: true,
@@ -1076,10 +1076,20 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
 
       this.addAlert(alert);
 
-      // Auto-trigger emergency cleanup
-      if (this.config.enableAutoCleanup) {
-        this.triggerCleanup("automatic", ["comprehensive"], true);
-      }
+      // Log emergency alert but don't trigger aggressive cleanup
+      logger.error(
+        "🚨 Emergency memory alert - manual intervention may be required",
+        "ExternalMemoryMonitor",
+        {
+          currentMemory: externalMB,
+          threshold: this.config.emergencyThreshold,
+          recommendations: [
+            "Review recent changes or deployments",
+            "Check for memory-intensive operations",
+            "Consider manual cleanup if needed",
+          ],
+        },
+      );
     }
   }
 

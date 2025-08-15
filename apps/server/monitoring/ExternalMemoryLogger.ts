@@ -7,6 +7,7 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "node:crypto";
 import { logger } from "../../../packages/shared/utils/logger";
 
 // ============================================================================
@@ -335,72 +336,59 @@ export class ExternalMemoryLogger {
    */
   private patchCryptoOperations(): void {
     try {
-      // Use dynamic import for crypto in ESM
-      import("node:crypto")
-        .then((crypto) => {
-          const originalRandomBytes = crypto.randomBytes;
-          const originalCreateHash = crypto.createHash;
-          const originalCreateCipher = crypto.createCipher;
+      // Use static import for crypto
+      const originalRandomBytes = crypto.randomBytes;
+      const originalCreateHash = crypto.createHash;
+      const originalCreateCipher = crypto.createCipher;
 
-          this.originalFunctions.set("crypto.randomBytes", originalRandomBytes);
-          this.originalFunctions.set("crypto.createHash", originalCreateHash);
-          this.originalFunctions.set(
-            "crypto.createCipher",
-            originalCreateCipher,
-          );
+      this.originalFunctions.set("crypto.randomBytes", originalRandomBytes);
+      this.originalFunctions.set("crypto.createHash", originalCreateHash);
+      this.originalFunctions.set("crypto.createCipher", originalCreateCipher);
 
-          crypto.randomBytes = (size: number, callback?: Function): Buffer => {
-            this.trackAllocation("crypto_random", size, {
-              operation: "crypto.randomBytes",
-              size,
-              isAsync: !!callback,
-            });
-            return originalRandomBytes.call(crypto, size, callback);
-          };
-
-          crypto.createHash = (algorithm: string, options?: any): any => {
-            const result = originalCreateHash.call(crypto, algorithm, options);
-            this.trackAllocation("crypto_hash", 512, {
-              // Estimated size
-              operation: "crypto.createHash",
-              algorithm,
-              estimatedSize: 512,
-            });
-            return result;
-          };
-
-          crypto.createCipher = (
-            algorithm: string,
-            password: any,
-            options?: any,
-          ): any => {
-            const result = originalCreateCipher.call(
-              crypto,
-              algorithm,
-              password,
-              options,
-            );
-            this.trackAllocation("crypto_cipher", 1024, {
-              // Estimated size
-              operation: "crypto.createCipher",
-              algorithm,
-              estimatedSize: 1024,
-            });
-            return result;
-          };
-
-          logger.debug(
-            "Crypto operations patched for tracking",
-            "ExternalMemoryLogger",
-          );
-        })
-        .catch((error) => {
-          logger.error(
-            "Failed to import crypto module",
-            "ExternalMemoryLogger",
-            error,
-          );
+      crypto.randomBytes = (size: number, callback?: Function): Buffer => {
+        this.trackAllocation("crypto_random", size, {
+          operation: "crypto.randomBytes",
+          size,
+          isAsync: !!callback,
         });
+        return originalRandomBytes.call(crypto, size, callback);
+      };
+
+      crypto.createHash = (algorithm: string, options?: any): any => {
+        const result = originalCreateHash.call(crypto, algorithm, options);
+        this.trackAllocation("crypto_hash", 512, {
+          // Estimated size
+          operation: "crypto.createHash",
+          algorithm,
+          estimatedSize: 512,
+        });
+        return result;
+      };
+
+      crypto.createCipher = (
+        algorithm: string,
+        password: any,
+        options?: any,
+      ): any => {
+        const result = originalCreateCipher.call(
+          crypto,
+          algorithm,
+          password,
+          options,
+        );
+        this.trackAllocation("crypto_cipher", 1024, {
+          // Estimated size
+          operation: "crypto.createCipher",
+          algorithm,
+          estimatedSize: 1024,
+        });
+        return result;
+      };
+
+      logger.debug(
+        "Crypto operations patched for tracking",
+        "ExternalMemoryLogger",
+      );
     } catch (error) {
       logger.error(
         "Failed to patch crypto operations",
