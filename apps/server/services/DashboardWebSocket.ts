@@ -440,19 +440,26 @@ class DashboardWebSocketService {
   private startHeartbeat(): void {
     if (!this.config.enableWebSocket) return;
 
-    this.heartbeatTimer = setInterval(() => {
-      try {
-        if (this.io) {
-          // Send heartbeat to all connected clients
-          this.io.emit("dashboard:heartbeat", {
-            timestamp: new Date().toISOString(),
-            activeConnections: this.stats.activeConnections,
-          });
+    // ✅ MEMORY FIX: Use TimerManager for tracked timers
+    const { TimerManager } = require("../utils/TimerManager");
+
+    this.heartbeatTimer = TimerManager.setInterval(
+      () => {
+        try {
+          if (this.io) {
+            // Send heartbeat to all connected clients
+            this.io.emit("dashboard:heartbeat", {
+              timestamp: new Date().toISOString(),
+              activeConnections: this.stats.activeConnections,
+            });
+          }
+        } catch (error) {
+          logger.error("❌ [WebSocket] Heartbeat error", "WebSocket", error);
         }
-      } catch (error) {
-        logger.error("❌ [WebSocket] Heartbeat error", "WebSocket", error);
-      }
-    }, this.config.heartbeatInterval);
+      },
+      this.config.heartbeatInterval,
+      "dashboard-websocket-heartbeat",
+    );
   }
 
   /**
@@ -506,9 +513,11 @@ class DashboardWebSocketService {
     try {
       logger.info("🔄 [WebSocket] Starting graceful shutdown", "WebSocket");
 
-      // Clear heartbeat timer
+      // ✅ MEMORY FIX: Clear heartbeat timer with TimerManager
+      const { TimerManager } = require("../utils/TimerManager");
+
       if (this.heartbeatTimer) {
-        clearInterval(this.heartbeatTimer);
+        TimerManager.clearInterval(this.heartbeatTimer);
         this.heartbeatTimer = undefined;
       }
 

@@ -237,20 +237,35 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
       "ExternalMemoryMonitor",
     );
 
+    // ✅ MEMORY FIX: Use TimerManager for tracked intervals
+    const { TimerManager } = require("../utils/TimerManager");
+
     // Start memory sampling
-    this.samplingInterval = setInterval(() => {
-      this.captureMemorySnapshot();
-    }, this.config.samplingInterval);
+    this.samplingInterval = TimerManager.setInterval(
+      () => {
+        this.captureMemorySnapshot();
+      },
+      this.config.samplingInterval,
+      "external-memory-sampling",
+    );
 
     // Start alert checking
-    this.alertInterval = setInterval(() => {
-      this.checkForAlerts();
-    }, this.config.alertCheckInterval);
+    this.alertInterval = TimerManager.setInterval(
+      () => {
+        this.checkForAlerts();
+      },
+      this.config.alertCheckInterval,
+      "external-memory-alerts",
+    );
 
     // Start cleanup checking
-    this.cleanupInterval = setInterval(() => {
-      this.checkForAutoCleanup();
-    }, this.config.cleanupCheckInterval);
+    this.cleanupInterval = TimerManager.setInterval(
+      () => {
+        this.checkForAutoCleanup();
+      },
+      this.config.cleanupCheckInterval,
+      "external-memory-cleanup",
+    );
 
     // Take initial snapshot
     this.captureMemorySnapshot();
@@ -271,19 +286,22 @@ export class RealTimeExternalMemoryMonitor extends EventEmitter {
 
     this.isRunning = false;
 
+    // ✅ MEMORY FIX: Use TimerManager for cleanup
+    const { TimerManager } = require("../utils/TimerManager");
+
     // Clear all intervals
     if (this.samplingInterval) {
-      clearInterval(this.samplingInterval);
+      TimerManager.clearInterval(this.samplingInterval);
       this.samplingInterval = undefined;
     }
 
     if (this.alertInterval) {
-      clearInterval(this.alertInterval);
+      TimerManager.clearInterval(this.alertInterval);
       this.alertInterval = undefined;
     }
 
     if (this.cleanupInterval) {
-      clearInterval(this.cleanupInterval);
+      TimerManager.clearInterval(this.cleanupInterval);
       this.cleanupInterval = undefined;
     }
 

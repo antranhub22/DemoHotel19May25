@@ -521,6 +521,17 @@ app.use((req, res, next) => {
       void 0;
     }
 
+    // 🚨 ULTIMATE MEMORY FIX: Initialize ultimate memory cleanup
+    try {
+      const {
+        ultimateMemoryCleanup,
+      } = require("@server/utils/UltimateMemoryCleanup");
+      await ultimateMemoryCleanup.initialize();
+      logger.info("🚨 ULTIMATE memory cleanup initialized", "Server");
+    } catch (_e) {
+      void 0;
+    }
+
     // 🚨 Initialize Real-Time External Memory Leak Detection System
     try {
       const externalMemorySystem = getExternalMemorySystem();
@@ -649,6 +660,17 @@ app.use((req, res, next) => {
             "🧹 Aggressive native module cleanup completed",
             "Server",
           );
+        } catch (_e) {
+          void 0;
+        }
+
+        // 🚨 ULTIMATE MEMORY FIX: Complete ultimate cleanup
+        try {
+          const {
+            ultimateMemoryCleanup,
+          } = require("@server/utils/UltimateMemoryCleanup");
+          await ultimateMemoryCleanup.shutdown();
+          logger.info("🚨 ULTIMATE memory cleanup completed", "Server");
         } catch (_e) {
           void 0;
         }
