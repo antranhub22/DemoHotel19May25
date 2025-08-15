@@ -335,59 +335,72 @@ export class ExternalMemoryLogger {
    */
   private patchCryptoOperations(): void {
     try {
-      const crypto = require("crypto");
-      const originalRandomBytes = crypto.randomBytes;
-      const originalCreateHash = crypto.createHash;
-      const originalCreateCipher = crypto.createCipher;
+      // Use dynamic import for crypto in ESM
+      import("crypto")
+        .then((crypto) => {
+          const originalRandomBytes = crypto.randomBytes;
+          const originalCreateHash = crypto.createHash;
+          const originalCreateCipher = crypto.createCipher;
 
-      this.originalFunctions.set("crypto.randomBytes", originalRandomBytes);
-      this.originalFunctions.set("crypto.createHash", originalCreateHash);
-      this.originalFunctions.set("crypto.createCipher", originalCreateCipher);
+          this.originalFunctions.set("crypto.randomBytes", originalRandomBytes);
+          this.originalFunctions.set("crypto.createHash", originalCreateHash);
+          this.originalFunctions.set(
+            "crypto.createCipher",
+            originalCreateCipher,
+          );
 
-      crypto.randomBytes = (size: number, callback?: Function): Buffer => {
-        this.trackAllocation("crypto_random", size, {
-          operation: "crypto.randomBytes",
-          size,
-          isAsync: !!callback,
+          crypto.randomBytes = (size: number, callback?: Function): Buffer => {
+            this.trackAllocation("crypto_random", size, {
+              operation: "crypto.randomBytes",
+              size,
+              isAsync: !!callback,
+            });
+            return originalRandomBytes.call(crypto, size, callback);
+          };
+
+          crypto.createHash = (algorithm: string, options?: any): any => {
+            const result = originalCreateHash.call(crypto, algorithm, options);
+            this.trackAllocation("crypto_hash", 512, {
+              // Estimated size
+              operation: "crypto.createHash",
+              algorithm,
+              estimatedSize: 512,
+            });
+            return result;
+          };
+
+          crypto.createCipher = (
+            algorithm: string,
+            password: any,
+            options?: any,
+          ): any => {
+            const result = originalCreateCipher.call(
+              crypto,
+              algorithm,
+              password,
+              options,
+            );
+            this.trackAllocation("crypto_cipher", 1024, {
+              // Estimated size
+              operation: "crypto.createCipher",
+              algorithm,
+              estimatedSize: 1024,
+            });
+            return result;
+          };
+
+          logger.debug(
+            "Crypto operations patched for tracking",
+            "ExternalMemoryLogger",
+          );
+        })
+        .catch((error) => {
+          logger.error(
+            "Failed to import crypto module",
+            "ExternalMemoryLogger",
+            error,
+          );
         });
-        return originalRandomBytes.call(crypto, size, callback);
-      };
-
-      crypto.createHash = (algorithm: string, options?: any): any => {
-        const result = originalCreateHash.call(crypto, algorithm, options);
-        this.trackAllocation("crypto_hash", 512, {
-          // Estimated size
-          operation: "crypto.createHash",
-          algorithm,
-          estimatedSize: 512,
-        });
-        return result;
-      };
-
-      crypto.createCipher = (
-        algorithm: string,
-        password: any,
-        options?: any,
-      ): any => {
-        const result = originalCreateCipher.call(
-          crypto,
-          algorithm,
-          password,
-          options,
-        );
-        this.trackAllocation("crypto_cipher", 1024, {
-          // Estimated size
-          operation: "crypto.createCipher",
-          algorithm,
-          estimatedSize: 1024,
-        });
-        return result;
-      };
-
-      logger.debug(
-        "Crypto operations patched for tracking",
-        "ExternalMemoryLogger",
-      );
     } catch (error) {
       logger.error(
         "Failed to patch crypto operations",
@@ -402,27 +415,38 @@ export class ExternalMemoryLogger {
    */
   private patchBcryptOperations(): void {
     try {
-      const bcrypt = require("bcrypt");
+      // Use dynamic import for bcrypt in ESM
+      import("bcrypt")
+        .then((bcrypt) => {
+          if (bcrypt.hash) {
+            const originalHash = bcrypt.hash;
+            this.originalFunctions.set("bcrypt.hash", originalHash);
 
-      if (bcrypt.hash) {
-        const originalHash = bcrypt.hash;
-        this.originalFunctions.set("bcrypt.hash", originalHash);
+            bcrypt.hash = async (
+              data: any,
+              saltOrRounds: any,
+            ): Promise<string> => {
+              this.trackAllocation("bcrypt_hash", 512, {
+                operation: "bcrypt.hash",
+                estimatedSize: 512,
+                saltRounds:
+                  typeof saltOrRounds === "number" ? saltOrRounds : "salt",
+              });
+              return originalHash.call(bcrypt, data, saltOrRounds);
+            };
+          }
 
-        bcrypt.hash = async (data: any, saltOrRounds: any): Promise<string> => {
-          this.trackAllocation("bcrypt_hash", 512, {
-            operation: "bcrypt.hash",
-            estimatedSize: 512,
-            saltRounds:
-              typeof saltOrRounds === "number" ? saltOrRounds : "salt",
-          });
-          return originalHash.call(bcrypt, data, saltOrRounds);
-        };
-      }
-
-      logger.debug(
-        "Bcrypt operations patched for tracking",
-        "ExternalMemoryLogger",
-      );
+          logger.debug(
+            "Bcrypt operations patched for tracking",
+            "ExternalMemoryLogger",
+          );
+        })
+        .catch((error) => {
+          logger.debug(
+            "Bcrypt not available for patching",
+            "ExternalMemoryLogger",
+          );
+        });
     } catch (error) {
       // Bcrypt might not be available
       logger.debug("Bcrypt not available for patching", "ExternalMemoryLogger");
@@ -471,35 +495,44 @@ export class ExternalMemoryLogger {
    */
   private patchSqliteOperations(): void {
     try {
-      const Database = require("better-sqlite3");
-      const originalConstructor = Database;
+      // Use dynamic import for better-sqlite3 in ESM
+      import("better-sqlite3")
+        .then((Database) => {
+          const originalConstructor = Database.default;
 
-      this.originalFunctions.set("better-sqlite3", originalConstructor);
+          this.originalFunctions.set("better-sqlite3", originalConstructor);
 
-      const wrappedConstructor = function (...args: any[]) {
-        ExternalMemoryLogger.getInstance().trackAllocation(
-          "sqlite_connection",
-          2 * 1024 * 1024,
-          {
-            operation: "SQLite.constructor",
-            estimatedSize: 2 * 1024 * 1024, // 2MB estimated
-            database: args[0],
-          },
-        );
-        return new originalConstructor(...args);
-      };
+          const wrappedConstructor = function (...args: any[]) {
+            ExternalMemoryLogger.getInstance().trackAllocation(
+              "sqlite_connection",
+              2 * 1024 * 1024,
+              {
+                operation: "SQLite.constructor",
+                estimatedSize: 2 * 1024 * 1024, // 2MB estimated
+                database: args[0],
+              },
+            );
+            return new originalConstructor(...args);
+          };
 
-      // Copy static properties
-      Object.setPrototypeOf(wrappedConstructor, originalConstructor);
-      Object.assign(wrappedConstructor, originalConstructor);
+          // Copy static properties
+          Object.setPrototypeOf(wrappedConstructor, originalConstructor);
+          Object.assign(wrappedConstructor, originalConstructor);
 
-      require.cache[require.resolve("better-sqlite3")].exports =
-        wrappedConstructor;
+          // Replace the default export
+          Database.default = wrappedConstructor;
 
-      logger.debug(
-        "SQLite operations patched for tracking",
-        "ExternalMemoryLogger",
-      );
+          logger.debug(
+            "SQLite operations patched for tracking",
+            "ExternalMemoryLogger",
+          );
+        })
+        .catch((error) => {
+          logger.debug(
+            "SQLite not available for patching",
+            "ExternalMemoryLogger",
+          );
+        });
     } catch (error) {
       logger.debug("SQLite not available for patching", "ExternalMemoryLogger");
     }
@@ -510,31 +543,39 @@ export class ExternalMemoryLogger {
    */
   private patchSocketIOOperations(): void {
     try {
-      const socketio = require("socket.io");
+      // Use dynamic import for socket.io in ESM
+      import("socket.io")
+        .then((socketio) => {
+          if (socketio.Server) {
+            const originalServer = socketio.Server;
+            this.originalFunctions.set("socketio.Server", originalServer);
 
-      if (socketio.Server) {
-        const originalServer = socketio.Server;
-        this.originalFunctions.set("socketio.Server", originalServer);
-
-        socketio.Server = class extends originalServer {
-          constructor(...args: any[]) {
-            super(...args);
-            ExternalMemoryLogger.getInstance().trackAllocation(
-              "socketio_server",
-              3 * 1024 * 1024,
-              {
-                operation: "SocketIO.Server.constructor",
-                estimatedSize: 3 * 1024 * 1024, // 3MB estimated
-              },
-            );
+            socketio.Server = class extends originalServer {
+              constructor(...args: any[]) {
+                super(...args);
+                ExternalMemoryLogger.getInstance().trackAllocation(
+                  "socketio_server",
+                  3 * 1024 * 1024,
+                  {
+                    operation: "SocketIO.Server.constructor",
+                    estimatedSize: 3 * 1024 * 1024, // 3MB estimated
+                  },
+                );
+              }
+            };
           }
-        };
-      }
 
-      logger.debug(
-        "Socket.IO operations patched for tracking",
-        "ExternalMemoryLogger",
-      );
+          logger.debug(
+            "Socket.IO operations patched for tracking",
+            "ExternalMemoryLogger",
+          );
+        })
+        .catch((error) => {
+          logger.debug(
+            "Socket.IO not available for patching",
+            "ExternalMemoryLogger",
+          );
+        });
     } catch (error) {
       logger.debug(
         "Socket.IO not available for patching",
