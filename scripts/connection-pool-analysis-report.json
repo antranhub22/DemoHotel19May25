@@ -1,0 +1,225 @@
+{
+  "timestamp": "2025-08-14T10:47:33.007Z",
+  "summary": {
+    "totalConnectionPools": 13,
+    "currentMemoryUsage": 654.01220703125,
+    "optimizedMemoryUsage": 318.806103515625,
+    "potentialSavings": 335.206103515625,
+    "savingsPercentage": "51.3",
+    "criticalIssuesFound": 5,
+    "recommendationsGenerated": 4
+  },
+  "detailedAnalysis": {
+    "databasePools": [
+      {
+        "name": "Prisma Connection Pool",
+        "file": "packages/shared/db/PrismaConnectionManager.ts",
+        "maxConnections": 20,
+        "minConnections": 5,
+        "ttl": 3600000,
+        "memoryEstimate": 100,
+        "issues": [],
+        "riskLevel": "MEDIUM"
+      },
+      {
+        "name": "Advanced Connection Pool",
+        "file": "apps/server/shared/ConnectionPoolManager.ts",
+        "maxConnections": 20,
+        "memoryEstimate": 150,
+        "issues": ["Unbounded metrics array", "Unbounded alerts array"],
+        "riskLevel": "CRITICAL"
+      },
+      {
+        "name": "Performance Connection Pool",
+        "file": "packages/shared/performance/optimization.ts",
+        "maxConnections": 25,
+        "memoryEstimate": 125,
+        "issues": ["Very high connection limit"],
+        "riskLevel": "HIGH"
+      }
+    ],
+    "websocketPools": [
+      {
+        "name": "Socket.IO Server",
+        "file": "apps/server/socket.ts",
+        "bufferSizePerConnection": 0.000244140625,
+        "estimatedConnections": 50,
+        "memoryEstimate": 20.01220703125,
+        "pingTimeout": 30000,
+        "issues": [],
+        "riskLevel": "MEDIUM"
+      },
+      {
+        "name": "Dashboard WebSocket",
+        "file": "apps/server/services/DashboardWebSocket.ts",
+        "estimatedConnections": 10,
+        "memoryEstimate": 20,
+        "issues": [],
+        "riskLevel": "LOW"
+      },
+      {
+        "name": "Client WebSocket Hooks",
+        "file": "apps/client/src/hooks/useWebSocket.ts",
+        "memoryEstimate": 10,
+        "issues": [],
+        "riskLevel": "LOW"
+      }
+    ],
+    "httpPools": [
+      {
+        "name": "Undici HTTP/2 Client",
+        "version": "5.28.3",
+        "memoryEstimate": 12,
+        "features": [
+          "HTTP/2 connection pools",
+          "TLS session cache",
+          "Request/response buffers"
+        ],
+        "riskLevel": "MEDIUM",
+        "issues": [
+          "TLS session cache may accumulate",
+          "HTTP/2 connection persistence"
+        ]
+      },
+      {
+        "name": "Node-fetch HTTP Client",
+        "version": "^3.3.2",
+        "memoryEstimate": 5,
+        "features": ["HTTP agent pools", "Keep-alive connections"],
+        "riskLevel": "LOW",
+        "issues": ["Keep-alive connection persistence"]
+      },
+      {
+        "name": "Axios HTTP Client",
+        "version": "^1.10.0",
+        "memoryEstimate": 4,
+        "features": ["Request/response interceptors", "Default HTTP agent"],
+        "riskLevel": "LOW",
+        "issues": ["Minimal - well-managed pools"]
+      }
+    ],
+    "redisPools": [
+      {
+        "name": "Cache Manager Redis",
+        "file": "apps/server/shared/CacheManager.ts",
+        "implemented": false,
+        "memoryEstimate": 0,
+        "issues": ["Redis not yet implemented"],
+        "riskLevel": "NONE"
+      },
+      {
+        "name": "Production Redis Config",
+        "file": "deploy/production/config.ts",
+        "clusterEnabled": true,
+        "sentinelEnabled": true,
+        "nodeCount": 20,
+        "memoryEstimate": 200,
+        "issues": [
+          "Multiple cluster node connections",
+          "Multiple sentinel connections",
+          "Configuration exists but may not be used"
+        ],
+        "riskLevel": "HIGH"
+      }
+    ],
+    "internalPools": [
+      {
+        "name": "Query Optimizer Pool",
+        "file": "packages/shared/performance/optimization.ts",
+        "memoryEstimate": 5,
+        "issues": [],
+        "riskLevel": "LOW"
+      },
+      {
+        "name": "Performance Monitor Pool",
+        "file": "packages/shared/performance/optimization.ts",
+        "memoryEstimate": 3,
+        "issues": [],
+        "riskLevel": "LOW"
+      }
+    ],
+    "totalMemoryEstimate": 654.01220703125,
+    "criticalIssues": [
+      {
+        "type": "Unbounded Collection",
+        "source": "Advanced Connection Pool",
+        "severity": "CRITICAL",
+        "issue": "Unbounded metrics array",
+        "estimatedImpact": "50-200MB memory leak over time"
+      },
+      {
+        "type": "Unbounded Collection",
+        "source": "Advanced Connection Pool",
+        "severity": "CRITICAL",
+        "issue": "Unbounded alerts array",
+        "estimatedImpact": "50-200MB memory leak over time"
+      },
+      {
+        "type": "High Connection Limit",
+        "source": "Prisma Connection Pool",
+        "severity": "HIGH",
+        "issue": "20 max connections",
+        "estimatedImpact": "75MB excessive memory usage"
+      },
+      {
+        "type": "High Connection Limit",
+        "source": "Advanced Connection Pool",
+        "severity": "HIGH",
+        "issue": "20 max connections",
+        "estimatedImpact": "75MB excessive memory usage"
+      },
+      {
+        "type": "High Connection Limit",
+        "source": "Performance Connection Pool",
+        "severity": "HIGH",
+        "issue": "25 max connections",
+        "estimatedImpact": "100MB excessive memory usage"
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "CRITICAL",
+        "action": "Fix Unbounded Collections",
+        "description": "Implement size limits and cleanup for all unbounded arrays and maps",
+        "estimatedSavings": "100-200MB",
+        "implementation": "Limit arrays to 500-1000 entries, implement LRU eviction"
+      },
+      {
+        "priority": "HIGH",
+        "action": "Reduce Connection Pool Limits",
+        "description": "Reduce max connections from 20+ to 3-5 per pool",
+        "estimatedSavings": "75-150MB",
+        "implementation": "Update connection pool configurations"
+      },
+      {
+        "priority": "MEDIUM",
+        "action": "Implement Connection Pool Monitoring",
+        "description": "Add real-time monitoring for all connection pools",
+        "estimatedSavings": "Prevention of future leaks",
+        "implementation": "Integrate with ProcessMemoryAnalyzer"
+      },
+      {
+        "priority": "MEDIUM",
+        "action": "Add Comprehensive Cleanup",
+        "description": "Implement shutdown cleanup for all pools",
+        "estimatedSavings": "Graceful memory release",
+        "implementation": "Add cleanup methods to all pool managers"
+      }
+    ],
+    "optimizedMemoryEstimate": 318.806103515625,
+    "totalSavings": 335.206103515625,
+    "savingsPercentage": "51.3"
+  },
+  "environment": {
+    "nodeVersion": "v18.20.8",
+    "platform": "darwin",
+    "arch": "x64",
+    "memoryUsage": {
+      "rss": 35651584,
+      "heapTotal": 6930432,
+      "heapUsed": 5359480,
+      "external": 677160,
+      "arrayBuffers": 85593
+    }
+  }
+}

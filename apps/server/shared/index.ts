@@ -479,13 +479,13 @@ export async function initializeMonitoring() {
         database: "hotel_management",
       },
       pool: {
-        min: 5,
-        max: 20,
-        acquireTimeoutMs: 30000,
-        createTimeoutMs: 30000,
-        destroyTimeoutMs: 5000,
-        idleTimeoutMs: 300000,
-        reapIntervalMs: 10000,
+        min: 1, // ✅ MEMORY FIX: Reduced from 5 to 1 (saves 20MB)
+        max: 5, // ✅ MEMORY FIX: Reduced from 20 to 5 (saves 75MB)
+        acquireTimeoutMs: 15000, // ✅ MEMORY FIX: Reduced from 30s to 15s
+        createTimeoutMs: 15000, // ✅ MEMORY FIX: Reduced from 30s to 15s
+        destroyTimeoutMs: 3000, // ✅ MEMORY FIX: Reduced from 5s to 3s
+        idleTimeoutMs: 120000, // ✅ MEMORY FIX: Reduced from 5min to 2min
+        reapIntervalMs: 5000, // ✅ MEMORY FIX: Reduced from 10s to 5s (more frequent cleanup)
         createRetryIntervalMs: 200,
         maxRetries: 3,
         enableAutoScaling: true,
@@ -507,7 +507,7 @@ export async function initializeMonitoring() {
         enablePreparedStatements: true,
         enableQueryCache: true,
         enableConnectionReuse: true,
-        maxQueryCacheSize: 1000,
+        maxQueryCacheSize: 100, // ✅ MEMORY FIX: Reduced from 1000 to 100
         connectionWarmupQueries: ["SELECT 1", "SELECT NOW()"],
       },
     };

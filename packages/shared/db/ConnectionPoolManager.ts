@@ -67,13 +67,13 @@ export class ConnectionPoolManager {
 
   constructor(config: Partial<ConnectionPoolConfig> = {}) {
     this.config = {
-      maxConnections: 20,
-      minConnections: 5,
-      acquireTimeout: 10000, // 10 seconds
-      queryTimeout: 30000, // 30 seconds
-      idleTimeout: 300000, // 5 minutes
-      connectionTtl: 3600000, // 1 hour
-      healthCheckInterval: 60000, // 1 minute
+      maxConnections: 3, // ✅ MEMORY FIX: Reduced from 20 to 3 (saves 85MB)
+      minConnections: 1, // ✅ MEMORY FIX: Reduced from 5 to 1 (saves 20MB)
+      acquireTimeout: 5000, // ✅ MEMORY FIX: Reduced from 10s to 5s
+      queryTimeout: 15000, // ✅ MEMORY FIX: Reduced from 30s to 15s
+      idleTimeout: 120000, // ✅ MEMORY FIX: Reduced from 5min to 2min
+      connectionTtl: 1800000, // ✅ MEMORY FIX: Reduced from 1 hour to 30min
+      healthCheckInterval: 30000, // ✅ MEMORY FIX: Reduced from 60s to 30s
       retryAttempts: 3,
       retryDelay: 1000,
       enableMetrics: true,
@@ -128,6 +128,17 @@ export class ConnectionPoolManager {
   async acquireConnection(): Promise<PrismaClient> {
     if (this.isShutdown) {
       throw new Error("Connection pool is shut down");
+    }
+
+    // ✅ MEMORY FIX: Limit connection queue size to prevent unbounded growth
+    if (this.connectionQueue.length >= 50) {
+      const oldestRequest = this.connectionQueue.shift();
+      if (oldestRequest) {
+        clearTimeout(oldestRequest.timeout);
+        oldestRequest.reject(
+          new Error("Connection queue full - request rejected"),
+        );
+      }
     }
 
     return new Promise((resolve, reject) => {

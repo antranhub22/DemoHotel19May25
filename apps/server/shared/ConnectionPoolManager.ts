@@ -142,6 +142,7 @@ export class ConnectionPoolManager extends EventEmitter {
   private autoScalingEvents: AutoScalingEvent[] = [];
   private queryCache = new Map<string, any>();
   private isInitialized = false;
+  private isShuttingDown = false; // ✅ MEMORY FIX: Track shutdown state
   private metricsInterval?: NodeJS.Timeout;
   private lastScalingAction = new Date();
 
@@ -619,19 +620,35 @@ export class ConnectionPoolManager extends EventEmitter {
           const metrics = await this.collectMetrics();
           this.metrics.push(metrics);
 
-          // ✅ MEMORY FIX: More aggressive cleanup - reduce from 1000 to 500 entries
-          if (this.metrics.length > 500) {
-            this.metrics = this.metrics.slice(-250); // Keep only last 250 entries
+          // ✅ MEMORY FIX: Even more aggressive cleanup to prevent unbounded growth
+          if (this.metrics.length > 200) {
+            this.metrics = this.metrics.slice(-100); // Keep only last 100 entries
           }
 
-          // ✅ MEMORY FIX: Cleanup old auto-scaling events
-          if (this.autoScalingEvents.length > 100) {
-            this.autoScalingEvents = this.autoScalingEvents.slice(-50);
+          // ✅ MEMORY FIX: Cleanup auto-scaling events more aggressively
+          if (this.autoScalingEvents.length > 50) {
+            this.autoScalingEvents = this.autoScalingEvents.slice(-25);
           }
 
-          // ✅ MEMORY FIX: Cleanup old alerts
+          // ✅ MEMORY FIX: Cleanup alerts more aggressively
           if (this.alerts.length > 50) {
             this.alerts = this.alerts.slice(-25);
+          }
+
+          // ✅ MEMORY FIX: Cleanup connection leaks older than 30 minutes
+          const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+          this.connectionLeaks = this.connectionLeaks.filter(
+            (leak) => leak.detectedAt.getTime() > thirtyMinutesAgo,
+          );
+
+          // ✅ MEMORY FIX: Limit query cache size aggressively
+          if (this.queryCache.size > 100) {
+            const entries = Array.from(this.queryCache.entries());
+            this.queryCache.clear();
+            // Keep only the most recent 50 entries
+            entries.slice(-50).forEach(([key, value]) => {
+              this.queryCache.set(key, value);
+            });
           }
 
           // ✅ MEMORY FIX: Cleanup connection leaks older than 1 hour
@@ -905,6 +922,84 @@ export class ConnectionPoolManager extends EventEmitter {
     logger.warn(`🚨 [ConnectionPool] Alert: ${message}`, "ConnectionPool", {
       alert,
     });
+  }
+
+  /**
+   * ✅ MEMORY FIX: Comprehensive shutdown and cleanup method
+   */
+  async shutdown(): Promise<void> {
+    if (this.isShuttingDown) {
+      return;
+    }
+
+    this.isShuttingDown = true;
+    logger.info(
+      "🔄 [ConnectionPool] Starting graceful shutdown",
+      "ConnectionPool",
+    );
+
+    try {
+      // Clear all timers and intervals
+      if (this.metricsInterval) {
+        clearInterval(this.metricsInterval);
+        this.metricsInterval = undefined;
+      }
+
+      // Cleanup all connections
+      const connectionCleanupPromises = Array.from(this.connections.keys()).map(
+        (connectionId) => this.destroyConnection(connectionId),
+      );
+
+      await Promise.allSettled(connectionCleanupPromises);
+
+      // Clear all collections to prevent memory leaks
+      this.connections.clear();
+      this.metrics.length = 0;
+      this.alerts.length = 0;
+      this.connectionLeaks.length = 0;
+      this.autoScalingEvents.length = 0;
+      this.queryCache.clear();
+
+      // Remove all event listeners
+      this.removeAllListeners();
+
+      logger.success(
+        "✅ [ConnectionPool] Graceful shutdown completed",
+        "ConnectionPool",
+      );
+    } catch (error) {
+      logger.error(
+        "❌ [ConnectionPool] Shutdown failed",
+        "ConnectionPool",
+        error,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * ✅ MEMORY FIX: Get current memory usage statistics
+   */
+  getMemoryUsage(): {
+    connectionsCount: number;
+    metricsCount: number;
+    alertsCount: number;
+    cacheSize: number;
+    estimatedMemoryMB: number;
+  } {
+    const estimatedMemoryMB =
+      this.connections.size * 5 + // 5MB per connection
+      this.metrics.length * 0.01 + // 10KB per metric
+      this.alerts.length * 0.002 + // 2KB per alert
+      this.queryCache.size * 0.001; // 1KB per cache entry
+
+    return {
+      connectionsCount: this.connections.size,
+      metricsCount: this.metrics.length,
+      alertsCount: this.alerts.length,
+      cacheSize: this.queryCache.size,
+      estimatedMemoryMB: Math.round(estimatedMemoryMB * 100) / 100,
+    };
   }
 
   private isSelectQuery(query: string): boolean {

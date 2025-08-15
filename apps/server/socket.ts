@@ -50,10 +50,10 @@ export function setupSocket(server: HTTPServer) {
       // ✅ FIX: Add additional CORS headers
       allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     },
-    // ✅ PERFORMANCE: Add connection limits
-    maxHttpBufferSize: 1e6, // 1MB limit
-    pingTimeout: 60000,
-    pingInterval: 25000,
+    // ✅ MEMORY FIX: Optimize buffer sizes and timeouts for memory efficiency
+    maxHttpBufferSize: 256 * 1024, // ✅ Reduced from 1MB to 256KB (saves significant memory per connection)
+    pingTimeout: 30000, // ✅ Reduced from 60s to 30s
+    pingInterval: 15000, // ✅ Reduced from 25s to 15s
     // ✅ FIX: Add additional options to prevent conflicts
     allowEIO3: true,
     transports: ["websocket", "polling"],
@@ -89,7 +89,7 @@ export function setupSocket(server: HTTPServer) {
   const connectionCounts = new Map<string, number>();
   const MAX_CONNECTIONS_PER_IP = 10;
 
-  // ✅ MEMORY FIX: Periodic cleanup of connection tracking
+  // ✅ MEMORY FIX: More aggressive periodic cleanup of connection tracking
   setInterval(
     () => {
       // Clean up connection counts for IPs with 0 connections
@@ -98,14 +98,29 @@ export function setupSocket(server: HTTPServer) {
           connectionCounts.delete(ip);
         }
       }
+
+      // ✅ MEMORY FIX: Force cleanup if too many tracked IPs (prevents unbounded growth)
+      if (connectionCounts.size > 1000) {
+        logger.warn(
+          `WebSocket connection tracking too large (${connectionCounts.size} IPs), forcing cleanup`,
+          "WebSocket",
+        );
+        connectionCounts.clear();
+      }
+
+      // ✅ MEMORY FIX: Force garbage collection if available and connections are high
+      if (global.gc && connectionCounts.size > 500) {
+        global.gc();
+      }
+
       // Log memory status
       logger.debug(
         `WebSocket connection tracking: ${connectionCounts.size} IPs`,
         "WebSocket",
       );
     },
-    5 * 60 * 1000,
-  ); // Every 5 minutes
+    2 * 60 * 1000,
+  ); // ✅ MEMORY FIX: Every 2 minutes (more frequent cleanup)
 
   io.on("connection", (socket: Socket) => {
     const clientIP = socket.handshake.address;
