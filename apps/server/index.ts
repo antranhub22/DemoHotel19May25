@@ -494,13 +494,15 @@ app.use((req, res, next) => {
     // ✅ Initialize external memory monitoring dashboard
     externalMemoryDashboard.initialize(io);
 
-    // 🚨 MEMORY FIX: Temporarily disable excessive monitoring to fix leaks
-    // externalMemoryMonitor.startMonitoring();
-    // externalMemoryLogger.startTracking();
-    // console.log("📊 External memory monitoring started");
-    console.log(
-      "🚨 External memory monitoring DISABLED to fix monitoring-induced leaks",
-    );
+    // 🚨 MEMORY FIX: Start monitoring with LIMITED data retention
+    try {
+      externalMemoryMonitor.startMonitoring();
+      // Disable detailed tracking to reduce memory usage
+      // externalMemoryLogger.startTracking();
+      console.log("📊 External memory monitoring started (LIMITED MODE)");
+    } catch (error) {
+      console.log("⚠️ External memory monitoring failed to start:", error);
+    }
 
     // ✅ MEMORY FIX: Start memory verification monitoring
     try {
@@ -535,16 +537,18 @@ app.use((req, res, next) => {
       void 0;
     }
 
-    // 🚨 MEMORY FIX: Disable real-time external memory system (causing self-monitoring leaks)
+    // 🚨 MEMORY FIX: Start external memory system with REDUCED retention
     try {
-      // const externalMemorySystem = getExternalMemorySystem();
-      // await externalMemorySystem.initialize(io);
-      // console.log("🚨 Real-time external memory leak detection active");
-      // console.log(
-      //   `🎯 External memory leak API: http://localhost:${port}/api/external-memory/status`,
-      // );
+      const externalMemorySystem = getExternalMemorySystem();
+      await externalMemorySystem.initialize(io);
+      console.log(
+        "🚨 Real-time external memory leak detection active (REDUCED MODE)",
+      );
+      console.log(
+        `🎯 External memory leak API: http://localhost:${port}/api/external-memory/status`,
+      );
       logger.info(
-        "🚨 External Memory Leak Detection DISABLED to prevent self-monitoring leaks",
+        "✅ External Memory Leak Detection started with reduced retention",
         "Server",
       );
     } catch (error) {
