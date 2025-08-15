@@ -4,6 +4,7 @@ import { EventEmitter } from "events";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { BackupManager } from "./BackupManager";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -776,7 +777,7 @@ export class DisasterRecovery extends EventEmitter {
         _errorOutput += data.toString();
       });
 
-      const timeoutId = setTimeout(
+      const timeoutId = TimerManager.setTimeout(
         () => {
           process.kill();
           reject(new Error(`Command timeout after ${timeout} minutes`));
@@ -868,7 +869,7 @@ export class DisasterRecovery extends EventEmitter {
   private startSiteHealthCheck(site: SiteConfig) {
     let failedChecks = 0;
 
-    const intervalId = setInterval(async () => {
+    const intervalId = TimerManager.setInterval(async () => {
       try {
         const isHealthy = await this.checkSiteHealth(site);
 
@@ -876,7 +877,7 @@ export class DisasterRecovery extends EventEmitter {
           failedChecks = 0;
           if (site.status === "failed") {
             site.status = "active";
-            this.emit("siteRecovered", site);
+            this.emit("siteRecovered", site, "auto-generated-interval-31");
           }
         } else {
           failedChecks++;
@@ -1071,7 +1072,7 @@ export class DisasterRecovery extends EventEmitter {
 
   private scheduleRecoveryTests() {
     // Schedule regular recovery tests
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.scheduleAutomaticTest();
       },
@@ -1159,9 +1160,9 @@ export class DisasterRecovery extends EventEmitter {
 
   private startEscalationProcedure(event: DisasterEvent) {
     for (const level of this.config.communication.escalationProcedure) {
-      setTimeout(
+      TimerManager.setTimeout(
         () => {
-          this.escalateToLevel(event, level);
+          this.escalateToLevel(event, level, "auto-generated-timeout-11");
         },
         level.timeDelay * 60 * 1000,
       );
@@ -1203,10 +1204,10 @@ export class DisasterRecovery extends EventEmitter {
 
   private schedulePostMortem(event: DisasterEvent) {
     // Schedule post-mortem meeting
-    setTimeout(
+    TimerManager.setTimeout(
       () => {
         console.log(`📝 Post-mortem scheduled for event: ${event.title}`);
-        this.emit("postMortemScheduled", event);
+        this.emit("postMortemScheduled", event, "auto-generated-timeout-12");
       },
       24 * 60 * 60 * 1000,
     ); // 24 hours after resolution
@@ -1218,9 +1219,13 @@ export class DisasterRecovery extends EventEmitter {
     this.monitoringActive = true;
 
     // Monitor RTO/RPO compliance
-    setInterval(() => {
-      this.monitorRTORPO();
-    }, 60 * 1000); // Every minute
+    TimerManager.setInterval(
+      () => {
+        this.monitorRTORPO();
+      },
+      60 * 1000,
+      "auto-generated-interval-33",
+    ); // Every minute
 
     console.log("📊 Disaster recovery monitoring started");
   }

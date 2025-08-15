@@ -4,13 +4,14 @@
 // Comprehensive health monitoring with module-specific checks,
 // dependency validation, cascade failure detection, and intelligent alerting
 
-import { db } from '@shared/db';
-import { logger } from '@shared/utils/logger';
+import { db } from "@shared/db";
+import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // Health check interfaces
 export interface ModuleHealthStatus {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+  status: "healthy" | "degraded" | "unhealthy" | "critical";
   uptime: number;
   lastCheck: Date;
   dependencies: DependencyHealth[];
@@ -21,8 +22,8 @@ export interface ModuleHealthStatus {
 
 export interface DependencyHealth {
   name: string;
-  type: 'database' | 'service' | 'external_api' | 'module';
-  status: 'healthy' | 'degraded' | 'failed';
+  type: "database" | "service" | "external_api" | "module";
+  status: "healthy" | "degraded" | "failed";
   responseTime: number;
   lastCheck: Date;
   errorCount: number;
@@ -38,7 +39,7 @@ export interface ModuleMetrics {
 
 export interface HealthIssue {
   id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   description: string;
   module: string;
   timestamp: Date;
@@ -47,7 +48,7 @@ export interface HealthIssue {
 }
 
 export interface SystemHealthSummary {
-  overallStatus: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+  overallStatus: "healthy" | "degraded" | "unhealthy" | "critical";
   modules: ModuleHealthStatus[];
   systemMetrics: {
     totalModules: number;
@@ -67,15 +68,15 @@ export interface CascadeFailure {
   id: string;
   rootCause: string;
   affectedModules: string[];
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   estimatedImpact: string;
   detectedAt: Date;
 }
 
 export interface HealthRecommendation {
   id: string;
-  type: 'performance' | 'reliability' | 'maintenance' | 'scaling';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  type: "performance" | "reliability" | "maintenance" | "scaling";
+  priority: "low" | "medium" | "high" | "urgent";
   description: string;
   module: string;
   actionItems: string[];
@@ -104,7 +105,7 @@ export class AdvancedHealthCheck {
   private isInitialized = false;
   private checkInterval: NodeJS.Timeout | null = null;
 
-  private constructor() { }
+  private constructor() {}
 
   static getInstance(): AdvancedHealthCheck {
     if (!this.instance) {
@@ -119,8 +120,8 @@ export class AdvancedHealthCheck {
   async initialize(): Promise<void> {
     try {
       logger.info(
-        '🏥 [AdvancedHealthCheck] Initializing advanced health check system v2.0',
-        'HealthCheck'
+        "🏥 [AdvancedHealthCheck] Initializing advanced health check system v2.0",
+        "HealthCheck",
       );
 
       // Register core health checkers
@@ -131,14 +132,14 @@ export class AdvancedHealthCheck {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [AdvancedHealthCheck] Advanced health check system initialized',
-        'HealthCheck'
+        "✅ [AdvancedHealthCheck] Advanced health check system initialized",
+        "HealthCheck",
       );
     } catch (error) {
       logger.error(
-        '❌ [AdvancedHealthCheck] Failed to initialize health check system',
-        'HealthCheck',
-        error
+        "❌ [AdvancedHealthCheck] Failed to initialize health check system",
+        "HealthCheck",
+        error,
       );
       throw error;
     }
@@ -150,7 +151,7 @@ export class AdvancedHealthCheck {
   registerModuleHealthChecker(checker: ModuleHealthChecker): void {
     logger.debug(
       `🔧 [AdvancedHealthCheck] Registering health checker for module: ${checker.name}`,
-      'HealthCheck'
+      "HealthCheck",
     );
     this.healthCheckers.set(checker.name, checker);
     this.healthHistory.set(checker.name, []);
@@ -165,29 +166,30 @@ export class AdvancedHealthCheck {
     try {
       // Run all health checks in parallel
       const moduleHealthPromises = Array.from(this.healthCheckers.values()).map(
-        async checker => {
+        async (checker) => {
           try {
             const health = await Promise.race([
               // Execute health check safely
               checker.checkFunction(),
               new Promise<ModuleHealthStatus>((_, reject) =>
-                setTimeout(
-                  () => reject(new Error('Health check timeout')),
-                  checker.timeout
-                )
+                TimerManager.setTimeout(
+                  () => reject(new Error("Health check timeout")),
+                  checker.timeout,
+                  "auto-generated-timeout-8",
+                ),
               ),
             ]);
             return health;
           } catch (error) {
             return this.createFailedHealthStatus(checker.name, error as Error);
           }
-        }
+        },
       );
 
       const moduleHealthStatuses = await Promise.all(moduleHealthPromises);
 
       // Update health history
-      moduleHealthStatuses.forEach(status => {
+      moduleHealthStatuses.forEach((status) => {
         const history = this.healthHistory.get(status.name) || [];
         history.push(status);
         // Keep only last 100 entries
@@ -217,15 +219,15 @@ export class AdvancedHealthCheck {
       const responseTime = Date.now() - startTime;
       logger.debug(
         `🏥 [AdvancedHealthCheck] System health check completed in ${responseTime}ms`,
-        'HealthCheck'
+        "HealthCheck",
       );
 
       return systemHealth;
     } catch (error) {
       logger.error(
-        '❌ [AdvancedHealthCheck] Failed to get system health',
-        'HealthCheck',
-        error
+        "❌ [AdvancedHealthCheck] Failed to get system health",
+        "HealthCheck",
+        error,
       );
       throw error;
     }
@@ -235,13 +237,13 @@ export class AdvancedHealthCheck {
    * Get health status for a specific module
    */
   async getModuleHealth(
-    moduleName: string
+    moduleName: string,
   ): Promise<ModuleHealthStatus | null> {
     const checker = this.healthCheckers.get(moduleName);
     if (!checker) {
       logger.warn(
         `⚠️ [AdvancedHealthCheck] No health checker found for module: ${moduleName}`,
-        'HealthCheck'
+        "HealthCheck",
       );
       return null;
     }
@@ -251,10 +253,11 @@ export class AdvancedHealthCheck {
         // Execute health check safely
         checker.checkFunction(),
         new Promise<ModuleHealthStatus>((_, reject) =>
-          setTimeout(
-            () => reject(new Error('Health check timeout')),
-            checker.timeout
-          )
+          TimerManager.setTimeout(
+            () => reject(new Error("Health check timeout")),
+            checker.timeout,
+            "auto-generated-timeout-9",
+          ),
         ),
       ]);
       return health;
@@ -277,7 +280,7 @@ export class AdvancedHealthCheck {
   private async registerCoreHealthCheckers(): Promise<void> {
     // Database health checker
     this.registerModuleHealthChecker({
-      name: 'database',
+      name: "database",
       checkFunction: async () => this.checkDatabaseHealth(),
       dependencies: [],
       criticalDependencies: [],
@@ -287,7 +290,7 @@ export class AdvancedHealthCheck {
 
     // Memory health checker
     this.registerModuleHealthChecker({
-      name: 'memory',
+      name: "memory",
       checkFunction: async () => this.checkMemoryHealth(),
       dependencies: [],
       criticalDependencies: [],
@@ -297,7 +300,7 @@ export class AdvancedHealthCheck {
 
     // Service container health checker
     this.registerModuleHealthChecker({
-      name: 'service-container',
+      name: "service-container",
       checkFunction: async () => this.checkServiceContainerHealth(),
       dependencies: [],
       criticalDependencies: [],
@@ -315,26 +318,26 @@ export class AdvancedHealthCheck {
 
     try {
       // Test database connection
-      const testQuery = await db.$client.query('SELECT 1 as test');
+      const testQuery = await db.$client.query("SELECT 1 as test");
       const responseTime = Date.now() - startTime;
 
       dependencies.push({
-        name: 'primary-database',
-        type: 'database',
-        status: testQuery ? 'healthy' : 'failed',
+        name: "primary-database",
+        type: "database",
+        status: testQuery ? "healthy" : "failed",
         responseTime,
         lastCheck: new Date(),
         errorCount: 0,
       });
 
       return {
-        name: 'database',
+        name: "database",
         status:
           responseTime < 1000
-            ? 'healthy'
+            ? "healthy"
             : responseTime < 3000
-              ? 'degraded'
-              : 'unhealthy',
+              ? "degraded"
+              : "unhealthy",
         uptime: process.uptime(),
         lastCheck: new Date(),
         dependencies,
@@ -351,17 +354,17 @@ export class AdvancedHealthCheck {
     } catch (error) {
       const responseTime = Date.now() - startTime;
       dependencies.push({
-        name: 'primary-database',
-        type: 'database',
-        status: 'failed',
+        name: "primary-database",
+        type: "database",
+        status: "failed",
         responseTime,
         lastCheck: new Date(),
         errorCount: 1,
       });
 
       return {
-        name: 'database',
-        status: 'critical',
+        name: "database",
+        status: "critical",
         uptime: process.uptime(),
         lastCheck: new Date(),
         dependencies,
@@ -375,12 +378,12 @@ export class AdvancedHealthCheck {
         issues: [
           {
             id: `db-error-${Date.now()}`,
-            severity: 'critical',
+            severity: "critical",
             description: `Database connection failed: ${(error as Error).message}`,
-            module: 'database',
+            module: "database",
             timestamp: new Date(),
             resolved: false,
-            affectedDependencies: ['primary-database'],
+            affectedDependencies: ["primary-database"],
           },
         ],
         responseTime,
@@ -398,37 +401,37 @@ export class AdvancedHealthCheck {
     const totalMemoryMB = memoryUsage.heapTotal / 1024 / 1024;
     const memoryUsagePercent = (usedMemoryMB / totalMemoryMB) * 100;
 
-    let status: 'healthy' | 'degraded' | 'unhealthy' | 'critical' = 'healthy';
+    let status: "healthy" | "degraded" | "unhealthy" | "critical" = "healthy";
     const issues: HealthIssue[] = [];
 
     if (memoryUsagePercent > 90) {
-      status = 'critical';
+      status = "critical";
       issues.push({
         id: `memory-critical-${Date.now()}`,
-        severity: 'critical',
+        severity: "critical",
         description: `Memory usage critically high: ${memoryUsagePercent.toFixed(1)}%`,
-        module: 'memory',
+        module: "memory",
         timestamp: new Date(),
         resolved: false,
         affectedDependencies: [],
       });
     } else if (memoryUsagePercent > 80) {
-      status = 'unhealthy';
+      status = "unhealthy";
       issues.push({
         id: `memory-high-${Date.now()}`,
-        severity: 'high',
+        severity: "high",
         description: `Memory usage high: ${memoryUsagePercent.toFixed(1)}%`,
-        module: 'memory',
+        module: "memory",
         timestamp: new Date(),
         resolved: false,
         affectedDependencies: [],
       });
     } else if (memoryUsagePercent > 70) {
-      status = 'degraded';
+      status = "degraded";
     }
 
     return {
-      name: 'memory',
+      name: "memory",
       status,
       uptime: process.uptime(),
       lastCheck: new Date(),
@@ -453,18 +456,18 @@ export class AdvancedHealthCheck {
 
     try {
       // Import ServiceContainer dynamically to avoid circular dependency
-      const { ServiceContainer } = await import('./ServiceContainer');
+      const { ServiceContainer } = await import("./ServiceContainer");
       const containerHealth = ServiceContainer.getHealthStatus();
 
-      const status = containerHealth.healthy ? 'healthy' : 'unhealthy';
+      const status = containerHealth.healthy ? "healthy" : "unhealthy";
       const issues: HealthIssue[] = [];
 
       if (containerHealth.errors.length > 0) {
         issues.push({
           id: `container-errors-${Date.now()}`,
-          severity: 'medium',
+          severity: "medium",
           description: `ServiceContainer has ${containerHealth.errors.length} errors`,
-          module: 'service-container',
+          module: "service-container",
           timestamp: new Date(),
           resolved: false,
           affectedDependencies: [],
@@ -472,7 +475,7 @@ export class AdvancedHealthCheck {
       }
 
       return {
-        name: 'service-container',
+        name: "service-container",
         status,
         uptime: process.uptime(),
         lastCheck: new Date(),
@@ -488,7 +491,7 @@ export class AdvancedHealthCheck {
         responseTime: Date.now() - startTime,
       };
     } catch (error) {
-      return this.createFailedHealthStatus('service-container', error as Error);
+      return this.createFailedHealthStatus("service-container", error as Error);
     }
   }
 
@@ -497,11 +500,11 @@ export class AdvancedHealthCheck {
    */
   private createFailedHealthStatus(
     moduleName: string,
-    error: Error
+    error: Error,
   ): ModuleHealthStatus {
     return {
       name: moduleName,
-      status: 'critical',
+      status: "critical",
       uptime: process.uptime(),
       lastCheck: new Date(),
       dependencies: [],
@@ -515,7 +518,7 @@ export class AdvancedHealthCheck {
       issues: [
         {
           id: `${moduleName}-error-${Date.now()}`,
-          severity: 'critical',
+          severity: "critical",
           description: `Health check failed: ${error.message}`,
           module: moduleName,
           timestamp: new Date(),
@@ -531,11 +534,11 @@ export class AdvancedHealthCheck {
    * Detect cascade failures
    */
   private detectCascadeFailures(
-    moduleStatuses: ModuleHealthStatus[]
+    moduleStatuses: ModuleHealthStatus[],
   ): CascadeFailure[] {
     const cascadeFailures: CascadeFailure[] = [];
     const failedModules = moduleStatuses.filter(
-      m => m.status === 'critical' || m.status === 'unhealthy'
+      (m) => m.status === "critical" || m.status === "unhealthy",
     );
 
     for (const failedModule of failedModules) {
@@ -559,7 +562,7 @@ export class AdvancedHealthCheck {
           rootCause: failedModule.name,
           affectedModules,
           severity:
-            checker.criticalDependencies.length > 0 ? 'critical' : 'high',
+            checker.criticalDependencies.length > 0 ? "critical" : "high",
           estimatedImpact: `${affectedModules.length} modules potentially affected`,
           detectedAt: new Date(),
         });
@@ -573,7 +576,7 @@ export class AdvancedHealthCheck {
    * Generate health recommendations
    */
   private generateHealthRecommendations(
-    moduleStatuses: ModuleHealthStatus[]
+    moduleStatuses: ModuleHealthStatus[],
   ): HealthRecommendation[] {
     const recommendations: HealthRecommendation[] = [];
 
@@ -582,16 +585,16 @@ export class AdvancedHealthCheck {
       if (module.responseTime > 5000) {
         recommendations.push({
           id: `perf-${module.name}-${Date.now()}`,
-          type: 'performance',
-          priority: 'high',
+          type: "performance",
+          priority: "high",
           description: `${module.name} response time is high (${module.responseTime}ms)`,
           module: module.name,
           actionItems: [
-            'Review module performance bottlenecks',
-            'Consider caching implementation',
-            'Optimize database queries',
+            "Review module performance bottlenecks",
+            "Consider caching implementation",
+            "Optimize database queries",
           ],
-          estimatedEffort: '2-4 hours',
+          estimatedEffort: "2-4 hours",
         });
       }
 
@@ -599,34 +602,34 @@ export class AdvancedHealthCheck {
       if (module.metrics.memoryUsage > 100) {
         recommendations.push({
           id: `memory-${module.name}-${Date.now()}`,
-          type: 'performance',
-          priority: 'medium',
+          type: "performance",
+          priority: "medium",
           description: `${module.name} memory usage is high (${module.metrics.memoryUsage.toFixed(1)}MB)`,
           module: module.name,
           actionItems: [
-            'Review memory usage patterns',
-            'Implement garbage collection optimization',
-            'Check for memory leaks',
+            "Review memory usage patterns",
+            "Implement garbage collection optimization",
+            "Check for memory leaks",
           ],
-          estimatedEffort: '1-2 hours',
+          estimatedEffort: "1-2 hours",
         });
       }
 
       // Critical issue recommendations
-      if (module.status === 'critical') {
+      if (module.status === "critical") {
         recommendations.push({
           id: `critical-${module.name}-${Date.now()}`,
-          type: 'reliability',
-          priority: 'urgent',
+          type: "reliability",
+          priority: "urgent",
           description: `${module.name} is in critical state`,
           module: module.name,
           actionItems: [
-            'Immediate investigation required',
-            'Check logs for error details',
-            'Verify all dependencies',
-            'Consider emergency restart',
+            "Immediate investigation required",
+            "Check logs for error details",
+            "Verify all dependencies",
+            "Consider emergency restart",
           ],
-          estimatedEffort: 'Immediate action required',
+          estimatedEffort: "Immediate action required",
         });
       }
     }
@@ -640,16 +643,16 @@ export class AdvancedHealthCheck {
   private calculateSystemMetrics(moduleStatuses: ModuleHealthStatus[]) {
     const totalModules = moduleStatuses.length;
     const healthyModules = moduleStatuses.filter(
-      m => m.status === 'healthy'
+      (m) => m.status === "healthy",
     ).length;
     const degradedModules = moduleStatuses.filter(
-      m => m.status === 'degraded'
+      (m) => m.status === "degraded",
     ).length;
     const unhealthyModules = moduleStatuses.filter(
-      m => m.status === 'unhealthy'
+      (m) => m.status === "unhealthy",
     ).length;
     const criticalModules = moduleStatuses.filter(
-      m => m.status === 'critical'
+      (m) => m.status === "critical",
     ).length;
 
     const overallResponseTime =
@@ -670,22 +673,22 @@ export class AdvancedHealthCheck {
    * Determine overall system status
    */
   private determineOverallStatus(
-    moduleStatuses: ModuleHealthStatus[]
-  ): 'healthy' | 'degraded' | 'unhealthy' | 'critical' {
+    moduleStatuses: ModuleHealthStatus[],
+  ): "healthy" | "degraded" | "unhealthy" | "critical" {
     const criticalCount = moduleStatuses.filter(
-      m => m.status === 'critical'
+      (m) => m.status === "critical",
     ).length;
     const unhealthyCount = moduleStatuses.filter(
-      m => m.status === 'unhealthy'
+      (m) => m.status === "unhealthy",
     ).length;
     const degradedCount = moduleStatuses.filter(
-      m => m.status === 'degraded'
+      (m) => m.status === "degraded",
     ).length;
 
-    if (criticalCount > 0) return 'critical';
-    if (unhealthyCount > 0) return 'unhealthy';
-    if (degradedCount > 0) return 'degraded';
-    return 'healthy';
+    if (criticalCount > 0) return "critical";
+    if (unhealthyCount > 0) return "unhealthy";
+    if (degradedCount > 0) return "degraded";
+    return "healthy";
   }
 
   /**
@@ -693,21 +696,21 @@ export class AdvancedHealthCheck {
    */
   private startContinuousMonitoring(): void {
     // Run health checks every 30 seconds
-    this.checkInterval = setInterval(async () => {
+    this.checkInterval = TimerManager.setInterval(async () => {
       try {
         await this.getSystemHealth();
       } catch (error) {
         logger.error(
-          '❌ [AdvancedHealthCheck] Continuous monitoring failed',
-          'HealthCheck',
-          error
+          "❌ [AdvancedHealthCheck] Continuous monitoring failed",
+          "HealthCheck",
+          error,
         );
       }
     }, 30000);
 
     logger.info(
-      '🔄 [AdvancedHealthCheck] Continuous health monitoring started',
-      'HealthCheck'
+      "🔄 [AdvancedHealthCheck] Continuous health monitoring started",
+      "HealthCheck",
     );
   }
 
@@ -719,8 +722,8 @@ export class AdvancedHealthCheck {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
       logger.info(
-        '⏹️ [AdvancedHealthCheck] Continuous monitoring stopped',
-        'HealthCheck'
+        "⏹️ [AdvancedHealthCheck] Continuous monitoring stopped",
+        "HealthCheck",
       );
     }
   }
@@ -736,7 +739,7 @@ export class AdvancedHealthCheck {
       monitoringActive: this.checkInterval !== null,
       totalHistoryEntries: Array.from(this.healthHistory.values()).reduce(
         (sum, history) => sum + history.length,
-        0
+        0,
       ),
     };
   }

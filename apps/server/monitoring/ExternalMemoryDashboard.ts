@@ -8,6 +8,7 @@
 import { logger } from "@shared/utils/logger";
 import { Request, Response, Router } from "express";
 import { Server as SocketIOServer } from "socket.io";
+import { TimerManager } from "../utils/TimerManager";
 import {
   ExternalMemoryAlert,
   ExternalMemorySnapshot,
@@ -132,11 +133,15 @@ export class ExternalMemoryDashboard {
    */
   private startRealtimeUpdates(): void {
     // Send status updates every 30 seconds
-    this.updateInterval = setInterval(() => {
-      if (this.connectedClients.size > 0) {
-        this.broadcastStatusUpdate();
-      }
-    }, 30000);
+    this.updateInterval = TimerManager.setInterval(
+      () => {
+        if (this.connectedClients.size > 0) {
+          this.broadcastStatusUpdate();
+        }
+      },
+      30000,
+      "auto-generated-interval-9",
+    );
   }
 
   /**

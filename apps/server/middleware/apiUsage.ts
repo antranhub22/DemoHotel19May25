@@ -6,6 +6,7 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // TYPES & INTERFACES
@@ -61,9 +62,13 @@ class ApiUsageTracker {
     this.prisma = new PrismaClient();
 
     // Start background processing
-    this.processingInterval = setInterval(() => {
-      this.flushUsageData();
-    }, this.flushInterval);
+    this.processingInterval = TimerManager.setInterval(
+      () => {
+        this.flushUsageData();
+      },
+      this.flushInterval,
+      "auto-generated-interval-1",
+    );
 
     logger.info("[ApiUsageTracker] Initialized with batch processing");
   }

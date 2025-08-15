@@ -9,6 +9,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "node:crypto";
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -950,7 +951,7 @@ export class ExternalMemoryLogger {
    */
   private setupCleanupSchedule(): void {
     // Clean up old consumers and operations every hour
-    this.cleanupInterval = setInterval(
+    this.cleanupInterval = TimerManager.setInterval(
       () => {
         this.cleanupOldData();
       },

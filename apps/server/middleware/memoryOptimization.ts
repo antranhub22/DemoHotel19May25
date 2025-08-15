@@ -8,6 +8,7 @@ import { NextFunction, Request, Response } from "express";
 import * as path from "path";
 import * as v8 from "v8";
 import { emergencyCleanup } from "./emergencyCleanup";
+import { TimerManager } from "../utils/TimerManager";
 
 interface MemoryStats {
   heapUsed: number;
@@ -40,10 +41,14 @@ class MemoryManager {
   }
 
   private startMonitoring(): void {
-    this.gcInterval = setInterval(() => {
-      this.checkMemoryUsage();
-      this.recordSample();
-    }, this.CHECK_INTERVAL);
+    this.gcInterval = TimerManager.setInterval(
+      () => {
+        this.checkMemoryUsage();
+        this.recordSample();
+      },
+      this.CHECK_INTERVAL,
+      "auto-generated-interval-3",
+    );
   }
 
   private checkMemoryUsage(): void {
@@ -193,7 +198,11 @@ class MemoryManager {
         // If GC is available, use it
         const manualGc = global.gc;
         manualGc();
-        setTimeout(() => manualGc(), 100); // Small delay then second GC
+        TimerManager.setTimeout(
+          () => manualGc(),
+          100,
+          "auto-generated-timeout-1",
+        ); // Small delay then second GC
         this.lastGC = Date.now();
       } else {
         // Alternative cleanup - use emergency cleanup for critical situations
@@ -290,7 +299,7 @@ export const memoryOptimizationMiddleware = (
     (req as any).memoryStats = before;
 
     // Long-running request watchdog
-    const watchdog = setTimeout(() => {
+    const watchdog = TimerManager.setTimeout(() => {
       const current = memoryManager.getMemoryReport();
       if (current.usage > memoryManager["CRITICAL_THRESHOLD"]) {
         logger.error(

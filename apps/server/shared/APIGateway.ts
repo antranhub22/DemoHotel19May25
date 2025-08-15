@@ -7,6 +7,7 @@
 import { logger } from "@shared/utils/logger";
 import { EventEmitter } from "events";
 import { NextFunction, Request, Response } from "express";
+import { TimerManager } from "../utils/TimerManager";
 
 // API Gateway interfaces
 export interface GatewayConfig {
@@ -1119,10 +1120,10 @@ export class APIGateway extends EventEmitter {
   }
 
   private startAnalytics(): void {
-    this.metricsInterval = setInterval(async () => {
+    this.metricsInterval = TimerManager.setInterval(async () => {
       try {
         const metrics = await this.getMetrics();
-        this.emit("metricsCollected", metrics);
+        this.emit("metricsCollected", metrics, "auto-generated-interval-18");
 
         // ✅ MEMORY FIX: Cleanup old active requests periodically
         const now = Date.now();

@@ -6,6 +6,7 @@
 import { PrismaClient } from "@prisma/client";
 import { logger } from "@shared/utils/logger";
 import { EventEmitter } from "events";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // TYPES & INTERFACES
@@ -315,7 +316,7 @@ export class UsageTrackingService extends EventEmitter {
    * Start background processing of usage events
    */
   private startBackgroundProcessing(): void {
-    setInterval(async () => {
+    TimerManager.setInterval(async () => {
       if (this.isProcessing || this.processingQueue.length === 0) {
         return;
       }
@@ -323,7 +324,11 @@ export class UsageTrackingService extends EventEmitter {
       this.isProcessing = true;
 
       try {
-        const events = this.processingQueue.splice(0, 100); // Process in batches
+        const events = this.processingQueue.splice(
+          0,
+          100,
+          "auto-generated-interval-17",
+        ); // Process in batches
         await this.processUsageEvents(events);
 
         logger.debug("[UsageTrackingService] Processed usage events batch", {

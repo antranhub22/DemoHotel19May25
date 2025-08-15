@@ -1,5 +1,6 @@
 import { securityHardening } from "@server/shared/SecurityHardening";
 import { Request, Response, Router } from "express";
+import { TimerManager } from "../../../utils/TimerManager";
 
 const router = Router();
 // TODO: Create proper security service with methods
@@ -212,7 +213,7 @@ router.get("/threats/live", (req: Request, res: Response) => {
   securityHardening.on("securityThreat", threatHandler);
 
   // Send periodic heartbeat
-  const heartbeat = setInterval(() => {
+  const heartbeat = TimerManager.setInterval(() => {
     res.write(
       `data: ${JSON.stringify({
         type: "heartbeat",

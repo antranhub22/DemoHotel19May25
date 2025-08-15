@@ -1,5 +1,6 @@
 // ✅ OPENAI USAGE MONITORING
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface UsageStats {
   totalCalls: number;
@@ -20,21 +21,21 @@ let usageStats: UsageStats = {
 
 // Model pricing (per 1M tokens) - Updated as of Jan 2025
 const MODEL_PRICING = {
-  'gpt-4o': { input: 5.0, output: 15.0 },
-  'gpt-4o-mini': { input: 0.15, output: 0.6 },
-  'gpt-4': { input: 30.0, output: 60.0 },
-  'gpt-3.5-turbo': { input: 0.5, output: 1.5 },
+  "gpt-4o": { input: 5.0, output: 15.0 },
+  "gpt-4o-mini": { input: 0.15, output: 0.6 },
+  "gpt-4": { input: 30.0, output: 60.0 },
+  "gpt-3.5-turbo": { input: 0.5, output: 1.5 },
 };
 
 export function trackOpenAIUsage(
   model: string,
   inputTokens: number,
   outputTokens: number,
-  operation: string
+  operation: string,
 ) {
   const pricing = MODEL_PRICING[model as keyof typeof MODEL_PRICING];
   if (!pricing) {
-    logger.warn(`[USAGE] Unknown model pricing: ${model}`, 'Usage');
+    logger.warn(`[USAGE] Unknown model pricing: ${model}`, "Usage");
     return;
   }
 
@@ -56,7 +57,7 @@ export function trackOpenAIUsage(
   usageStats.byModel[model].tokens += totalTokens;
   usageStats.byModel[model].cost += totalCost;
 
-  logger.debug(`💰 [USAGE] ${operation}`, 'Usage', {
+  logger.debug(`💰 [USAGE] ${operation}`, "Usage", {
     model,
     inputTokens,
     outputTokens,
@@ -69,7 +70,7 @@ export function trackOpenAIUsage(
     // $10 threshold
     logger.warn(
       `🚨 [COST-ALERT] Daily OpenAI usage: $${usageStats.estimatedCost.toFixed(2)}`,
-      'Usage'
+      "Usage",
     );
   }
 }
@@ -86,16 +87,17 @@ export function resetUsageStats() {
     byModel: {},
     lastReset: Date.now(),
   };
-  logger.info('[USAGE] Usage stats reset', 'Usage');
+  logger.info("[USAGE] Usage stats reset", "Usage");
 }
 
 // Auto-reset daily at midnight
-setInterval(() => {
+TimerManager.setInterval(() => {
   const now = new Date();
   if (now.getHours() === 0 && now.getMinutes() === 0) {
     logger.info(
       `[USAGE] Daily reset - Total cost: $${usageStats.estimatedCost.toFixed(2)}`,
-      'Usage'
+      "Usage",
+      "auto-generated-interval-14",
     );
     resetUsageStats();
   }

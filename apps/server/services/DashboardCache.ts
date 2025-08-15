@@ -5,6 +5,7 @@
 
 import { logger } from "../../../packages/shared/utils/logger";
 import { errorTracking } from "./ErrorTracking";
+import { TimerManager } from "../utils/TimerManager";
 
 export interface CacheEntry<T> {
   data: T;
@@ -297,9 +298,13 @@ class DashboardCache {
    * Start automatic cleanup timer
    */
   private startCleanup(): void {
-    this.cleanupTimer = setInterval(() => {
-      this.cleanup();
-    }, this.config.cleanupInterval);
+    this.cleanupTimer = TimerManager.setInterval(
+      () => {
+        this.cleanup();
+      },
+      this.config.cleanupInterval,
+      "auto-generated-interval-16",
+    );
   }
 
   /**

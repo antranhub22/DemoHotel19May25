@@ -2,6 +2,7 @@
 import { getDatabaseMetrics, initializeDatabase } from "@shared/db";
 import { PrismaConnectionManager } from "@shared/db/PrismaConnectionManager";
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 /**
  * Database Initialization Script
@@ -21,9 +22,13 @@ export async function initializeDatabaseOnStartup(): Promise<void> {
 
   try {
     // Set connection timeout for startup
-    const initTimeout = setTimeout(() => {
-      throw new Error("Database initialization timeout (30 seconds)");
-    }, 30000);
+    const initTimeout = TimerManager.setTimeout(
+      () => {
+        throw new Error("Database initialization timeout (30 seconds)");
+      },
+      30000,
+      "auto-generated-timeout-14",
+    );
 
     // 🚨 CRITICAL FIX: Initialize PrismaConnectionManager first
     const startTime = Date.now();
@@ -104,7 +109,7 @@ function setupStartupHealthMonitoring(): void {
   let healthCheckCount = 0;
   const maxStartupChecks = 3;
 
-  const startupHealthInterval = setInterval(() => {
+  const startupHealthInterval = TimerManager.setInterval(() => {
     try {
       const metrics = getDatabaseMetrics();
       healthCheckCount++;

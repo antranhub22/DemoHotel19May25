@@ -7,6 +7,7 @@
 import { EventEmitter } from "events";
 import { WebSocket, WebSocketServer } from "ws";
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 import { MonitoringDashboard } from "./MonitoringDashboard";
 
 // WebSocket interfaces
@@ -676,7 +677,7 @@ export class WebSocketDashboard extends EventEmitter {
   }
 
   private startHeartbeat(): void {
-    this.heartbeatInterval = setInterval(() => {
+    this.heartbeatInterval = TimerManager.setInterval(() => {
       for (const [clientId, client] of this.clients) {
         if (!client.isAlive) {
           logger.debug(
@@ -697,7 +698,7 @@ export class WebSocketDashboard extends EventEmitter {
   }
 
   private startMetricsStreaming(): void {
-    this.metricsInterval = setInterval(async () => {
+    this.metricsInterval = TimerManager.setInterval(async () => {
       if (!this.monitoringDashboard) return;
 
       try {

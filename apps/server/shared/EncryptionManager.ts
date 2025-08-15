@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { EventEmitter } from "events";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -656,7 +657,7 @@ export class EncryptionManager extends EventEmitter {
   // ============================================
 
   private startKeyRotationScheduler() {
-    this.rotationInterval = setInterval(
+    this.rotationInterval = TimerManager.setInterval(
       () => {
         this.checkKeyRotation();
       },
@@ -665,7 +666,7 @@ export class EncryptionManager extends EventEmitter {
   }
 
   private startCacheCleanup() {
-    this.cacheCleanupInterval = setInterval(() => {
+    this.cacheCleanupInterval = TimerManager.setInterval(() => {
       const now = Date.now();
       for (const [keyId, cached] of this.keyCache.entries()) {
         if (cached.expiry <= now) {

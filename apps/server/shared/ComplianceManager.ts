@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { EventEmitter } from "events";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -827,7 +828,7 @@ export class ComplianceManager extends EventEmitter {
 
   private startComplianceMonitoring() {
     // Check for compliance violations every hour
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.checkComplianceStatus();
       },
@@ -837,7 +838,7 @@ export class ComplianceManager extends EventEmitter {
 
   private startRetentionEnforcement() {
     // Run retention enforcement daily
-    setInterval(
+    TimerManager.setInterval(
       () => {
         if (this.config.dataRetention.automaticDeletion) {
           this.enforceDataRetention();

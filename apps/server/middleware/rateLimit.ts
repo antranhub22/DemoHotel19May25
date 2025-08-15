@@ -5,6 +5,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // TYPES & INTERFACES
@@ -43,9 +44,13 @@ class RateLimitStore {
 
   constructor() {
     // Clean up expired entries every minute
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, 60000);
+    this.cleanupInterval = TimerManager.setInterval(
+      () => {
+        this.cleanup();
+      },
+      60000,
+      "auto-generated-interval-6",
+    );
   }
 
   get(key: string): RateLimitEntry | undefined {

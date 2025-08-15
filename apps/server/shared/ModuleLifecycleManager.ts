@@ -5,17 +5,18 @@
 // health monitoring, dependency validation, and graceful degradation
 // Orchestrates module initialization, monitoring, and cleanup
 
-import { logger } from '@shared/utils/logger';
-import { FeatureFlags } from './FeatureFlags';
+import { logger } from "@shared/utils/logger";
+import { FeatureFlags } from "./FeatureFlags";
+import { TimerManager } from "../utils/TimerManager";
 
 export type ModuleState =
-  | 'uninitialized'
-  | 'initializing'
-  | 'running'
-  | 'degraded'
-  | 'stopping'
-  | 'stopped'
-  | 'failed';
+  | "uninitialized"
+  | "initializing"
+  | "running"
+  | "degraded"
+  | "stopping"
+  | "stopped"
+  | "failed";
 
 export interface ModuleLifecycleHooks {
   onStartup?: () => Promise<void> | void;
@@ -100,7 +101,7 @@ export class ModuleLifecycleManager {
     // Initialize status
     this.moduleStatus.set(module.name, {
       module,
-      state: 'uninitialized',
+      state: "uninitialized",
       healthCheckCount: 0,
       failureCount: 0,
       metrics: {
@@ -115,8 +116,8 @@ export class ModuleLifecycleManager {
 
     logger.info(
       `🔄 [ModuleLifecycle] Registered module: ${module.name} v${module.version}`,
-      'ModuleLifecycle',
-      { module: module.name, dependencies: module.dependencies }
+      "ModuleLifecycle",
+      { module: module.name, dependencies: module.dependencies },
     );
   }
 
@@ -125,10 +126,10 @@ export class ModuleLifecycleManager {
    */
   private static validateModuleDefinition(module: ModuleDefinition): void {
     if (!module.name) {
-      throw new Error('Module name is required');
+      throw new Error("Module name is required");
     }
     if (!module.version) {
-      throw new Error('Module version is required');
+      throw new Error("Module version is required");
     }
     if (this.modules.has(module.name)) {
       throw new Error(`Module '${module.name}' is already registered`);
@@ -141,7 +142,7 @@ export class ModuleLifecycleManager {
           // Allow forward dependencies - they might be registered later
           logger.warn(
             `🔄 [ModuleLifecycle] Dependency '${dep}' for module '${module.name}' not yet registered`,
-            'ModuleLifecycle'
+            "ModuleLifecycle",
           );
         }
       }
@@ -159,11 +160,11 @@ export class ModuleLifecycleManager {
   private static validateNoCycles(
     moduleName: string,
     dependencies: string[],
-    visited: Set<string> = new Set()
+    visited: Set<string> = new Set(),
   ): void {
     if (visited.has(moduleName)) {
       throw new Error(
-        `Circular dependency detected involving module '${moduleName}'`
+        `Circular dependency detected involving module '${moduleName}'`,
       );
     }
 
@@ -188,7 +189,7 @@ export class ModuleLifecycleManager {
     const visit = (moduleName: string) => {
       if (visiting.has(moduleName)) {
         throw new Error(
-          `Circular dependency detected involving: ${moduleName}`
+          `Circular dependency detected involving: ${moduleName}`,
         );
       }
       if (visited.has(moduleName)) return;
@@ -209,7 +210,7 @@ export class ModuleLifecycleManager {
 
     // Sort by priority first, then resolve dependencies
     const modulesByPriority = Array.from(this.modules.entries()).sort(
-      ([, a], [, b]) => (a.priority || 100) - (b.priority || 100)
+      ([, a], [, b]) => (a.priority || 100) - (b.priority || 100),
     );
 
     for (const [moduleName] of modulesByPriority) {
@@ -220,9 +221,9 @@ export class ModuleLifecycleManager {
     this.shutdownOrder = [...startupOrder].reverse();
 
     logger.debug(
-      '🔄 [ModuleLifecycle] Updated execution order',
-      'ModuleLifecycle',
-      { startupOrder: this.startupOrder, shutdownOrder: this.shutdownOrder }
+      "🔄 [ModuleLifecycle] Updated execution order",
+      "ModuleLifecycle",
+      { startupOrder: this.startupOrder, shutdownOrder: this.shutdownOrder },
     );
   }
 
@@ -235,8 +236,8 @@ export class ModuleLifecycleManager {
    */
   static async startAllModules(): Promise<void> {
     logger.info(
-      '🚀 [ModuleLifecycle] Starting all modules...',
-      'ModuleLifecycle'
+      "🚀 [ModuleLifecycle] Starting all modules...",
+      "ModuleLifecycle",
     );
 
     const startTime = Date.now();
@@ -257,40 +258,40 @@ export class ModuleLifecycleManager {
 
         logger.error(
           `❌ [ModuleLifecycle] Failed to start module: ${moduleName}`,
-          'ModuleLifecycle',
-          error
+          "ModuleLifecycle",
+          error,
         );
 
         // Check if this is a critical module or if we should continue
         const module = this.modules.get(moduleName);
         if (module && !this.shouldContinueOnFailure(moduleName)) {
           throw new Error(
-            `Critical module '${moduleName}' failed to start: ${errorMessage}`
+            `Critical module '${moduleName}' failed to start: ${errorMessage}`,
           );
         }
       }
     }
 
     const totalTime = Date.now() - startTime;
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
     if (failureCount === 0) {
       logger.success(
         `🎉 [ModuleLifecycle] All modules started successfully (${totalTime}ms)`,
-        'ModuleLifecycle',
-        { totalModules: results.length, startupTime: totalTime }
+        "ModuleLifecycle",
+        { totalModules: results.length, startupTime: totalTime },
       );
     } else {
       logger.warn(
         `⚠️ [ModuleLifecycle] Module startup completed with failures (${totalTime}ms)`,
-        'ModuleLifecycle',
+        "ModuleLifecycle",
         {
           successCount,
           failureCount,
           totalModules: results.length,
-          failures: results.filter(r => !r.success),
-        }
+          failures: results.filter((r) => !r.success),
+        },
       );
     }
 
@@ -302,7 +303,7 @@ export class ModuleLifecycleManager {
    * Start a specific module
    */
   static async startModule(
-    moduleName: string
+    moduleName: string,
   ): Promise<{ startupTime: number }> {
     const module = this.modules.get(moduleName);
     if (!module) {
@@ -315,10 +316,10 @@ export class ModuleLifecycleManager {
     if (module.featureFlag && !FeatureFlags.isEnabled(module.featureFlag)) {
       logger.info(
         `🚩 [ModuleLifecycle] Module '${moduleName}' disabled by feature flag`,
-        'ModuleLifecycle',
-        { featureFlag: module.featureFlag }
+        "ModuleLifecycle",
+        { featureFlag: module.featureFlag },
       );
-      status.state = 'stopped';
+      status.state = "stopped";
       return { startupTime: 0 };
     }
 
@@ -326,7 +327,7 @@ export class ModuleLifecycleManager {
     if (module.dependencies) {
       for (const dep of module.dependencies) {
         const depStatus = this.moduleStatus.get(dep);
-        if (!depStatus || depStatus.state !== 'running') {
+        if (!depStatus || depStatus.state !== "running") {
           throw new Error(`Dependency '${dep}' is not running`);
         }
       }
@@ -334,12 +335,12 @@ export class ModuleLifecycleManager {
 
     logger.info(
       `🔄 [ModuleLifecycle] Starting module: ${moduleName}`,
-      'ModuleLifecycle',
-      { version: module.version, dependencies: module.dependencies }
+      "ModuleLifecycle",
+      { version: module.version, dependencies: module.dependencies },
     );
 
     const startTime = Date.now();
-    status.state = 'initializing';
+    status.state = "initializing";
 
     try {
       // Execute startup hook
@@ -351,24 +352,24 @@ export class ModuleLifecycleManager {
       await this.registerModuleServices(moduleName);
 
       const startupTime = Date.now() - startTime;
-      status.state = 'running';
+      status.state = "running";
       status.startedAt = new Date();
       status.metrics.startupTime = startupTime;
 
       logger.success(
         `✅ [ModuleLifecycle] Module started: ${moduleName} (${startupTime}ms)`,
-        'ModuleLifecycle',
-        { startupTime, version: module.version }
+        "ModuleLifecycle",
+        { startupTime, version: module.version },
       );
 
       return { startupTime };
     } catch (error) {
-      status.state = 'failed';
+      status.state = "failed";
       status.failureCount++;
       status.lastFailure = {
         timestamp: new Date(),
         error: error instanceof Error ? error.message : String(error),
-        context: { phase: 'startup' },
+        context: { phase: "startup" },
       };
       status.metrics.totalFailures++;
 
@@ -381,8 +382,8 @@ export class ModuleLifecycleManager {
    */
   static async stopAllModules(): Promise<void> {
     logger.info(
-      '🛑 [ModuleLifecycle] Stopping all modules...',
-      'ModuleLifecycle'
+      "🛑 [ModuleLifecycle] Stopping all modules...",
+      "ModuleLifecycle",
     );
 
     this.isShuttingDown = true;
@@ -408,25 +409,25 @@ export class ModuleLifecycleManager {
 
         logger.error(
           `❌ [ModuleLifecycle] Failed to stop module: ${moduleName}`,
-          'ModuleLifecycle',
-          error
+          "ModuleLifecycle",
+          error,
         );
       }
     }
 
     const totalTime = Date.now() - startTime;
-    const successCount = results.filter(r => r.success).length;
-    const failureCount = results.filter(r => !r.success).length;
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
 
     logger.info(
       `🛑 [ModuleLifecycle] Module shutdown completed (${totalTime}ms)`,
-      'ModuleLifecycle',
+      "ModuleLifecycle",
       {
         successCount,
         failureCount,
         totalModules: results.length,
         shutdownTime: totalTime,
-      }
+      },
     );
   }
 
@@ -434,7 +435,7 @@ export class ModuleLifecycleManager {
    * Stop a specific module
    */
   static async stopModule(
-    moduleName: string
+    moduleName: string,
   ): Promise<{ shutdownTime: number }> {
     const module = this.modules.get(moduleName);
     if (!module) {
@@ -443,17 +444,17 @@ export class ModuleLifecycleManager {
 
     const status = this.moduleStatus.get(moduleName)!;
 
-    if (status.state === 'stopped' || status.state === 'uninitialized') {
+    if (status.state === "stopped" || status.state === "uninitialized") {
       return { shutdownTime: 0 };
     }
 
     logger.info(
       `🔄 [ModuleLifecycle] Stopping module: ${moduleName}`,
-      'ModuleLifecycle'
+      "ModuleLifecycle",
     );
 
     const startTime = Date.now();
-    status.state = 'stopping';
+    status.state = "stopping";
 
     try {
       // Execute shutdown hook with timeout
@@ -463,30 +464,34 @@ export class ModuleLifecycleManager {
         await Promise.race([
           module.lifecycle.onShutdown(),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Shutdown timeout')), timeout)
+            TimerManager.setTimeout(
+              () => reject(new Error("Shutdown timeout")),
+              timeout,
+              "auto-generated-timeout-13",
+            ),
           ),
         ]);
       }
 
       const shutdownTime = Date.now() - startTime;
-      status.state = 'stopped';
+      status.state = "stopped";
       status.stoppedAt = new Date();
       status.metrics.shutdownTime = shutdownTime;
 
       logger.success(
         `✅ [ModuleLifecycle] Module stopped: ${moduleName} (${shutdownTime}ms)`,
-        'ModuleLifecycle',
-        { shutdownTime }
+        "ModuleLifecycle",
+        { shutdownTime },
       );
 
       return { shutdownTime };
     } catch (error) {
-      status.state = 'failed';
+      status.state = "failed";
       status.failureCount++;
       status.lastFailure = {
         timestamp: new Date(),
         error: error instanceof Error ? error.message : String(error),
-        context: { phase: 'shutdown' },
+        context: { phase: "shutdown" },
       };
 
       throw error;
@@ -504,19 +509,23 @@ export class ModuleLifecycleManager {
     for (const [moduleName, module] of this.modules.entries()) {
       const status = this.moduleStatus.get(moduleName)!;
 
-      if (status.state === 'running' && module.lifecycle?.onHealthCheck) {
+      if (status.state === "running" && module.lifecycle?.onHealthCheck) {
         const interval = module.healthCheckInterval || 30000; // 30 seconds default
 
-        const healthInterval = setInterval(async () => {
-          await this.performHealthCheck(moduleName);
-        }, interval);
+        const healthInterval = TimerManager.setInterval(
+          async () => {
+            await this.performHealthCheck(moduleName);
+          },
+          interval,
+          "auto-generated-interval-43",
+        );
 
         this.healthCheckIntervals.set(moduleName, healthInterval);
 
         logger.debug(
           `❤️ [ModuleLifecycle] Started health monitoring for: ${moduleName}`,
-          'ModuleLifecycle',
-          { interval }
+          "ModuleLifecycle",
+          { interval },
         );
       }
     }
@@ -530,7 +539,7 @@ export class ModuleLifecycleManager {
       clearInterval(interval);
       logger.debug(
         `❤️ [ModuleLifecycle] Stopped health monitoring for: ${moduleName}`,
-        'ModuleLifecycle'
+        "ModuleLifecycle",
       );
     }
     this.healthCheckIntervals.clear();
@@ -560,9 +569,9 @@ export class ModuleLifecycleManager {
 
       if (isHealthy) {
         // Module is healthy
-        if (status.state === 'degraded') {
+        if (status.state === "degraded") {
           // Module recovered from degraded state
-          status.state = 'running';
+          status.state = "running";
           status.degradedAt = undefined;
 
           if (module.lifecycle?.onRecovered) {
@@ -571,7 +580,7 @@ export class ModuleLifecycleManager {
 
           logger.info(
             `💚 [ModuleLifecycle] Module recovered: ${moduleName}`,
-            'ModuleLifecycle'
+            "ModuleLifecycle",
           );
         }
       } else {
@@ -589,8 +598,8 @@ export class ModuleLifecycleManager {
     } catch (error) {
       logger.error(
         `❌ [ModuleLifecycle] Health check failed for: ${moduleName}`,
-        'ModuleLifecycle',
-        error
+        "ModuleLifecycle",
+        error,
       );
 
       await this.handleUnhealthyModule(moduleName, error);
@@ -603,7 +612,7 @@ export class ModuleLifecycleManager {
    */
   private static async handleUnhealthyModule(
     moduleName: string,
-    error?: any
+    error?: any,
   ): Promise<void> {
     const module = this.modules.get(moduleName)!;
     const status = this.moduleStatus.get(moduleName)!;
@@ -615,27 +624,27 @@ export class ModuleLifecycleManager {
       error:
         error instanceof Error
           ? error.message
-          : String(error) || 'Health check failed',
-      context: { phase: 'health-check' },
+          : String(error) || "Health check failed",
+      context: { phase: "health-check" },
     };
 
     const maxFailures = module.maxFailures || 3;
 
     if (status.failureCount >= maxFailures) {
       // Mark module as failed
-      status.state = 'failed';
+      status.state = "failed";
 
       logger.error(
         `💀 [ModuleLifecycle] Module failed after ${status.failureCount} failures: ${moduleName}`,
-        'ModuleLifecycle',
-        { maxFailures, lastFailure: status.lastFailure }
+        "ModuleLifecycle",
+        { maxFailures, lastFailure: status.lastFailure },
       );
 
       // Notify dependent modules
       await this.notifyDependentModules(moduleName);
-    } else if (status.state === 'running') {
+    } else if (status.state === "running") {
       // Mark module as degraded
-      status.state = 'degraded';
+      status.state = "degraded";
       status.degradedAt = new Date();
 
       if (module.lifecycle?.onDegraded) {
@@ -644,8 +653,8 @@ export class ModuleLifecycleManager {
 
       logger.warn(
         `⚠️ [ModuleLifecycle] Module degraded: ${moduleName} (${status.failureCount}/${maxFailures} failures)`,
-        'ModuleLifecycle',
-        { failureCount: status.failureCount, maxFailures }
+        "ModuleLifecycle",
+        { failureCount: status.failureCount, maxFailures },
       );
     }
   }
@@ -654,13 +663,13 @@ export class ModuleLifecycleManager {
    * Notify dependent modules when a module fails
    */
   private static async notifyDependentModules(
-    failedModuleName: string
+    failedModuleName: string,
   ): Promise<void> {
     for (const [moduleName, module] of this.modules.entries()) {
       if (module.dependencies?.includes(failedModuleName)) {
         logger.warn(
           `⚠️ [ModuleLifecycle] Notifying module '${moduleName}' of dependency failure: ${failedModuleName}`,
-          'ModuleLifecycle'
+          "ModuleLifecycle",
         );
 
         if (module.lifecycle?.onDependencyFailed) {
@@ -669,8 +678,8 @@ export class ModuleLifecycleManager {
           } catch (error) {
             logger.error(
               `❌ [ModuleLifecycle] Failed to notify module '${moduleName}' of dependency failure`,
-              'ModuleLifecycle',
-              error
+              "ModuleLifecycle",
+              error,
             );
           }
         }
@@ -686,13 +695,13 @@ export class ModuleLifecycleManager {
    * Register module services with ServiceContainer
    */
   private static async registerModuleServices(
-    moduleName: string
+    moduleName: string,
   ): Promise<void> {
     // This is where we could auto-discover and register services for the module
     // For now, we'll just log that services could be registered here
     logger.debug(
       `🔧 [ModuleLifecycle] Registering services for module: ${moduleName}`,
-      'ModuleLifecycle'
+      "ModuleLifecycle",
     );
   }
 
@@ -714,7 +723,7 @@ export class ModuleLifecycleManager {
     if (module.priority && module.priority > 50) return true;
 
     // Core modules should not continue on failure
-    const coreModules = ['tenant-module', 'auth-module'];
+    const coreModules = ["tenant-module", "auth-module"];
     return !coreModules.includes(moduleName);
   }
 
@@ -744,7 +753,7 @@ export class ModuleLifecycleManager {
    * Get overall system health
    */
   static getSystemHealth(): {
-    overallStatus: 'healthy' | 'degraded' | 'critical';
+    overallStatus: "healthy" | "degraded" | "critical";
     totalModules: number;
     runningModules: number;
     degradedModules: number;
@@ -755,32 +764,34 @@ export class ModuleLifecycleManager {
     const moduleStates = Array.from(this.moduleStatus.values());
 
     const runningModules = moduleStates.filter(
-      s => s.state === 'running'
+      (s) => s.state === "running",
     ).length;
     const degradedModules = moduleStates.filter(
-      s => s.state === 'degraded'
+      (s) => s.state === "degraded",
     ).length;
-    const failedModules = moduleStates.filter(s => s.state === 'failed').length;
+    const failedModules = moduleStates.filter(
+      (s) => s.state === "failed",
+    ).length;
     const stoppedModules = moduleStates.filter(
-      s => s.state === 'stopped'
+      (s) => s.state === "stopped",
     ).length;
 
-    let overallStatus: 'healthy' | 'degraded' | 'critical';
+    let overallStatus: "healthy" | "degraded" | "critical";
     if (failedModules > 0) {
-      overallStatus = 'critical';
+      overallStatus = "critical";
     } else if (degradedModules > 0) {
-      overallStatus = 'degraded';
+      overallStatus = "degraded";
     } else {
-      overallStatus = 'healthy';
+      overallStatus = "healthy";
     }
 
     const details = {};
     for (const [name, status] of this.moduleStatus.entries()) {
       const healthRate = status.metrics.healthCheckSuccessRate;
-      let health = 'excellent';
-      if (healthRate < 95) health = 'good';
-      if (healthRate < 85) health = 'fair';
-      if (healthRate < 70) health = 'poor';
+      let health = "excellent";
+      if (healthRate < 95) health = "good";
+      if (healthRate < 85) health = "fair";
+      if (healthRate < 70) health = "poor";
 
       details[name] = {
         state: status.state,
@@ -807,14 +818,14 @@ export class ModuleLifecycleManager {
     const modulesStatus = this.getModulesStatus();
 
     return {
-      version: '2.0',
+      version: "2.0",
       timestamp: new Date().toISOString(),
       systemHealth,
       executionOrder: {
         startup: this.startupOrder,
         shutdown: this.shutdownOrder,
       },
-      modules: Object.keys(modulesStatus).map(name => {
+      modules: Object.keys(modulesStatus).map((name) => {
         const module = this.modules.get(name)!;
         const status = modulesStatus[name];
 
@@ -851,6 +862,6 @@ export class ModuleLifecycleManager {
     this.shutdownOrder = [];
     this.isShuttingDown = false;
 
-    logger.debug('🧹 [ModuleLifecycle] Cleared all modules', 'ModuleLifecycle');
+    logger.debug("🧹 [ModuleLifecycle] Cleared all modules", "ModuleLifecycle");
   }
 }

@@ -3,6 +3,7 @@ import { EventEmitter } from "events";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { BackupManager } from "./BackupManager";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -388,9 +389,13 @@ export class PointInTimeRecovery extends EventEmitter {
     await this.initializeLogFile(this.currentLogFile);
 
     // Start flush timer
-    setInterval(() => {
-      this.flushTransactionLogs();
-    }, this.config.transactionLog.flushInterval * 1000);
+    TimerManager.setInterval(
+      () => {
+        this.flushTransactionLogs();
+      },
+      this.config.transactionLog.flushInterval * 1000,
+      "auto-generated-interval-50",
+    );
 
     // Simulate transaction capture
     this.simulateTransactionCapture();
@@ -398,7 +403,7 @@ export class PointInTimeRecovery extends EventEmitter {
 
   private simulateTransactionCapture() {
     // Simulate capturing database transactions
-    setInterval(
+    TimerManager.setInterval(
       () => {
         if (!this.isCapturing) return;
 
@@ -535,7 +540,7 @@ export class PointInTimeRecovery extends EventEmitter {
     console.log("💾 Starting incremental backup scheduler");
 
     // Schedule incremental backups
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.createIncrementalBackup();
       },
@@ -543,7 +548,7 @@ export class PointInTimeRecovery extends EventEmitter {
     );
 
     // Schedule baseline backups
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.createBaselineBackup();
       },
@@ -1176,12 +1181,16 @@ export class PointInTimeRecovery extends EventEmitter {
     console.log("📊 Starting PITR monitoring");
 
     // Monitor transaction log health
-    setInterval(() => {
-      this.checkTransactionLogHealth();
-    }, 60 * 1000); // Every minute
+    TimerManager.setInterval(
+      () => {
+        this.checkTransactionLogHealth();
+      },
+      60 * 1000,
+      "auto-generated-interval-54",
+    ); // Every minute
 
     // Monitor recovery point health
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.checkRecoveryPointHealth();
       },
@@ -1263,7 +1272,7 @@ export class PointInTimeRecovery extends EventEmitter {
 
   private startCleanupScheduler(): void {
     // Clean up old transaction logs daily
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.cleanupOldTransactionLogs();
       },
@@ -1271,7 +1280,7 @@ export class PointInTimeRecovery extends EventEmitter {
     );
 
     // Clean up old recovery points daily
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.cleanupOldRecoveryPoints();
       },

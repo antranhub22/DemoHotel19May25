@@ -5,11 +5,12 @@
 // with ServiceContainer, FeatureFlags, and ModuleLifecycle systems
 // Provides unified monitoring and observability across the entire system
 
-import { EnhancedLogger, type LogContext } from './EnhancedLogger';
-import { FeatureFlags } from './FeatureFlags';
-import { MetricsCollector } from './MetricsCollector';
-import { ModuleLifecycleManager } from './ModuleLifecycleManager';
-import { ServiceContainer } from './ServiceContainer';
+import { EnhancedLogger, type LogContext } from "./EnhancedLogger";
+import { FeatureFlags } from "./FeatureFlags";
+import { MetricsCollector } from "./MetricsCollector";
+import { ModuleLifecycleManager } from "./ModuleLifecycleManager";
+import { ServiceContainer } from "./ServiceContainer";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // INTEGRATION CONFIGURATION
@@ -20,7 +21,7 @@ export interface MonitoringConfig {
   enableMetricsCollection: boolean;
   enablePerformanceTracing: boolean;
   enableAutoAlerts: boolean;
-  logLevel: 'debug' | 'info' | 'warn' | 'error';
+  logLevel: "debug" | "info" | "warn" | "error";
   metricsInterval: number;
   maxLogHistory: number;
   maxMetricsHistory: number;
@@ -37,7 +38,7 @@ const defaultConfig: MonitoringConfig = {
   enableMetricsCollection: true,
   enablePerformanceTracing: true,
   enableAutoAlerts: true,
-  logLevel: 'info',
+  logLevel: "info",
   metricsInterval: 30000,
   maxLogHistory: 10000,
   maxMetricsHistory: 1000,
@@ -69,8 +70,8 @@ export class MonitoringIntegration {
   private static isInitialized = false;
   private static config: MonitoringConfig = defaultConfig;
   private static logger = EnhancedLogger.createModuleLogger(
-    'MonitoringIntegration',
-    '2.0.0'
+    "MonitoringIntegration",
+    "2.0.0",
   );
 
   // Integration state
@@ -88,34 +89,34 @@ export class MonitoringIntegration {
    * Initialize the monitoring integration system
    */
   static async initialize(
-    customConfig: Partial<MonitoringConfig> = {}
+    customConfig: Partial<MonitoringConfig> = {},
   ): Promise<void> {
     if (this.isInitialized) {
-      this.logger.warn('MonitoringIntegration already initialized');
+      this.logger.warn("MonitoringIntegration already initialized");
       return;
     }
 
     this.config = { ...defaultConfig, ...customConfig };
 
-    this.logger.info('🔧 MonitoringIntegration v2.0 initializing...', {
+    this.logger.info("🔧 MonitoringIntegration v2.0 initializing...", {
       config: this.config,
     });
 
     try {
       // ✅ SAFETY CHECK: Verify dependencies are available
       if (!this.checkDependencies()) {
-        throw new Error('Required dependencies not available');
+        throw new Error("Required dependencies not available");
       }
 
       // Initialize Enhanced Logger if enabled
       if (this.config.enableEnhancedLogging) {
-        this.logger.info('🔍 Initializing Enhanced Logging system...');
+        this.logger.info("🔍 Initializing Enhanced Logging system...");
         // EnhancedLogger is static, no explicit initialization needed
       }
 
       // Initialize Metrics Collector if enabled
       if (this.config.enableMetricsCollection) {
-        this.logger.info('📊 Initializing Metrics Collection system...');
+        this.logger.info("📊 Initializing Metrics Collection system...");
         MetricsCollector.initialize({
           collectInterval: this.config.metricsInterval,
           maxHistory: this.config.maxMetricsHistory,
@@ -133,18 +134,18 @@ export class MonitoringIntegration {
 
       this.isInitialized = true;
       this.logger.success(
-        '✅ MonitoringIntegration v2.0 initialized successfully'
+        "✅ MonitoringIntegration v2.0 initialized successfully",
       );
 
       // Log initial system snapshot
       await this.logSystemSnapshot();
     } catch (error) {
-      this.logger.error('❌ Failed to initialize MonitoringIntegration', error);
+      this.logger.error("❌ Failed to initialize MonitoringIntegration", error);
 
       // ✅ PRODUCTION SAFETY: Don't crash in production, use graceful degradation
-      if (process.env.NODE_ENV === 'production') {
+      if (process.env.NODE_ENV === "production") {
         this.logger.warn(
-          '🔄 Running in degraded mode without full monitoring capabilities'
+          "🔄 Running in degraded mode without full monitoring capabilities",
         );
         this.isInitialized = true; // Mark as initialized to prevent retries
         return;
@@ -159,7 +160,7 @@ export class MonitoringIntegration {
    */
   static updateConfig(updates: Partial<MonitoringConfig>): void {
     this.config = { ...this.config, ...updates };
-    this.logger.info('⚙️ Monitoring configuration updated', { updates });
+    this.logger.info("⚙️ Monitoring configuration updated", { updates });
   }
 
   // ============================================
@@ -170,7 +171,7 @@ export class MonitoringIntegration {
    * Set up ServiceContainer monitoring integration
    */
   private static async setupServiceContainerIntegration(): Promise<void> {
-    this.logger.info('🔧 Setting up ServiceContainer integration...');
+    this.logger.info("🔧 Setting up ServiceContainer integration...");
 
     try {
       // Monitor service registrations and instantiations
@@ -178,11 +179,11 @@ export class MonitoringIntegration {
       ServiceContainer.register = function (
         name: string,
         serviceClass: any,
-        options: any = {}
+        options: any = {},
       ) {
         const result = originalRegister.call(this, name, serviceClass, options);
 
-        MonitoringIntegration.logger.audit('Service registered', {
+        MonitoringIntegration.logger.audit("Service registered", {
           serviceName: name,
           module: options.module,
           singleton: options.singleton,
@@ -192,7 +193,7 @@ export class MonitoringIntegration {
         if (options.module) {
           MetricsCollector.registerModule(`service:${name}`, {
             name: `service:${name}`,
-            state: 'running',
+            state: "running",
             customMetrics: { registeredAt: Date.now() },
           });
         }
@@ -223,7 +224,7 @@ export class MonitoringIntegration {
             error,
             {
               duration: `${duration.toFixed(2)}ms`,
-            }
+            },
           );
 
           MetricsCollector.recordModuleError(`service:${name}`);
@@ -231,11 +232,11 @@ export class MonitoringIntegration {
         }
       };
 
-      this.logger.success('✅ ServiceContainer integration configured');
+      this.logger.success("✅ ServiceContainer integration configured");
     } catch (error) {
       this.logger.error(
-        '❌ Failed to setup ServiceContainer integration',
-        error
+        "❌ Failed to setup ServiceContainer integration",
+        error,
       );
       throw error;
     }
@@ -249,13 +250,13 @@ export class MonitoringIntegration {
    * Set up FeatureFlags monitoring integration
    */
   private static async setupFeatureFlagsIntegration(): Promise<void> {
-    this.logger.info('🚩 Setting up FeatureFlags integration...');
+    this.logger.info("🚩 Setting up FeatureFlags integration...");
 
     try {
       // Monitor flag changes
       const flags = FeatureFlags.getAllFlags();
       for (const flag of flags) {
-        FeatureFlags.addListener(flag.name, updatedFlag => {
+        FeatureFlags.addListener(flag.name, (updatedFlag) => {
           this.logger.audit(`Feature flag changed: ${updatedFlag.name}`, {
             flagName: updatedFlag.name,
             enabled: updatedFlag.enabled,
@@ -266,9 +267,9 @@ export class MonitoringIntegration {
           // Update metrics
           MetricsCollector.setGauge(
             `flag_${updatedFlag.name}_enabled`,
-            updatedFlag.enabled ? 1 : 0
+            updatedFlag.enabled ? 1 : 0,
           );
-          MetricsCollector.incrementCounter('flag_changes_total');
+          MetricsCollector.incrementCounter("flag_changes_total");
         });
       }
 
@@ -276,7 +277,7 @@ export class MonitoringIntegration {
       const originalEvaluateABTest = FeatureFlags.evaluateABTest;
       FeatureFlags.evaluateABTest = function (
         testName: string,
-        userId: string
+        userId: string,
       ) {
         const result = originalEvaluateABTest.call(this, testName, userId);
 
@@ -287,7 +288,7 @@ export class MonitoringIntegration {
               testName,
               userId,
               variant: result,
-            }
+            },
           );
 
           MetricsCollector.incrementCounter(`abtest_${testName}_${result}`);
@@ -296,9 +297,9 @@ export class MonitoringIntegration {
         return result;
       };
 
-      this.logger.success('✅ FeatureFlags integration configured');
+      this.logger.success("✅ FeatureFlags integration configured");
     } catch (error) {
-      this.logger.error('❌ Failed to setup FeatureFlags integration', error);
+      this.logger.error("❌ Failed to setup FeatureFlags integration", error);
       throw error;
     }
   }
@@ -311,19 +312,23 @@ export class MonitoringIntegration {
    * Set up ModuleLifecycle monitoring integration
    */
   private static async setupModuleLifecycleIntegration(): Promise<void> {
-    this.logger.info('🔄 Setting up ModuleLifecycle integration...');
+    this.logger.info("🔄 Setting up ModuleLifecycle integration...");
 
     try {
       // Monitor module state changes by periodically checking status
-      setInterval(() => {
-        this.monitorModuleStates();
-      }, 10000); // Check every 10 seconds
+      TimerManager.setInterval(
+        () => {
+          this.monitorModuleStates();
+        },
+        10000,
+        "auto-generated-interval-46",
+      ); // Check every 10 seconds
 
-      this.logger.success('✅ ModuleLifecycle integration configured');
+      this.logger.success("✅ ModuleLifecycle integration configured");
     } catch (error) {
       this.logger.error(
-        '❌ Failed to setup ModuleLifecycle integration',
-        error
+        "❌ Failed to setup ModuleLifecycle integration",
+        error,
       );
       throw error;
     }
@@ -338,14 +343,14 @@ export class MonitoringIntegration {
       const modulesStatus = ModuleLifecycleManager.getModulesStatus();
 
       // Update system-level metrics
-      MetricsCollector.setGauge('modules_total', systemHealth.totalModules);
-      MetricsCollector.setGauge('modules_running', systemHealth.runningModules);
+      MetricsCollector.setGauge("modules_total", systemHealth.totalModules);
+      MetricsCollector.setGauge("modules_running", systemHealth.runningModules);
       MetricsCollector.setGauge(
-        'modules_degraded',
-        systemHealth.degradedModules
+        "modules_degraded",
+        systemHealth.degradedModules,
       );
-      MetricsCollector.setGauge('modules_failed', systemHealth.failedModules);
-      MetricsCollector.setGauge('modules_stopped', systemHealth.stoppedModules);
+      MetricsCollector.setGauge("modules_failed", systemHealth.failedModules);
+      MetricsCollector.setGauge("modules_stopped", systemHealth.stoppedModules);
 
       // Update individual module metrics
       for (const [moduleName, status] of Object.entries(modulesStatus)) {
@@ -364,7 +369,7 @@ export class MonitoringIntegration {
         });
 
         // Log state changes
-        if (status.state === 'failed' || status.state === 'degraded') {
+        if (status.state === "failed" || status.state === "degraded") {
           this.logger.warn(`Module ${moduleName} is in ${status.state} state`, {
             module: moduleName,
             state: status.state,
@@ -375,14 +380,14 @@ export class MonitoringIntegration {
       }
 
       // Log overall system health if degraded or critical
-      if (systemHealth.overallStatus !== 'healthy') {
+      if (systemHealth.overallStatus !== "healthy") {
         this.logger.warn(`System health is ${systemHealth.overallStatus}`, {
           overallStatus: systemHealth.overallStatus,
           details: systemHealth.details,
         });
       }
     } catch (error) {
-      this.logger.error('❌ Failed to monitor module states', error);
+      this.logger.error("❌ Failed to monitor module states", error);
     }
   }
 
@@ -394,24 +399,36 @@ export class MonitoringIntegration {
    * Start continuous monitoring tasks
    */
   private static startMonitoringTasks(): void {
-    this.logger.info('🚀 Starting monitoring tasks...');
+    this.logger.info("🚀 Starting monitoring tasks...");
 
     // System snapshot every minute
-    setInterval(() => {
-      this.logSystemSnapshot();
-    }, 60000);
+    TimerManager.setInterval(
+      () => {
+        this.logSystemSnapshot();
+      },
+      60000,
+      "auto-generated-interval-47",
+    );
 
     // Performance correlation analysis every 5 minutes
-    setInterval(() => {
-      this.performCorrelationAnalysis();
-    }, 300000);
+    TimerManager.setInterval(
+      () => {
+        this.performCorrelationAnalysis();
+      },
+      300000,
+      "auto-generated-interval-48",
+    );
 
     // Health summary every 30 seconds
-    setInterval(() => {
-      this.updateHealthSummary();
-    }, 30000);
+    TimerManager.setInterval(
+      () => {
+        this.updateHealthSummary();
+      },
+      30000,
+      "auto-generated-interval-49",
+    );
 
-    this.logger.success('✅ Monitoring tasks started');
+    this.logger.success("✅ Monitoring tasks started");
   }
 
   /**
@@ -434,7 +451,7 @@ export class MonitoringIntegration {
         logs: EnhancedLogger.getHealthStatus(),
       };
 
-      this.logger.info('📸 System snapshot captured', {
+      this.logger.info("📸 System snapshot captured", {
         memoryUsage: `${Math.round(snapshot.system.memory.heapUsed / 1024 / 1024)}MB`,
         totalServices: snapshot.services.instantiatedServices,
         totalFlags: snapshot.features.summary?.totalFlags,
@@ -444,7 +461,7 @@ export class MonitoringIntegration {
 
       this.lastSystemSnapshot = snapshot;
     } catch (error) {
-      this.logger.error('❌ Failed to capture system snapshot', error);
+      this.logger.error("❌ Failed to capture system snapshot", error);
     }
   }
 
@@ -464,25 +481,25 @@ export class MonitoringIntegration {
       };
 
       this.logger.info(
-        '🔬 Performance correlation analysis completed',
-        analysis
+        "🔬 Performance correlation analysis completed",
+        analysis,
       );
 
       // Store analysis results as metrics
       MetricsCollector.setGauge(
-        'analysis_memory_trend',
-        analysis.memoryTrend.direction
+        "analysis_memory_trend",
+        analysis.memoryTrend.direction,
       );
       MetricsCollector.setGauge(
-        'analysis_response_trend',
-        analysis.responseTrend.direction
+        "analysis_response_trend",
+        analysis.responseTrend.direction,
       );
       MetricsCollector.setGauge(
-        'analysis_error_correlation',
-        analysis.errorCorrelation.strength
+        "analysis_error_correlation",
+        analysis.errorCorrelation.strength,
       );
     } catch (error) {
-      this.logger.error('❌ Performance correlation analysis failed', error);
+      this.logger.error("❌ Performance correlation analysis failed", error);
     }
   }
 
@@ -496,12 +513,12 @@ export class MonitoringIntegration {
       // Convert health statuses to numeric values for metrics
       const healthToNumber = (status: string) => {
         switch (status) {
-          case 'healthy':
+          case "healthy":
             return 2;
-          case 'warning':
-          case 'degraded':
+          case "warning":
+          case "degraded":
             return 1;
-          case 'critical':
+          case "critical":
             return 0;
           default:
             return -1;
@@ -509,28 +526,28 @@ export class MonitoringIntegration {
       };
 
       MetricsCollector.setGauge(
-        'health_overall',
-        healthToNumber(health.overall)
+        "health_overall",
+        healthToNumber(health.overall),
       );
       MetricsCollector.setGauge(
-        'health_memory',
-        healthToNumber(health.components.memory)
+        "health_memory",
+        healthToNumber(health.components.memory),
       );
       MetricsCollector.setGauge(
-        'health_response_time',
-        healthToNumber(health.components.responseTime)
+        "health_response_time",
+        healthToNumber(health.components.responseTime),
       );
       MetricsCollector.setGauge(
-        'health_error_rate',
-        healthToNumber(health.components.errorRate)
+        "health_error_rate",
+        healthToNumber(health.components.errorRate),
       );
       MetricsCollector.setGauge(
-        'health_modules',
-        healthToNumber(health.components.modules)
+        "health_modules",
+        healthToNumber(health.components.modules),
       );
-      MetricsCollector.setGauge('health_recent_alerts', health.recentAlerts);
+      MetricsCollector.setGauge("health_recent_alerts", health.recentAlerts);
     } catch (error) {
-      this.logger.error('❌ Failed to update health summary', error);
+      this.logger.error("❌ Failed to update health summary", error);
     }
   }
 
@@ -545,7 +562,7 @@ export class MonitoringIntegration {
     const history = MetricsCollector.getMetricsHistory(10);
     if (history.length < 2) return { direction: 0, rate: 0 };
 
-    const memoryValues = history.map(m => m.system.memoryUsage.heapUsed);
+    const memoryValues = history.map((m) => m.system.memoryUsage.heapUsed);
     const first = memoryValues[0];
     const last = memoryValues[memoryValues.length - 1];
 
@@ -565,7 +582,9 @@ export class MonitoringIntegration {
     const history = MetricsCollector.getMetricsHistory(10);
     if (history.length < 2) return { direction: 0, rate: 0 };
 
-    const responseValues = history.map(m => m.application.responseTime.average);
+    const responseValues = history.map(
+      (m) => m.application.responseTime.average,
+    );
     const first = responseValues[0];
     const last = responseValues[responseValues.length - 1];
 
@@ -589,12 +608,12 @@ export class MonitoringIntegration {
     let correlationStrength = 0;
 
     // Check correlation between errors and memory usage
-    const errorRates = history.map(m => m.application.errorRate);
-    const memoryUsage = history.map(m => m.system.memoryUsage.heapUsed);
+    const errorRates = history.map((m) => m.application.errorRate);
+    const memoryUsage = history.map((m) => m.system.memoryUsage.heapUsed);
 
     // Simple correlation check (if errors increase with memory)
     if (this.hasPositiveCorrelation(errorRates, memoryUsage)) {
-      factors.push('memory_usage');
+      factors.push("memory_usage");
       correlationStrength += 0.3;
     }
 
@@ -616,11 +635,11 @@ export class MonitoringIntegration {
     const healthy = [];
 
     for (const [name, status] of Object.entries(modulesStatus)) {
-      if (status.state === 'failed') {
+      if (status.state === "failed") {
         errors.push(name);
-      } else if (status.state === 'degraded') {
+      } else if (status.state === "degraded") {
         slow.push(name);
-      } else if (status.state === 'running') {
+      } else if (status.state === "running") {
         healthy.push(name);
       }
     }
@@ -633,7 +652,7 @@ export class MonitoringIntegration {
    */
   private static hasPositiveCorrelation(
     arr1: number[],
-    arr2: number[]
+    arr2: number[],
   ): boolean {
     if (arr1.length !== arr2.length || arr1.length < 2) return false;
 
@@ -681,7 +700,7 @@ export class MonitoringIntegration {
   /**
    * Get module-specific logger
    */
-  static getModuleLogger(moduleName: string, version: string = '1.0.0') {
+  static getModuleLogger(moduleName: string, version: string = "1.0.0") {
     const key = `${moduleName}:${version}`;
 
     if (!this.moduleLogger.has(key)) {
@@ -698,7 +717,7 @@ export class MonitoringIntegration {
   static recordPerformanceOperation(
     operationName: string,
     duration: number,
-    metadata: LogContext = {}
+    metadata: LogContext = {},
   ): void {
     this.logger.info(`⚡ Performance: ${operationName}`, {
       ...metadata,
@@ -708,7 +727,7 @@ export class MonitoringIntegration {
 
     MetricsCollector.recordHistogram(
       `operation_${operationName}_duration`,
-      duration
+      duration,
     );
     MetricsCollector.incrementCounter(`operation_${operationName}_total`);
 
@@ -721,7 +740,7 @@ export class MonitoringIntegration {
    * Trigger manual system health check
    */
   static async performHealthCheck(): Promise<any> {
-    this.logger.info('🔍 Performing manual health check...');
+    this.logger.info("🔍 Performing manual health check...");
 
     const results = {
       timestamp: new Date().toISOString(),
@@ -732,11 +751,11 @@ export class MonitoringIntegration {
       logs: EnhancedLogger.getHealthStatus(),
     };
 
-    this.logger.success('✅ Health check completed', {
+    this.logger.success("✅ Health check completed", {
       servicesHealthy: results.services.instantiatedServices > 0,
-      modulesHealthy: results.modules.overallStatus === 'healthy',
-      metricsHealthy: results.metrics.overall === 'healthy',
-      logsHealthy: results.logs.status === 'healthy',
+      modulesHealthy: results.modules.overallStatus === "healthy",
+      metricsHealthy: results.metrics.overall === "healthy",
+      logsHealthy: results.logs.status === "healthy",
     });
 
     return results;
@@ -749,7 +768,7 @@ export class MonitoringIntegration {
     return {
       metadata: {
         generatedAt: new Date().toISOString(),
-        reportVersion: '2.0.0',
+        reportVersion: "2.0.0",
         systemUptime: process.uptime(),
       },
       configuration: this.config,
@@ -778,34 +797,34 @@ export class MonitoringIntegration {
   private static checkDependencies(): boolean {
     try {
       // Check if core classes are available
-      if (typeof EnhancedLogger === 'undefined') {
-        console.warn('⚠️ EnhancedLogger not available');
+      if (typeof EnhancedLogger === "undefined") {
+        console.warn("⚠️ EnhancedLogger not available");
         return false;
       }
 
-      if (typeof MetricsCollector === 'undefined') {
-        console.warn('⚠️ MetricsCollector not available');
+      if (typeof MetricsCollector === "undefined") {
+        console.warn("⚠️ MetricsCollector not available");
         return false;
       }
 
-      if (typeof ServiceContainer === 'undefined') {
-        console.warn('⚠️ ServiceContainer not available');
+      if (typeof ServiceContainer === "undefined") {
+        console.warn("⚠️ ServiceContainer not available");
         return false;
       }
 
-      if (typeof FeatureFlags === 'undefined') {
-        console.warn('⚠️ FeatureFlags not available');
+      if (typeof FeatureFlags === "undefined") {
+        console.warn("⚠️ FeatureFlags not available");
         return false;
       }
 
-      if (typeof ModuleLifecycleManager === 'undefined') {
-        console.warn('⚠️ ModuleLifecycleManager not available');
+      if (typeof ModuleLifecycleManager === "undefined") {
+        console.warn("⚠️ ModuleLifecycleManager not available");
         return false;
       }
 
       return true;
     } catch (error) {
-      console.warn('⚠️ Dependency check failed:', error);
+      console.warn("⚠️ Dependency check failed:", error);
       return false;
     }
   }

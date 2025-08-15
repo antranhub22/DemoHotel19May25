@@ -9,6 +9,7 @@ import { logger } from "@shared/utils/logger";
 import { EventEmitter } from "events";
 import * as fs from "fs";
 import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================================================
 // INTERFACES & TYPES
@@ -187,14 +188,22 @@ export class ExternalMemoryMonitor extends EventEmitter {
     this.takeSnapshot();
 
     // Schedule periodic snapshots
-    this.intervals.snapshot = setInterval(() => {
-      this.takeSnapshot();
-    }, this.config.snapshotInterval);
+    this.intervals.snapshot = TimerManager.setInterval(
+      () => {
+        this.takeSnapshot();
+      },
+      this.config.snapshotInterval,
+      "auto-generated-interval-11",
+    );
 
     // Schedule periodic analysis
-    this.intervals.analysis = setInterval(() => {
-      this.analyzeMemoryPatterns();
-    }, this.config.analysisInterval);
+    this.intervals.analysis = TimerManager.setInterval(
+      () => {
+        this.analyzeMemoryPatterns();
+      },
+      this.config.analysisInterval,
+      "auto-generated-interval-12",
+    );
 
     logger.info(
       "🔍 External memory monitoring started",
@@ -837,7 +846,7 @@ export class ExternalMemoryMonitor extends EventEmitter {
    */
   private setupCleanupSchedule(): void {
     // Clean up old data files every 24 hours
-    this.intervals.cleanup = setInterval(
+    this.intervals.cleanup = TimerManager.setInterval(
       () => {
         this.cleanupOldDataFiles();
       },

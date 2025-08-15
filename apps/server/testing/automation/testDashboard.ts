@@ -1,8 +1,9 @@
-import { logger } from '@shared/utils/logger';
-import express from 'express';
-import fs from 'fs/promises';
-import path from 'path';
-import { CITestResult } from './ciIntegration';
+import { logger } from "@shared/utils/logger";
+import express from "express";
+import fs from "fs/promises";
+import path from "path";
+import { CITestResult } from "./ciIntegration";
+import { TimerManager } from "../../utils/TimerManager";
 
 // ============================================
 // DASHBOARD INTERFACES
@@ -15,7 +16,7 @@ export interface DashboardMetrics {
     averageResponseTime: number;
     lastRunTimestamp: Date;
     environment: string;
-    status: 'healthy' | 'warning' | 'critical';
+    status: "healthy" | "warning" | "critical";
   };
   trends: {
     daily: DashboardDataPoint[];
@@ -47,7 +48,7 @@ export interface DashboardDataPoint {
   totalTests: number;
   passRate: number;
   averageResponseTime: number;
-  deploymentStatus: 'success' | 'failure' | 'blocked';
+  deploymentStatus: "success" | "failure" | "blocked";
 }
 
 export interface EndpointMetrics {
@@ -61,11 +62,11 @@ export interface EndpointMetrics {
 }
 
 export interface ResponseTimeDistribution {
-  '<100ms': number;
-  '100-500ms': number;
-  '500ms-1s': number;
-  '1s-3s': number;
-  '>3s': number;
+  "<100ms": number;
+  "100-500ms": number;
+  "500ms-1s": number;
+  "1s-3s": number;
+  ">3s": number;
 }
 
 export interface DeploymentMetrics {
@@ -73,7 +74,7 @@ export interface DeploymentMetrics {
   environment: string;
   timestamp: Date;
   duration: number;
-  status: 'success' | 'failure' | 'rollback';
+  status: "success" | "failure" | "rollback";
   testResults: {
     total: number;
     passed: number;
@@ -94,8 +95,8 @@ export class TestMetricsCollector {
     const timestamp = new Date();
 
     logger.info(
-      '📊 [METRICS-COLLECTOR] Collecting test metrics...',
-      'MetricsCollector'
+      "📊 [METRICS-COLLECTOR] Collecting test metrics...",
+      "MetricsCollector",
     );
 
     const metrics = {
@@ -139,14 +140,14 @@ export class TestMetricsCollector {
     await this.persistMetrics(metrics);
 
     logger.info(
-      '✅ [METRICS-COLLECTOR] Metrics collected and stored',
-      'MetricsCollector'
+      "✅ [METRICS-COLLECTOR] Metrics collected and stored",
+      "MetricsCollector",
     );
   }
 
   async getDashboardMetrics(): Promise<DashboardMetrics> {
     const allMetrics = Array.from(this.metricsStorage.values()).sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
     );
 
     const current = this.calculateCurrentMetrics(allMetrics);
@@ -171,8 +172,8 @@ export class TestMetricsCollector {
         passRate: 0,
         averageResponseTime: 0,
         lastRunTimestamp: new Date(),
-        environment: 'unknown',
-        status: 'critical',
+        environment: "unknown",
+        status: "critical",
       };
     }
 
@@ -205,7 +206,7 @@ export class TestMetricsCollector {
     // Aggregate endpoint performance data
     const endpointMap = new Map();
 
-    allMetrics.forEach(metric => {
+    allMetrics.forEach((metric) => {
       // Process performance data (implementation details would depend on actual data structure)
     });
 
@@ -234,7 +235,7 @@ export class TestMetricsCollector {
 
     const avgQualityScore =
       latestMetrics
-        .filter(m => m.qualityGate)
+        .filter((m) => m.qualityGate)
         .reduce((sum, m) => sum + m.qualityGate.score, 0) /
         latestMetrics.length || 0;
 
@@ -252,14 +253,14 @@ export class TestMetricsCollector {
 
   private calculateDeploymentMetrics(allMetrics: any[]): any {
     const deployments = allMetrics
-      .filter(m => m.deployment)
+      .filter((m) => m.deployment)
       .slice(0, 20) // Last 20 deployments
-      .map(m => ({
+      .map((m) => ({
         id: `deploy_${m.timestamp.getTime()}`,
         environment: m.environment,
         timestamp: m.timestamp,
         duration: m.testResults.duration,
-        status: m.deployment.allowed ? 'success' : 'failure',
+        status: m.deployment.allowed ? "success" : "failure",
         testResults: {
           total: m.testResults.total,
           passed: m.testResults.passed,
@@ -269,7 +270,7 @@ export class TestMetricsCollector {
       }));
 
     const successfulDeployments = deployments.filter(
-      d => d.status === 'success'
+      (d) => d.status === "success",
     ).length;
     const successRate =
       deployments.length > 0
@@ -290,17 +291,17 @@ export class TestMetricsCollector {
   }
 
   private determineHealthStatus(
-    metrics: any
-  ): 'healthy' | 'warning' | 'critical' {
-    if (metrics.testResults.passRate < 80) return 'critical';
-    if (metrics.testResults.passRate < 95) return 'warning';
-    if (metrics.performance.averageResponseTime > 1000) return 'warning';
-    return 'healthy';
+    metrics: any,
+  ): "healthy" | "warning" | "critical" {
+    if (metrics.testResults.passRate < 80) return "critical";
+    if (metrics.testResults.passRate < 95) return "warning";
+    if (metrics.performance.averageResponseTime > 1000) return "warning";
+    return "healthy";
   }
 
   private aggregateMetricsByHour(
     metrics: any[],
-    since: Date
+    since: Date,
   ): DashboardDataPoint[] {
     // Implementation for hourly aggregation
     return [];
@@ -308,7 +309,7 @@ export class TestMetricsCollector {
 
   private aggregateMetricsByDay(
     metrics: any[],
-    since: Date
+    since: Date,
   ): DashboardDataPoint[] {
     // Implementation for daily aggregation
     return [];
@@ -316,36 +317,36 @@ export class TestMetricsCollector {
 
   private aggregateMetricsByWeek(
     metrics: any[],
-    since: Date
+    since: Date,
   ): DashboardDataPoint[] {
     // Implementation for weekly aggregation
     return [];
   }
 
   private calculateResponseTimeDistribution(
-    metrics: any[]
+    metrics: any[],
   ): ResponseTimeDistribution {
     // Implementation for response time distribution calculation
     return {
-      '<100ms': 45,
-      '100-500ms': 35,
-      '500ms-1s': 15,
-      '1s-3s': 4,
-      '>3s': 1,
+      "<100ms": 45,
+      "100-500ms": 35,
+      "500ms-1s": 15,
+      "1s-3s": 4,
+      ">3s": 1,
     };
   }
 
   private getTopSlowEndpoints(metrics: any[], count: number): string[] {
-    return ['/api/v2/calls', '/api/summaries', '/api/transcripts'];
+    return ["/api/v2/calls", "/api/summaries", "/api/transcripts"];
   }
 
   private getTopFastEndpoints(metrics: any[], count: number): string[] {
-    return ['/api/health/versioned', '/api/version/current', '/api/guest/auth'];
+    return ["/api/health/versioned", "/api/version/current", "/api/guest/auth"];
   }
 
   private async cleanupOldMetrics(): Promise<void> {
     const cutoffDate = new Date(
-      Date.now() - this.dataRetentionDays * 24 * 60 * 60 * 1000
+      Date.now() - this.dataRetentionDays * 24 * 60 * 60 * 1000,
     );
 
     for (const [key, metrics] of this.metricsStorage.entries()) {
@@ -357,16 +358,16 @@ export class TestMetricsCollector {
 
   private async persistMetrics(metrics: any): Promise<void> {
     try {
-      const metricsDir = path.join(process.cwd(), 'test-results', 'metrics');
+      const metricsDir = path.join(process.cwd(), "test-results", "metrics");
       await fs.mkdir(metricsDir, { recursive: true });
 
-      const filename = `metrics-${metrics.timestamp.toISOString().split('T')[0]}.json`;
+      const filename = `metrics-${metrics.timestamp.toISOString().split("T")[0]}.json`;
       const filepath = path.join(metricsDir, filename);
 
       // Read existing data or create new
       let dailyMetrics = [];
       try {
-        const existingData = await fs.readFile(filepath, 'utf-8');
+        const existingData = await fs.readFile(filepath, "utf-8");
         dailyMetrics = JSON.parse(existingData);
       } catch {
         // File doesn't exist, start with empty array
@@ -376,9 +377,9 @@ export class TestMetricsCollector {
       await fs.writeFile(filepath, JSON.stringify(dailyMetrics, null, 2));
     } catch (error) {
       logger.error(
-        '❌ [METRICS-COLLECTOR] Failed to persist metrics:',
-        'MetricsCollector',
-        error
+        "❌ [METRICS-COLLECTOR] Failed to persist metrics:",
+        "MetricsCollector",
+        error,
       );
     }
   }
@@ -402,33 +403,33 @@ export class TestDashboardServer {
 
   private setupRoutes(): void {
     // Serve static files
-    this.app.use(express.static(path.join(__dirname, 'dashboard-public')));
+    this.app.use(express.static(path.join(__dirname, "dashboard-public")));
 
     // API Routes
-    this.app.get('/api/metrics', async (req, res) => {
+    this.app.get("/api/metrics", async (req, res) => {
       try {
         const metrics = await this.metricsCollector.getDashboardMetrics();
         res.json(metrics);
       } catch (error) {
         logger.error(
-          '❌ [DASHBOARD] Error getting metrics:',
-          'Dashboard',
-          error
+          "❌ [DASHBOARD] Error getting metrics:",
+          "Dashboard",
+          error,
         );
-        res.status(500).json({ error: 'Failed to retrieve metrics' });
+        res.status(500).json({ error: "Failed to retrieve metrics" });
       }
     });
 
-    this.app.get('/api/health', (req, res) => {
+    this.app.get("/api/health", (req, res) => {
       res.json({
-        status: 'healthy',
+        status: "healthy",
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
       });
     });
 
     // Main dashboard route
-    this.app.get('/', (req, res) => {
+    this.app.get("/", (req, res) => {
       res.send(this.generateDashboardHTML());
     });
   }
@@ -649,18 +650,18 @@ export class TestDashboardServer {
         fetchMetrics();
         
         // Auto-refresh every 30 seconds
-        setInterval(fetchMetrics, 30000);
+        TimerManager.setInterval(fetchMetrics, 30000, "auto-generated-interval-61");
     </script>
 </body>
 </html>`;
   }
 
   async start(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       this.app.listen(this.port, () => {
         logger.info(
           `📊 [DASHBOARD] Test dashboard server running on http://localhost:${this.port}`,
-          'Dashboard'
+          "Dashboard",
         );
         resolve();
       });
@@ -708,8 +709,8 @@ export class NotificationService {
 
   async sendTestResults(result: CITestResult): Promise<void> {
     logger.info(
-      '📢 [NOTIFICATIONS] Sending test result notifications...',
-      'Notifications'
+      "📢 [NOTIFICATIONS] Sending test result notifications...",
+      "Notifications",
     );
 
     const promises = [];
@@ -732,24 +733,24 @@ export class NotificationService {
   private async sendSlackNotification(result: CITestResult): Promise<void> {
     // Implementation for Slack notifications
     logger.info(
-      '📱 [NOTIFICATIONS] Sending Slack notification...',
-      'Notifications'
+      "📱 [NOTIFICATIONS] Sending Slack notification...",
+      "Notifications",
     );
   }
 
   private async sendEmailNotification(result: CITestResult): Promise<void> {
     // Implementation for email notifications
     logger.info(
-      '📧 [NOTIFICATIONS] Sending email notification...',
-      'Notifications'
+      "📧 [NOTIFICATIONS] Sending email notification...",
+      "Notifications",
     );
   }
 
   private async updateGitHubStatus(result: CITestResult): Promise<void> {
     // Implementation for GitHub status updates
     logger.info(
-      '📱 [NOTIFICATIONS] Updating GitHub status...',
-      'Notifications'
+      "📱 [NOTIFICATIONS] Updating GitHub status...",
+      "Notifications",
     );
   }
 }

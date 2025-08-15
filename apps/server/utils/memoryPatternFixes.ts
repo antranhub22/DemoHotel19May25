@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================================================
 // ERROR ARRAY FIXES
@@ -57,9 +58,13 @@ function fixErrorArrays() {
   };
 
   // Reset counts periodically
-  setInterval(() => {
-    errorCounts.clear();
-  }, 300000); // Reset every 5 minutes
+  TimerManager.setInterval(
+    () => {
+      errorCounts.clear();
+    },
+    300000,
+    "auto-generated-interval-64",
+  ); // Reset every 5 minutes
 
   logger.info("🛡️ Error array protection enabled", "MemoryPatternFixes");
 }
@@ -289,7 +294,7 @@ function startGlobalMemoryMonitoring() {
   }
 
   // ✅ MEMORY FIX: Reduce monitoring frequency and adjust thresholds
-  memoryCheckInterval = setInterval(() => {
+  memoryCheckInterval = TimerManager.setInterval(() => {
     const memUsage = process.memoryUsage();
     const heapUsedMB = memUsage.heapUsed / 1024 / 1024;
     const heapTotalMB = memUsage.heapTotal / 1024 / 1024;

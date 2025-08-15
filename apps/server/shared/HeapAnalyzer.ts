@@ -9,6 +9,7 @@ import { logger } from "@shared/utils/logger";
 import * as fs from "fs";
 import * as path from "path";
 import * as v8 from "v8";
+import { TimerManager } from "../utils/TimerManager";
 
 export interface HeapSnapshotInfo {
   id: string;
@@ -401,7 +402,7 @@ class HeapAnalyzer {
   private setupPeriodicAnalysis(): void {
     // Take snapshot every 30 minutes in production
     if (process.env.NODE_ENV === "production") {
-      setInterval(
+      TimerManager.setInterval(
         () => {
           this.takeSnapshot("periodic_production");
         },
@@ -414,12 +415,9 @@ class HeapAnalyzer {
     // Manual snapshots can be taken via API endpoint if needed
     /*
     if (process.env.NODE_ENV === "development") {
-      setInterval(
-        () => {
+      TimerManager.setInterval(() => {
           this.takeSnapshot("periodic_development");
-        },
-        10 * 60 * 1000,
-      );
+        }, 10 * 60 * 1000, );
     }
     */
   }

@@ -6,6 +6,7 @@ import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
 import { Readable, Transform, pipeline } from "stream";
 import { promisify } from "util";
+import { TimerManager } from "../utils/TimerManager";
 
 const pipelineAsync = promisify(pipeline);
 
@@ -147,10 +148,14 @@ class StreamingOptimization {
         });
 
         // Set up timeout
-        const timeout = setTimeout(() => {
-          jsonStream.destroy(new Error("Stream timeout"));
-          reject(new Error("Streaming timeout"));
-        }, this.config.timeoutMs);
+        const timeout = TimerManager.setTimeout(
+          () => {
+            jsonStream.destroy(new Error("Stream timeout"));
+            reject(new Error("Streaming timeout"));
+          },
+          this.config.timeoutMs,
+          "auto-generated-timeout-5",
+        );
 
         // Pipe with error handling
         jsonStream
@@ -209,9 +214,13 @@ class StreamingOptimization {
     });
 
     // Set timeout for upload
-    const timeout = setTimeout(() => {
-      passThrough.destroy(new Error("Upload timeout"));
-    }, this.config.timeoutMs);
+    const timeout = TimerManager.setTimeout(
+      () => {
+        passThrough.destroy(new Error("Upload timeout"));
+      },
+      this.config.timeoutMs,
+      "auto-generated-timeout-6",
+    );
 
     passThrough.on("end", () => {
       clearTimeout(timeout);
@@ -252,10 +261,14 @@ class StreamingOptimization {
     return new Promise((resolve, reject) => {
       this.stats.streamsCreated++;
 
-      const timeout = setTimeout(() => {
-        req.destroy(new Error("Upload timeout"));
-        reject(new Error("Upload streaming timeout"));
-      }, this.config.timeoutMs);
+      const timeout = TimerManager.setTimeout(
+        () => {
+          req.destroy(new Error("Upload timeout"));
+          reject(new Error("Upload streaming timeout"));
+        },
+        this.config.timeoutMs,
+        "auto-generated-timeout-7",
+      );
 
       req.on("data", (chunk: Buffer) => {
         totalSize += chunk.length;

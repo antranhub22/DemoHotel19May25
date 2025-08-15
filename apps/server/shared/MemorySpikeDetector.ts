@@ -9,6 +9,7 @@ import { logger } from "@shared/utils/logger";
 import { memoryTracker } from "@server/shared/MemoryAllocationTracker";
 import * as fs from "fs";
 import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 export interface MemorySpike {
   id: string;
@@ -346,7 +347,7 @@ class MemorySpikeDetector {
   private startMonitoring(): void {
     let lastMemoryUsage = process.memoryUsage();
 
-    setInterval(() => {
+    TimerManager.setInterval(() => {
       if (!this.isEnabled) return;
 
       const currentMemoryUsage = process.memoryUsage();
@@ -374,7 +375,7 @@ class MemorySpikeDetector {
    * Periodic cleanup of old spike records
    */
   private setupPeriodicCleanup(): void {
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.cleanupOldSpikes();
       },

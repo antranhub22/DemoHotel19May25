@@ -12,6 +12,7 @@
  */
 
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface NuclearMemoryStats {
   heapUsed: number;
@@ -277,10 +278,16 @@ class NuclearMemoryManager {
 
     // ✅ IMMEDIATE CLEANUP before restart
     this.performNuclearCleanup().finally(() => {
-      setTimeout(() => {
-        console.error("🚨 NUCLEAR KILL SWITCH ACTIVATED - Process exiting...");
-        process.exit(1); // Force immediate restart
-      }, 3000);
+      TimerManager.setTimeout(
+        () => {
+          console.error(
+            "🚨 NUCLEAR KILL SWITCH ACTIVATED - Process exiting...",
+          );
+          process.exit(1); // Force immediate restart
+        },
+        3000,
+        "auto-generated-timeout-3",
+      );
     });
   }
 
@@ -380,9 +387,13 @@ class NuclearMemoryManager {
       },
     );
 
-    this.monitoringInterval = setInterval(() => {
-      this.checkMemoryUsage();
-    }, this.CHECK_INTERVAL);
+    this.monitoringInterval = TimerManager.setInterval(
+      () => {
+        this.checkMemoryUsage();
+      },
+      this.CHECK_INTERVAL,
+      "auto-generated-interval-4",
+    );
 
     // ✅ IMMEDIATE: Check memory on startup
     this.checkMemoryUsage();

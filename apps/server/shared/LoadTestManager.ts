@@ -4,9 +4,10 @@
 // Comprehensive load testing system with stress testing, concurrent user simulation,
 // performance benchmarking, and detailed analytics
 
-import { logger } from '@shared/utils/logger';
-import { cacheManager } from './CacheManager';
-import { performanceAuditor } from './PerformanceAuditor';
+import { logger } from "@shared/utils/logger";
+import { cacheManager } from "./CacheManager";
+import { performanceAuditor } from "./PerformanceAuditor";
+import { TimerManager } from "../utils/TimerManager";
 
 // Load testing interfaces
 export interface LoadTestScenario {
@@ -22,7 +23,7 @@ export interface LoadTestScenario {
 }
 
 export interface LoadTestEndpoint {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
   weight: number; // percentage of total requests
   headers?: Record<string, string>;
@@ -33,15 +34,15 @@ export interface LoadTestEndpoint {
 }
 
 export interface LoadTestDataPattern {
-  type: 'sequential' | 'random' | 'weighted' | 'realistic';
+  type: "sequential" | "random" | "weighted" | "realistic";
   data: any[];
   weights?: number[];
 }
 
 export interface LoadTestCondition {
-  type: 'response_time' | 'error_rate' | 'throughput' | 'resource_usage';
+  type: "response_time" | "error_rate" | "throughput" | "resource_usage";
   threshold: number;
-  action: 'continue' | 'stop' | 'throttle' | 'alert';
+  action: "continue" | "stop" | "throttle" | "alert";
 }
 
 export interface LoadTestResult {
@@ -120,7 +121,7 @@ export interface UserJourneyStep {
 }
 
 export interface StressTestConfig {
-  type: 'spike' | 'gradual' | 'sustained' | 'burst';
+  type: "spike" | "gradual" | "sustained" | "burst";
   baseline: number; // RPS
   peak: number; // RPS
   duration: number; // seconds
@@ -153,8 +154,8 @@ export class LoadTestManager {
   async initialize(): Promise<void> {
     try {
       logger.info(
-        '📈 [LoadTestManager] Initializing load testing system',
-        'LoadTestManager'
+        "📈 [LoadTestManager] Initializing load testing system",
+        "LoadTestManager",
       );
 
       // Setup test data generators
@@ -165,14 +166,14 @@ export class LoadTestManager {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [LoadTestManager] Load testing system initialized',
-        'LoadTestManager'
+        "✅ [LoadTestManager] Load testing system initialized",
+        "LoadTestManager",
       );
     } catch (error) {
       logger.error(
-        '❌ [LoadTestManager] Failed to initialize load test manager',
-        'LoadTestManager',
-        error
+        "❌ [LoadTestManager] Failed to initialize load test manager",
+        "LoadTestManager",
+        error,
       );
       throw error;
     }
@@ -185,7 +186,7 @@ export class LoadTestManager {
     try {
       logger.info(
         `🚀 [LoadTestManager] Starting load test: ${scenario.name}`,
-        'LoadTestManager'
+        "LoadTestManager",
       );
 
       const testId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -206,7 +207,7 @@ export class LoadTestManager {
       result.recommendations = this.generateRecommendations(
         result,
         preTestAudit,
-        postTestAudit
+        postTestAudit,
       );
 
       // Store results
@@ -215,21 +216,21 @@ export class LoadTestManager {
 
       logger.success(
         `✅ [LoadTestManager] Load test completed: ${scenario.name}`,
-        'LoadTestManager',
+        "LoadTestManager",
         {
           duration: result.duration,
           totalRequests: result.summary.totalRequests,
           errorRate: result.summary.errorRate,
           averageResponseTime: result.summary.averageResponseTime,
-        }
+        },
       );
 
       return result;
     } catch (error) {
       logger.error(
-        '❌ [LoadTestManager] Load test failed',
-        'LoadTestManager',
-        error
+        "❌ [LoadTestManager] Load test failed",
+        "LoadTestManager",
+        error,
       );
       throw error;
     }
@@ -239,12 +240,12 @@ export class LoadTestManager {
    * Run concurrent user simulation
    */
   async runConcurrentUserSimulation(
-    simulation: ConcurrentUserSimulation
+    simulation: ConcurrentUserSimulation,
   ): Promise<LoadTestResult> {
     try {
       logger.info(
         `👥 [LoadTestManager] Starting user simulation: ${simulation.name}`,
-        'LoadTestManager'
+        "LoadTestManager",
       );
 
       // Convert user simulation to load test scenario
@@ -254,9 +255,9 @@ export class LoadTestManager {
       return await this.runLoadTest(scenario);
     } catch (error) {
       logger.error(
-        '❌ [LoadTestManager] User simulation failed',
-        'LoadTestManager',
-        error
+        "❌ [LoadTestManager] User simulation failed",
+        "LoadTestManager",
+        error,
       );
       throw error;
     }
@@ -267,12 +268,12 @@ export class LoadTestManager {
    */
   async runStressTest(
     config: StressTestConfig,
-    baseScenario: LoadTestScenario
+    baseScenario: LoadTestScenario,
   ): Promise<LoadTestResult> {
     try {
       logger.info(
         `💥 [LoadTestManager] Starting stress test: ${config.type}`,
-        'LoadTestManager'
+        "LoadTestManager",
       );
 
       // Create stress test scenario
@@ -282,9 +283,9 @@ export class LoadTestManager {
       return await this.runLoadTest(stressScenario);
     } catch (error) {
       logger.error(
-        '❌ [LoadTestManager] Stress test failed',
-        'LoadTestManager',
-        error
+        "❌ [LoadTestManager] Stress test failed",
+        "LoadTestManager",
+        error,
       );
       throw error;
     }
@@ -301,7 +302,7 @@ export class LoadTestManager {
     currentRPS: number;
     currentUsers: number;
   }> {
-    return Array.from(this.activeTests.values()).map(execution => ({
+    return Array.from(this.activeTests.values()).map((execution) => ({
       id: execution.id,
       scenario: execution.scenario.name,
       startTime: execution.startTime,
@@ -323,7 +324,7 @@ export class LoadTestManager {
    */
   getPerformanceComparison(
     testId1: string,
-    testId2: string
+    testId2: string,
   ): {
     test1: LoadTestResult;
     test2: LoadTestResult;
@@ -334,8 +335,8 @@ export class LoadTestManager {
       recommendations: string[];
     };
   } | null {
-    const test1 = this.testResults.find(r => r.scenario === testId1);
-    const test2 = this.testResults.find(r => r.scenario === testId2);
+    const test1 = this.testResults.find((r) => r.scenario === testId1);
+    const test2 = this.testResults.find((r) => r.scenario === testId2);
 
     if (!test1 || !test2) return null;
 
@@ -351,10 +352,10 @@ export class LoadTestManager {
 
     const recommendations = [];
     if (responseTimeChange > 10)
-      recommendations.push('Response time degraded significantly');
+      recommendations.push("Response time degraded significantly");
     if (throughputChange < -10)
-      recommendations.push('Throughput decreased significantly');
-    if (errorRateChange > 0.05) recommendations.push('Error rate increased');
+      recommendations.push("Throughput decreased significantly");
+    if (errorRateChange > 0.05) recommendations.push("Error rate increased");
 
     return {
       test1,
@@ -386,7 +387,7 @@ export class LoadTestManager {
   // Private methods
 
   private async executeLoadTest(
-    execution: LoadTestExecution
+    execution: LoadTestExecution,
   ): Promise<LoadTestResult> {
     const startTime = new Date();
     const scenario = execution.scenario;
@@ -409,10 +410,14 @@ export class LoadTestManager {
     }> = [];
 
     // Start performance monitoring
-    const monitoringInterval = setInterval(async () => {
-      const snapshot = await this.capturePerformanceSnapshot();
-      performanceSnapshots.push(snapshot);
-    }, 1000);
+    const monitoringInterval = TimerManager.setInterval(
+      async () => {
+        const snapshot = await this.capturePerformanceSnapshot();
+        performanceSnapshots.push(snapshot);
+      },
+      1000,
+      "auto-generated-interval-38",
+    );
 
     try {
       // Simulate load test execution
@@ -431,7 +436,7 @@ export class LoadTestManager {
         endTime,
         duration,
         requests,
-        performanceSnapshots
+        performanceSnapshots,
       );
 
       return result;
@@ -443,7 +448,7 @@ export class LoadTestManager {
 
   private async simulateLoadTestExecution(
     scenario: LoadTestScenario,
-    requests: Array<any>
+    requests: Array<any>,
   ): Promise<void> {
     const { duration, rampUp, targetRPS, endpoints } = scenario;
 
@@ -457,7 +462,7 @@ export class LoadTestManager {
         stepDuration,
         currentRPS,
         endpoints,
-        requests
+        requests,
       );
     }
 
@@ -468,7 +473,7 @@ export class LoadTestManager {
         sustainedDuration,
         targetRPS,
         endpoints,
-        requests
+        requests,
       );
     }
   }
@@ -477,7 +482,7 @@ export class LoadTestManager {
     duration: number,
     rps: number,
     endpoints: LoadTestEndpoint[],
-    requests: Array<any>
+    requests: Array<any>,
   ): Promise<void> {
     const totalRequests = Math.floor(duration * rps);
     const interval = 1000 / rps; // ms between requests
@@ -502,13 +507,13 @@ export class LoadTestManager {
 
       // Wait for next request
       if (i < totalRequests - 1) {
-        await new Promise(resolve => setTimeout(resolve, interval));
+        await new Promise((resolve) => setTimeout(resolve, interval));
       }
     }
   }
 
   private selectWeightedEndpoint(
-    endpoints: LoadTestEndpoint[]
+    endpoints: LoadTestEndpoint[],
   ): LoadTestEndpoint {
     const totalWeight = endpoints.reduce((sum, ep) => sum + ep.weight, 0);
     const random = Math.random() * totalWeight;
@@ -548,19 +553,19 @@ export class LoadTestManager {
 
   private getBaseResponseTime(endpoint: LoadTestEndpoint): number {
     // Base response times by endpoint type (ms)
-    if (endpoint.path.includes('/health')) return 50;
-    if (endpoint.path.includes('/analytics')) return 300;
-    if (endpoint.path.includes('/hotel')) return 200;
-    if (endpoint.path.includes('/voice')) return 150;
-    if (endpoint.method === 'POST') return 250;
+    if (endpoint.path.includes("/health")) return 50;
+    if (endpoint.path.includes("/analytics")) return 300;
+    if (endpoint.path.includes("/hotel")) return 200;
+    if (endpoint.path.includes("/voice")) return 150;
+    if (endpoint.method === "POST") return 250;
     return 100;
   }
 
   private getErrorProbability(endpoint: LoadTestEndpoint): number {
     // Error probabilities by endpoint type
-    if (endpoint.path.includes('/health')) return 0.001; // 0.1%
-    if (endpoint.path.includes('/analytics')) return 0.02; // 2%
-    if (endpoint.method === 'POST') return 0.015; // 1.5%
+    if (endpoint.path.includes("/health")) return 0.001; // 0.1%
+    if (endpoint.path.includes("/analytics")) return 0.02; // 2%
+    if (endpoint.method === "POST") return 0.015; // 1.5%
     return 0.01; // 1%
   }
 
@@ -587,14 +592,14 @@ export class LoadTestManager {
     endTime: Date,
     duration: number,
     requests: Array<any>,
-    performanceSnapshots: Array<any>
+    performanceSnapshots: Array<any>,
   ): LoadTestResult {
     const successfulRequests = requests.filter(
-      r => r.status >= 200 && r.status < 400
+      (r) => r.status >= 200 && r.status < 400,
     );
-    const failedRequests = requests.filter(r => r.status >= 400);
+    const failedRequests = requests.filter((r) => r.status >= 400);
 
-    const responseTimes = requests.map(r => r.endTime - r.startTime);
+    const responseTimes = requests.map((r) => r.endTime - r.startTime);
     responseTimes.sort((a, b) => a - b);
 
     const p95Index = Math.floor(responseTimes.length * 0.95);
@@ -604,7 +609,7 @@ export class LoadTestManager {
     const endpointResults: LoadTestEndpointResult[] = [];
     const endpointGroups = new Map<string, any[]>();
 
-    requests.forEach(req => {
+    requests.forEach((req) => {
       const key = `${req.method} ${req.endpoint}`;
       if (!endpointGroups.has(key)) {
         endpointGroups.set(key, []);
@@ -613,11 +618,11 @@ export class LoadTestManager {
     });
 
     endpointGroups.forEach((reqs, key) => {
-      const [method, endpoint] = key.split(' ', 2);
-      const successful = reqs.filter(r => r.status >= 200 && r.status < 400);
-      const failed = reqs.filter(r => r.status >= 400);
+      const [method, endpoint] = key.split(" ", 2);
+      const successful = reqs.filter((r) => r.status >= 200 && r.status < 400);
+      const failed = reqs.filter((r) => r.status >= 400);
       const times = reqs
-        .map(r => r.endTime - r.startTime)
+        .map((r) => r.endTime - r.startTime)
         .sort((a, b) => a - b);
 
       endpointResults.push({
@@ -632,12 +637,12 @@ export class LoadTestManager {
         p99ResponseTime: times[Math.floor(times.length * 0.99)] || 0,
         errorRate: failed.length / reqs.length,
         requestsPerSecond: reqs.length / duration,
-        errors: failed.map(r => ({
+        errors: failed.map((r) => ({
           timestamp: new Date(r.startTime),
           endpoint,
           method,
           statusCode: r.status,
-          error: r.error || 'Unknown error',
+          error: r.error || "Unknown error",
           responseTime: r.endTime - r.startTime,
         })),
       });
@@ -664,19 +669,19 @@ export class LoadTestManager {
       },
       endpoints: endpointResults,
       performance: {
-        cpuUsage: performanceSnapshots.map(s => s.cpuUsage),
-        memoryUsage: performanceSnapshots.map(s => s.memoryUsage),
-        cacheHitRate: performanceSnapshots.map(s => s.cacheHitRate),
+        cpuUsage: performanceSnapshots.map((s) => s.cpuUsage),
+        memoryUsage: performanceSnapshots.map((s) => s.memoryUsage),
+        cacheHitRate: performanceSnapshots.map((s) => s.cacheHitRate),
         databaseConnections: performanceSnapshots.map(
-          () => Math.floor(Math.random() * 10) + 5
+          () => Math.floor(Math.random() * 10) + 5,
         ),
       },
-      errors: failedRequests.map(r => ({
+      errors: failedRequests.map((r) => ({
         timestamp: new Date(r.startTime),
         endpoint: r.endpoint,
         method: r.method,
         statusCode: r.status,
-        error: r.error || 'Unknown error',
+        error: r.error || "Unknown error",
         responseTime: r.endTime - r.startTime,
       })),
       recommendations: [],
@@ -684,16 +689,17 @@ export class LoadTestManager {
   }
 
   private convertUserSimulationToScenario(
-    simulation: ConcurrentUserSimulation
+    simulation: ConcurrentUserSimulation,
   ): LoadTestScenario {
     // Convert user journeys to endpoints with weights
     const endpoints: LoadTestEndpoint[] = [];
 
-    simulation.userJourneys.forEach(journey => {
-      journey.steps.forEach(step => {
+    simulation.userJourneys.forEach((journey) => {
+      journey.steps.forEach((step) => {
         const existingEndpoint = endpoints.find(
-          ep =>
-            ep.path === step.endpoint.path && ep.method === step.endpoint.method
+          (ep) =>
+            ep.path === step.endpoint.path &&
+            ep.method === step.endpoint.method,
         );
 
         if (existingEndpoint) {
@@ -722,25 +728,25 @@ export class LoadTestManager {
 
   private createStressScenario(
     config: StressTestConfig,
-    baseScenario: LoadTestScenario
+    baseScenario: LoadTestScenario,
   ): LoadTestScenario {
     let targetRPS: number;
     let duration: number;
 
     switch (config.type) {
-      case 'spike':
+      case "spike":
         targetRPS = config.peak;
         duration = config.spikeDuration || 30;
         break;
-      case 'gradual':
+      case "gradual":
         targetRPS = config.peak;
         duration = config.duration;
         break;
-      case 'sustained':
+      case "sustained":
         targetRPS = config.peak;
         duration = config.duration;
         break;
-      case 'burst':
+      case "burst":
         targetRPS = config.peak;
         duration = config.duration;
         break;
@@ -755,44 +761,44 @@ export class LoadTestManager {
       description: `${config.type} stress test with peak ${config.peak} RPS`,
       targetRPS,
       duration,
-      rampUp: config.type === 'spike' ? 1 : Math.min(duration * 0.1, 30),
+      rampUp: config.type === "spike" ? 1 : Math.min(duration * 0.1, 30),
     };
   }
 
   private generateRecommendations(
     result: LoadTestResult,
     preTestAudit: any,
-    postTestAudit: any
+    postTestAudit: any,
   ): string[] {
     const recommendations: string[] = [];
 
     // Response time recommendations
     if (result.summary.averageResponseTime > 1000) {
       recommendations.push(
-        'Consider implementing caching to reduce response times'
+        "Consider implementing caching to reduce response times",
       );
     }
 
     if (result.summary.p95ResponseTime > 3000) {
       recommendations.push(
-        'Optimize slow endpoints - 95th percentile is too high'
+        "Optimize slow endpoints - 95th percentile is too high",
       );
     }
 
     // Error rate recommendations
     if (result.summary.errorRate > 0.05) {
-      recommendations.push('Investigate and fix high error rate issues');
+      recommendations.push("Investigate and fix high error rate issues");
     }
 
     // Throughput recommendations
     if (result.summary.throughput < result.summary.requestsPerSecond * 0.8) {
-      recommendations.push('Improve system capacity to handle target load');
+      recommendations.push("Improve system capacity to handle target load");
     }
 
     // Performance degradation
     if (postTestAudit.score < preTestAudit.score - 10) {
       recommendations.push(
-        'System performance degraded during test - investigate resource usage'
+        "System performance degraded during test - investigate resource usage",
       );
     }
 
@@ -802,16 +808,16 @@ export class LoadTestManager {
   private async setupTestDataGenerators(): Promise<void> {
     // Setup would include test data generation utilities
     logger.debug(
-      '📊 [LoadTestManager] Test data generators ready',
-      'LoadTestManager'
+      "📊 [LoadTestManager] Test data generators ready",
+      "LoadTestManager",
     );
   }
 
   private async establishPerformanceBaseline(): Promise<void> {
     // Establish baseline performance metrics
     logger.debug(
-      '📋 [LoadTestManager] Performance baseline established',
-      'LoadTestManager'
+      "📋 [LoadTestManager] Performance baseline established",
+      "LoadTestManager",
     );
   }
 }
@@ -856,7 +862,7 @@ export const runLoadTest = (scenario: LoadTestScenario) =>
   loadTestManager.runLoadTest(scenario);
 export const runStressTest = (
   config: StressTestConfig,
-  scenario: LoadTestScenario
+  scenario: LoadTestScenario,
 ) => loadTestManager.runStressTest(config, scenario);
 export const runUserSimulation = (simulation: ConcurrentUserSimulation) =>
   loadTestManager.runConcurrentUserSimulation(simulation);

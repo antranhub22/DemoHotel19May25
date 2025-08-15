@@ -6,9 +6,10 @@
  */
 
 import { logger } from "@shared/utils/logger";
-import * as v8 from "v8";
 import * as fs from "fs";
 import * as path from "path";
+import * as v8 from "v8";
+import { TimerManager } from "../utils/TimerManager";
 
 export interface MemorySnapshot {
   heapUsed: number;
@@ -380,7 +381,7 @@ class MemoryAllocationTracker {
    * Periodic memory check to catch gradual leaks
    */
   private startPeriodicMemoryCheck(): void {
-    setInterval(
+    TimerManager.setInterval(
       () => {
         const currentSnapshot = this.takeMemorySnapshot("periodic_check");
 

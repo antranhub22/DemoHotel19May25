@@ -4,7 +4,8 @@
 // Comprehensive metrics collection with per-module performance tracking,
 // business KPI monitoring, real-time alerting, and custom dashboard support
 
-import { logger } from '@shared/utils/logger';
+import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // Metrics interfaces
 export interface PerformanceMetrics {
@@ -24,21 +25,21 @@ export interface BusinessKPI {
   value: number;
   unit: string;
   category:
-    | 'revenue'
-    | 'operations'
-    | 'customer_satisfaction'
-    | 'performance'
-    | 'growth';
+    | "revenue"
+    | "operations"
+    | "customer_satisfaction"
+    | "performance"
+    | "growth";
   target?: number;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   module: string;
   timestamp: Date;
 }
 
 export interface Alert {
   id: string;
-  type: 'performance' | 'business' | 'system' | 'security';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type: "performance" | "business" | "system" | "security";
+  severity: "low" | "medium" | "high" | "critical";
   title: string;
   message: string;
   module: string;
@@ -144,10 +145,10 @@ export class AdvancedMetricsCollector {
         cpuUsage: 80, // 80%
       },
       businessThresholds: {
-        'daily-revenue': { target: 10000, warning: 8000, critical: 5000 },
-        'customer-satisfaction': { target: 4.5, warning: 4.0, critical: 3.0 },
-        'booking-conversion': { target: 0.15, warning: 0.1, critical: 0.05 },
-        'avg-response-time': { target: 500, warning: 1000, critical: 2000 },
+        "daily-revenue": { target: 10000, warning: 8000, critical: 5000 },
+        "customer-satisfaction": { target: 4.5, warning: 4.0, critical: 3.0 },
+        "booking-conversion": { target: 0.15, warning: 0.1, critical: 0.05 },
+        "avg-response-time": { target: 500, warning: 1000, critical: 2000 },
       },
     };
   }
@@ -165,8 +166,8 @@ export class AdvancedMetricsCollector {
   async initialize(config?: Partial<MetricsConfig>): Promise<void> {
     try {
       logger.info(
-        '📊 [AdvancedMetricsCollector] Initializing advanced metrics collection v2.0',
-        'MetricsCollector'
+        "📊 [AdvancedMetricsCollector] Initializing advanced metrics collection v2.0",
+        "MetricsCollector",
       );
 
       if (config) {
@@ -183,14 +184,14 @@ export class AdvancedMetricsCollector {
 
       this.isInitialized = true;
       logger.success(
-        '✅ [AdvancedMetricsCollector] Advanced metrics collector initialized',
-        'MetricsCollector'
+        "✅ [AdvancedMetricsCollector] Advanced metrics collector initialized",
+        "MetricsCollector",
       );
     } catch (error) {
       logger.error(
-        '❌ [AdvancedMetricsCollector] Failed to initialize metrics collector',
-        'MetricsCollector',
-        error
+        "❌ [AdvancedMetricsCollector] Failed to initialize metrics collector",
+        "MetricsCollector",
+        error,
       );
       throw error;
     }
@@ -200,7 +201,7 @@ export class AdvancedMetricsCollector {
    * Record performance metrics for a module operation
    */
   recordPerformanceMetrics(
-    metrics: Omit<PerformanceMetrics, 'timestamp'>
+    metrics: Omit<PerformanceMetrics, "timestamp">,
   ): void {
     const performanceMetrics: PerformanceMetrics = {
       ...metrics,
@@ -217,14 +218,14 @@ export class AdvancedMetricsCollector {
 
     logger.debug(
       `📈 [MetricsCollector] Recorded performance metrics for ${metrics.module}:${metrics.operation}`,
-      'MetricsCollector'
+      "MetricsCollector",
     );
   }
 
   /**
    * Record business KPI
    */
-  recordBusinessKPI(kpi: Omit<BusinessKPI, 'timestamp'>): void {
+  recordBusinessKPI(kpi: Omit<BusinessKPI, "timestamp">): void {
     const businessKPI: BusinessKPI = {
       ...kpi,
       timestamp: new Date(),
@@ -240,19 +241,19 @@ export class AdvancedMetricsCollector {
 
     logger.debug(
       `💼 [MetricsCollector] Recorded business KPI: ${kpi.name} = ${kpi.value}${kpi.unit}`,
-      'MetricsCollector'
+      "MetricsCollector",
     );
   }
 
   /**
    * Create an alert
    */
-  createAlert(alert: Omit<Alert, 'id' | 'triggeredAt' | 'resolved'>): void {
+  createAlert(alert: Omit<Alert, "id" | "triggeredAt" | "resolved">): void {
     // ✅ FIX: Disable alerts in production to prevent false alerts
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       logger.debug(
         `[Metrics] Alert creation disabled in production: ${alert.title}`,
-        'AdvancedMetricsCollector'
+        "AdvancedMetricsCollector",
       );
       return;
     }
@@ -271,19 +272,19 @@ export class AdvancedMetricsCollector {
 
       logger.warn(
         `🚨 [Metrics] Alert created: ${alert.title} (${alert.severity})`,
-        'AdvancedMetricsCollector',
+        "AdvancedMetricsCollector",
         {
           alertId,
           module: alert.module,
           threshold: alert.threshold,
           currentValue: alert.currentValue,
-        }
+        },
       );
     } catch (error) {
       logger.error(
-        '❌ [Metrics] Failed to create alert',
-        'AdvancedMetricsCollector',
-        error
+        "❌ [Metrics] Failed to create alert",
+        "AdvancedMetricsCollector",
+        error,
       );
     }
   }
@@ -307,12 +308,12 @@ export class AdvancedMetricsCollector {
 
     logger.info(
       `✅ [MetricsCollector] Alert resolved: ${alert.title}`,
-      'MetricsCollector',
+      "MetricsCollector",
       {
         alertId,
         duration: alert.resolvedAt.getTime() - alert.triggeredAt.getTime(),
         reason,
-      }
+      },
     );
 
     return true;
@@ -327,10 +328,10 @@ export class AdvancedMetricsCollector {
 
     // Get recent metrics
     const recentMetrics = this.metricsHistory.filter(
-      m => m.timestamp >= last24Hours
+      (m) => m.timestamp >= last24Hours,
     );
     const recentKPIs = this.businessKPIs.filter(
-      k => k.timestamp >= last24Hours
+      (k) => k.timestamp >= last24Hours,
     );
 
     // Calculate overall performance
@@ -358,7 +359,7 @@ export class AdvancedMetricsCollector {
       alerts: {
         active: Array.from(this.activeAlerts.values()),
         resolved: this.alertHistory.filter(
-          a => a.resolved && a.resolvedAt && a.resolvedAt >= last24Hours
+          (a) => a.resolved && a.resolvedAt && a.resolvedAt >= last24Hours,
         ),
         summary: alertSummary,
       },
@@ -376,9 +377,9 @@ export class AdvancedMetricsCollector {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     return {
-      performance: this.metricsHistory.filter(m => m.timestamp >= cutoff),
-      business: this.businessKPIs.filter(k => k.timestamp >= cutoff),
-      alerts: this.alertHistory.filter(a => a.triggeredAt >= cutoff),
+      performance: this.metricsHistory.filter((m) => m.timestamp >= cutoff),
+      business: this.businessKPIs.filter((k) => k.timestamp >= cutoff),
+      alerts: this.alertHistory.filter((a) => a.triggeredAt >= cutoff),
     };
   }
 
@@ -387,7 +388,7 @@ export class AdvancedMetricsCollector {
    */
   getModuleMetrics(
     moduleName: string,
-    hours: number = 24
+    hours: number = 24,
   ): {
     performance: PerformanceMetrics[];
     business: BusinessKPI[];
@@ -402,13 +403,13 @@ export class AdvancedMetricsCollector {
     const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
 
     const performance = this.metricsHistory.filter(
-      m => m.module === moduleName && m.timestamp >= cutoff
+      (m) => m.module === moduleName && m.timestamp >= cutoff,
     );
     const business = this.businessKPIs.filter(
-      k => k.module === moduleName && k.timestamp >= cutoff
+      (k) => k.module === moduleName && k.timestamp >= cutoff,
     );
     const alerts = this.alertHistory.filter(
-      a => a.module === moduleName && a.triggeredAt >= cutoff
+      (a) => a.module === moduleName && a.triggeredAt >= cutoff,
     );
 
     // Calculate summary
@@ -434,7 +435,7 @@ export class AdvancedMetricsCollector {
    * Get system health based on metrics
    */
   getSystemHealthFromMetrics(): {
-    status: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
+    status: "healthy" | "degraded" | "unhealthy" | "critical";
     score: number;
     issues: string[];
     recommendations: string[];
@@ -450,9 +451,9 @@ export class AdvancedMetricsCollector {
       this.config.performanceThresholds.responseTime
     ) {
       issues.push(
-        `High response time: ${snapshot.performance.overall.averageResponseTime}ms`
+        `High response time: ${snapshot.performance.overall.averageResponseTime}ms`,
       );
-      recommendations.push('Optimize slow endpoints and consider caching');
+      recommendations.push("Optimize slow endpoints and consider caching");
       score -= 20;
     }
 
@@ -461,9 +462,9 @@ export class AdvancedMetricsCollector {
       this.config.performanceThresholds.errorRate
     ) {
       issues.push(
-        `High error rate: ${(snapshot.performance.overall.errorRate * 100).toFixed(2)}%`
+        `High error rate: ${(snapshot.performance.overall.errorRate * 100).toFixed(2)}%`,
       );
-      recommendations.push('Investigate and fix error-prone operations');
+      recommendations.push("Investigate and fix error-prone operations");
       score -= 25;
     }
 
@@ -472,38 +473,38 @@ export class AdvancedMetricsCollector {
       this.config.performanceThresholds.memoryUsage
     ) {
       issues.push(
-        `High memory usage: ${snapshot.performance.overall.memoryUsage}MB`
+        `High memory usage: ${snapshot.performance.overall.memoryUsage}MB`,
       );
-      recommendations.push('Monitor memory leaks and optimize memory usage');
+      recommendations.push("Monitor memory leaks and optimize memory usage");
       score -= 15;
     }
 
     // Check active alerts
     const criticalAlerts = snapshot.alerts.active.filter(
-      a => a.severity === 'critical'
+      (a) => a.severity === "critical",
     ).length;
     const highAlerts = snapshot.alerts.active.filter(
-      a => a.severity === 'high'
+      (a) => a.severity === "high",
     ).length;
 
     if (criticalAlerts > 0) {
       issues.push(`${criticalAlerts} critical alerts active`);
-      recommendations.push('Address critical alerts immediately');
+      recommendations.push("Address critical alerts immediately");
       score -= 30;
     }
 
     if (highAlerts > 0) {
       issues.push(`${highAlerts} high-priority alerts active`);
-      recommendations.push('Review and resolve high-priority alerts');
+      recommendations.push("Review and resolve high-priority alerts");
       score -= 15;
     }
 
     // Determine status
-    let status: 'healthy' | 'degraded' | 'unhealthy' | 'critical';
-    if (score >= 90) status = 'healthy';
-    else if (score >= 70) status = 'degraded';
-    else if (score >= 50) status = 'unhealthy';
-    else status = 'critical';
+    let status: "healthy" | "degraded" | "unhealthy" | "critical";
+    if (score >= 90) status = "healthy";
+    else if (score >= 70) status = "degraded";
+    else if (score >= 50) status = "unhealthy";
+    else status = "critical";
 
     return { status, score: Math.max(0, score), issues, recommendations };
   }
@@ -533,13 +534,17 @@ export class AdvancedMetricsCollector {
   // Private methods
 
   private startContinuousCollection(): void {
-    this.collectionInterval = setInterval(() => {
-      this.collectSystemMetrics();
-    }, this.config.collectionInterval);
+    this.collectionInterval = TimerManager.setInterval(
+      () => {
+        this.collectSystemMetrics();
+      },
+      this.config.collectionInterval,
+      "auto-generated-interval-20",
+    );
 
     logger.info(
-      '🔄 [AdvancedMetricsCollector] Started continuous metrics collection',
-      'MetricsCollector'
+      "🔄 [AdvancedMetricsCollector] Started continuous metrics collection",
+      "MetricsCollector",
     );
   }
 
@@ -550,8 +555,8 @@ export class AdvancedMetricsCollector {
       const cpuUsage = process.cpuUsage();
 
       this.recordPerformanceMetrics({
-        module: 'system',
-        operation: 'system-metrics',
+        module: "system",
+        operation: "system-metrics",
         responseTime: 0,
         memoryUsage: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
         cpuUsage: Math.round((cpuUsage.user + cpuUsage.system) / 1000), // ms to %
@@ -565,9 +570,9 @@ export class AdvancedMetricsCollector {
       }
     } catch (error) {
       logger.error(
-        '❌ [AdvancedMetricsCollector] Failed to collect system metrics',
-        'MetricsCollector',
-        error
+        "❌ [AdvancedMetricsCollector] Failed to collect system metrics",
+        "MetricsCollector",
+        error,
       );
     }
   }
@@ -582,48 +587,48 @@ export class AdvancedMetricsCollector {
     if (isBusinessHours) {
       // Simulated business metrics - replace with actual data queries
       this.recordBusinessKPI({
-        name: 'concurrent-calls',
+        name: "concurrent-calls",
         value: Math.floor(Math.random() * 50) + 10,
-        unit: 'calls',
-        category: 'operations',
-        trend: 'stable',
-        module: 'voice-module',
+        unit: "calls",
+        category: "operations",
+        trend: "stable",
+        module: "voice-module",
       });
 
       this.recordBusinessKPI({
-        name: 'customer-satisfaction',
+        name: "customer-satisfaction",
         value: Math.random() * 1 + 4, // 4-5 range
-        unit: 'rating',
-        category: 'customer_satisfaction',
+        unit: "rating",
+        category: "customer_satisfaction",
         target: 4.5,
-        trend: 'up',
-        module: 'hotel-module',
+        trend: "up",
+        module: "hotel-module",
       });
 
       this.recordBusinessKPI({
-        name: 'response-efficiency',
+        name: "response-efficiency",
         value: Math.random() * 20 + 80, // 80-100% range
-        unit: '%',
-        category: 'performance',
+        unit: "%",
+        category: "performance",
         target: 95,
-        trend: 'stable',
-        module: 'analytics-module',
+        trend: "stable",
+        module: "analytics-module",
       });
     }
   }
 
   private async initializeBusinessKPIs(): Promise<void> {
     logger.debug(
-      '💼 [AdvancedMetricsCollector] Initializing business KPI tracking',
-      'MetricsCollector'
+      "💼 [AdvancedMetricsCollector] Initializing business KPI tracking",
+      "MetricsCollector",
     );
 
     // Initialize with baseline KPIs
     const baselineKPIs = [
-      { name: 'daily-revenue', target: 10000, module: 'hotel-module' },
-      { name: 'customer-satisfaction', target: 4.5, module: 'hotel-module' },
-      { name: 'booking-conversion', target: 0.15, module: 'hotel-module' },
-      { name: 'avg-response-time', target: 500, module: 'core-module' },
+      { name: "daily-revenue", target: 10000, module: "hotel-module" },
+      { name: "customer-satisfaction", target: 4.5, module: "hotel-module" },
+      { name: "booking-conversion", target: 0.15, module: "hotel-module" },
+      { name: "avg-response-time", target: 500, module: "core-module" },
     ];
 
     for (const kpi of baselineKPIs) {
@@ -642,12 +647,12 @@ export class AdvancedMetricsCollector {
 
     if (metrics.responseTime > performanceThresholds.responseTime) {
       this.createAlert({
-        type: 'performance',
+        type: "performance",
         severity:
           metrics.responseTime > performanceThresholds.responseTime * 2
-            ? 'critical'
-            : 'high',
-        title: 'High Response Time',
+            ? "critical"
+            : "high",
+        title: "High Response Time",
         message: `Response time of ${metrics.responseTime}ms exceeds threshold of ${performanceThresholds.responseTime}ms`,
         module: metrics.module,
         threshold: performanceThresholds.responseTime,
@@ -658,12 +663,12 @@ export class AdvancedMetricsCollector {
 
     if (metrics.errorRate > performanceThresholds.errorRate) {
       this.createAlert({
-        type: 'performance',
+        type: "performance",
         severity:
           metrics.errorRate > performanceThresholds.errorRate * 2
-            ? 'critical'
-            : 'high',
-        title: 'High Error Rate',
+            ? "critical"
+            : "high",
+        title: "High Error Rate",
         message: `Error rate of ${(metrics.errorRate * 100).toFixed(2)}% exceeds threshold of ${(performanceThresholds.errorRate * 100).toFixed(2)}%`,
         module: metrics.module,
         threshold: performanceThresholds.errorRate,
@@ -674,12 +679,12 @@ export class AdvancedMetricsCollector {
 
     if (metrics.memoryUsage > performanceThresholds.memoryUsage) {
       this.createAlert({
-        type: 'system',
+        type: "system",
         severity:
           metrics.memoryUsage > performanceThresholds.memoryUsage * 1.5
-            ? 'critical'
-            : 'medium',
-        title: 'High Memory Usage',
+            ? "critical"
+            : "medium",
+        title: "High Memory Usage",
         message: `Memory usage of ${metrics.memoryUsage}MB exceeds threshold of ${performanceThresholds.memoryUsage}MB`,
         module: metrics.module,
         threshold: performanceThresholds.memoryUsage,
@@ -697,9 +702,9 @@ export class AdvancedMetricsCollector {
 
     if (kpi.value < threshold.critical) {
       this.createAlert({
-        type: 'business',
-        severity: 'critical',
-        title: 'Critical Business KPI',
+        type: "business",
+        severity: "critical",
+        title: "Critical Business KPI",
         message: `${kpi.name} value of ${kpi.value}${kpi.unit} is below critical threshold of ${threshold.critical}${kpi.unit}`,
         module: kpi.module,
         threshold: threshold.critical,
@@ -708,9 +713,9 @@ export class AdvancedMetricsCollector {
       });
     } else if (kpi.value < threshold.warning) {
       this.createAlert({
-        type: 'business',
-        severity: 'medium',
-        title: 'Business KPI Warning',
+        type: "business",
+        severity: "medium",
+        title: "Business KPI Warning",
         message: `${kpi.name} value of ${kpi.value}${kpi.unit} is below warning threshold of ${threshold.warning}${kpi.unit}`,
         module: kpi.module,
         threshold: threshold.warning,
@@ -748,7 +753,7 @@ export class AdvancedMetricsCollector {
     const moduleMetrics: Record<string, PerformanceMetrics[]> = {};
 
     // Group metrics by module
-    metrics.forEach(metric => {
+    metrics.forEach((metric) => {
       if (!moduleMetrics[metric.module]) {
         moduleMetrics[metric.module] = [];
       }
@@ -785,7 +790,7 @@ export class AdvancedMetricsCollector {
 
     // Group KPIs by name
     const kpiGroups: Record<string, BusinessKPI[]> = {};
-    kpis.forEach(kpi => {
+    kpis.forEach((kpi) => {
       if (!kpiGroups[kpi.name]) {
         kpiGroups[kpi.name] = [];
       }
@@ -796,7 +801,7 @@ export class AdvancedMetricsCollector {
     for (const [name, kpiList] of Object.entries(kpiGroups)) {
       if (kpiList.length >= 2) {
         const sorted = kpiList.sort(
-          (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+          (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
         );
         const current = sorted[sorted.length - 1];
         const previous = sorted[sorted.length - 2];
@@ -809,7 +814,7 @@ export class AdvancedMetricsCollector {
           value: current.value,
           change,
           changePercent: Math.round(changePercent * 100) / 100,
-          period: '24h',
+          period: "24h",
         };
       }
     }
@@ -821,27 +826,27 @@ export class AdvancedMetricsCollector {
     const activeAlerts = Array.from(this.activeAlerts.values());
     return {
       total: this.alertHistory.length,
-      critical: activeAlerts.filter(a => a.severity === 'critical').length,
-      high: activeAlerts.filter(a => a.severity === 'high').length,
-      medium: activeAlerts.filter(a => a.severity === 'medium').length,
-      low: activeAlerts.filter(a => a.severity === 'low').length,
+      critical: activeAlerts.filter((a) => a.severity === "critical").length,
+      high: activeAlerts.filter((a) => a.severity === "high").length,
+      medium: activeAlerts.filter((a) => a.severity === "medium").length,
+      low: activeAlerts.filter((a) => a.severity === "low").length,
     };
   }
 
   private cleanupOldMetrics(): void {
     const cutoff = new Date(
-      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000
+      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000,
     );
     this.metricsHistory = this.metricsHistory.filter(
-      m => m.timestamp >= cutoff
+      (m) => m.timestamp >= cutoff,
     );
   }
 
   private cleanupOldKPIs(): void {
     const cutoff = new Date(
-      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000
+      Date.now() - this.config.retentionDays * 24 * 60 * 60 * 1000,
     );
-    this.businessKPIs = this.businessKPIs.filter(k => k.timestamp >= cutoff);
+    this.businessKPIs = this.businessKPIs.filter((k) => k.timestamp >= cutoff);
   }
 
   /**
@@ -852,8 +857,8 @@ export class AdvancedMetricsCollector {
       clearInterval(this.collectionInterval);
       this.collectionInterval = null;
       logger.info(
-        '⏹️ [AdvancedMetricsCollector] Stopped metrics collection',
-        'MetricsCollector'
+        "⏹️ [AdvancedMetricsCollector] Stopped metrics collection",
+        "MetricsCollector",
       );
     }
   }
@@ -866,9 +871,9 @@ export const advancedMetricsCollector = AdvancedMetricsCollector.getInstance();
 export const initializeAdvancedMetrics = (config?: Partial<MetricsConfig>) =>
   advancedMetricsCollector.initialize(config);
 export const recordPerformanceMetrics = (
-  metrics: Omit<PerformanceMetrics, 'timestamp'>
+  metrics: Omit<PerformanceMetrics, "timestamp">,
 ) => advancedMetricsCollector.recordPerformanceMetrics(metrics);
-export const recordBusinessKPI = (kpi: Omit<BusinessKPI, 'timestamp'>) =>
+export const recordBusinessKPI = (kpi: Omit<BusinessKPI, "timestamp">) =>
   advancedMetricsCollector.recordBusinessKPI(kpi);
 export const getCurrentMetricsSnapshot = () =>
   advancedMetricsCollector.getCurrentSnapshot();

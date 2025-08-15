@@ -6,6 +6,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { recordPerformanceMetrics } from "./AdvancedMetricsCollector";
+import { TimerManager } from "../utils/TimerManager";
 
 // Cache interfaces
 export interface CacheEntry<T = any> {
@@ -607,9 +608,13 @@ export class CacheManager {
   }
 
   private startCleanupInterval(): void {
-    this.cleanupInterval = setInterval(() => {
-      this.cleanup();
-    }, this.config.cleanupInterval);
+    this.cleanupInterval = TimerManager.setInterval(
+      () => {
+        this.cleanup();
+      },
+      this.config.cleanupInterval,
+      "auto-generated-interval-27",
+    );
 
     logger.debug("🔄 [CacheManager] Started cleanup interval", "CacheManager");
   }

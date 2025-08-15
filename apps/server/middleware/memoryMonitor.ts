@@ -6,6 +6,7 @@
  */
 
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface MemoryStats {
   rss: number;
@@ -49,9 +50,13 @@ class MemoryMonitor {
     this.checkMemoryUsage();
 
     // Periodic monitoring
-    this.monitoringInterval = setInterval(() => {
-      this.checkMemoryUsage();
-    }, intervalMs);
+    this.monitoringInterval = TimerManager.setInterval(
+      () => {
+        this.checkMemoryUsage();
+      },
+      intervalMs,
+      "auto-generated-interval-2",
+    );
 
     logger.info("🔍 Memory monitoring started", "MemoryMonitor", {
       interval: `${intervalMs / 1000}s`,

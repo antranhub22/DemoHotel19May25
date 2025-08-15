@@ -4,6 +4,7 @@
  */
 
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface NativeModuleLeakSource {
   name: string;
@@ -371,7 +372,7 @@ class NativeModuleCleanup {
    */
   private startPeriodicCleanup(): void {
     // Aggressive cleanup every 5 minutes
-    setInterval(() => {
+    TimerManager.setInterval(() => {
       if (this.isShuttingDown) return;
 
       try {

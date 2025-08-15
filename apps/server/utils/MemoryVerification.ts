@@ -4,6 +4,7 @@
  */
 
 import { logger } from "../../../packages/shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface MemorySnapshot {
   timestamp: string;
@@ -53,9 +54,13 @@ export class MemoryVerification {
     });
 
     // Start periodic monitoring
-    this.monitoringInterval = setInterval(() => {
-      this.takeSnapshot();
-    }, intervalSeconds * 1000);
+    this.monitoringInterval = TimerManager.setInterval(
+      () => {
+        this.takeSnapshot();
+      },
+      intervalSeconds * 1000,
+      "auto-generated-interval-62",
+    );
   }
 
   /**

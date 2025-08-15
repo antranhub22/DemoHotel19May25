@@ -4,6 +4,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { NextFunction, Request, Response } from "express";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================================================
 // UPLOAD LIMITER CONFIGURATION
@@ -219,9 +220,13 @@ class UploadLimiter {
    * Start periodic stats reset
    */
   private startStatsReset(): void {
-    setInterval(() => {
-      this.resetStats();
-    }, this.config.trackingWindowMs);
+    TimerManager.setInterval(
+      () => {
+        this.resetStats();
+      },
+      this.config.trackingWindowMs,
+      "auto-generated-interval-8",
+    );
   }
 
   /**

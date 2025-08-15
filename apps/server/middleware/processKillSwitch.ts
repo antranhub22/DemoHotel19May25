@@ -4,6 +4,7 @@
  */
 
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 interface ProcessMemoryStats {
   heapUsed: number;
@@ -59,7 +60,7 @@ class ProcessKillSwitch {
     console.error(`⏰ Restarting in 5 seconds...`);
 
     // ✅ GRACEFUL: Give time for cleanup and logging
-    setTimeout(() => {
+    TimerManager.setTimeout(() => {
       console.error("🔥 KILL SWITCH ACTIVATED - Process exiting...");
       process.exit(1); // Let process manager (PM2, Docker, Render) restart
     }, 5000);
@@ -142,9 +143,13 @@ class ProcessKillSwitch {
       },
     );
 
-    this.monitoringInterval = setInterval(() => {
-      this.checkMemoryUsage();
-    }, this.CHECK_INTERVAL);
+    this.monitoringInterval = TimerManager.setInterval(
+      () => {
+        this.checkMemoryUsage();
+      },
+      this.CHECK_INTERVAL,
+      "auto-generated-interval-5",
+    );
 
     // ✅ IMMEDIATE: Check memory on startup
     this.checkMemoryUsage();

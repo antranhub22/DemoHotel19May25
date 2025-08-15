@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { EventEmitter } from "events";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -1133,7 +1134,7 @@ export class BackupManager extends EventEmitter {
     // For simplicity, we'll use setTimeout with calculated intervals
     const interval = this.calculateInterval(schedule);
 
-    const timeoutId = setInterval(async () => {
+    const timeoutId = TimerManager.setInterval(async () => {
       try {
         console.log(`🔄 Running scheduled backup: ${schedule.name}`);
 
@@ -1192,7 +1193,7 @@ export class BackupManager extends EventEmitter {
     if (!this.config.monitoring.enabled) return;
 
     // Monitor backup health every 5 minutes
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.performHealthCheck();
       },
@@ -1202,7 +1203,7 @@ export class BackupManager extends EventEmitter {
 
   private startCleanupScheduler() {
     // Run cleanup daily
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.cleanupExpiredBackups();
       },

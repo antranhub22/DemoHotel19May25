@@ -5,6 +5,7 @@
 // indexing strategies, performance monitoring, and optimization recommendations
 
 import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // Database optimization interfaces
 export interface DatabaseConfig {
@@ -455,7 +456,7 @@ export class DatabaseOptimizer {
   private startPerformanceMonitoring(): void {
     const interval = (this.config.monitoring?.metricsInterval || 30) * 1000;
 
-    this.monitoringInterval = setInterval(async () => {
+    this.monitoringInterval = TimerManager.setInterval(async () => {
       try {
         const metrics = await this.collectConnectionMetrics();
         this.connectionMetrics.push(metrics);

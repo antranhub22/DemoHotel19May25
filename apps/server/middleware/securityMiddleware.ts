@@ -1,5 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { logger } from '@shared/utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { logger } from "@shared/utils/logger";
+import { TimerManager } from "../utils/TimerManager";
 
 // ✅ NEW: Phase 5 - Advanced security middleware
 interface SecurityConfig {
@@ -34,7 +35,7 @@ const DEFAULT_SECURITY_CONFIG: SecurityConfig = {
   },
   cors: {
     enabled: true,
-    origin: ['http://localhost:3000', 'https://yourdomain.com'],
+    origin: ["http://localhost:3000", "https://yourdomain.com"],
     credentials: true,
   },
   helmet: {
@@ -60,7 +61,7 @@ export const advancedRateLimiting = (config: Partial<SecurityConfig> = {}) => {
       return next();
     }
 
-    const clientId = req.ip || req.connection.remoteAddress || 'unknown';
+    const clientId = req.ip || req.connection.remoteAddress || "unknown";
     const now = Date.now();
     const windowMs = securityConfig.rateLimiting.windowMs;
 
@@ -78,33 +79,33 @@ export const advancedRateLimiting = (config: Partial<SecurityConfig> = {}) => {
 
       if (clientData.count > securityConfig.rateLimiting.maxRequests) {
         logger.warn(
-          '🚫 [SecurityMiddleware] Rate limit exceeded',
-          'SecurityMiddleware',
+          "🚫 [SecurityMiddleware] Rate limit exceeded",
+          "SecurityMiddleware",
           {
             clientId,
             count: clientData.count,
             maxRequests: securityConfig.rateLimiting.maxRequests,
-          }
+          },
         );
 
         return res.status(429).json({
           success: false,
-          error: 'Too many requests',
-          code: 'RATE_LIMIT_EXCEEDED',
+          error: "Too many requests",
+          code: "RATE_LIMIT_EXCEEDED",
           retryAfter: Math.ceil((clientData.resetTime - now) / 1000),
         });
       }
     }
 
     // Add rate limit headers
-    res.setHeader('X-RateLimit-Limit', securityConfig.rateLimiting.maxRequests);
+    res.setHeader("X-RateLimit-Limit", securityConfig.rateLimiting.maxRequests);
     res.setHeader(
-      'X-RateLimit-Remaining',
-      securityConfig.rateLimiting.maxRequests - (clientData?.count || 1)
+      "X-RateLimit-Remaining",
+      securityConfig.rateLimiting.maxRequests - (clientData?.count || 1),
     );
     res.setHeader(
-      'X-RateLimit-Reset',
-      Math.ceil((clientData?.resetTime || now + windowMs) / 1000)
+      "X-RateLimit-Reset",
+      Math.ceil((clientData?.resetTime || now + windowMs) / 1000),
     );
 
     next();
@@ -121,12 +122,12 @@ export const inputSanitization = (config: Partial<SecurityConfig> = {}) => {
     }
 
     const sanitizeValue = (value: any): any => {
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         // ✅ NEW: Phase 5 - Basic XSS protection
         let sanitized = value
-          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          .replace(/javascript:/gi, '')
-          .replace(/on\w+\s*=/gi, '')
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+          .replace(/javascript:/gi, "")
+          .replace(/on\w+\s*=/gi, "")
           .trim();
 
         // ✅ NEW: Phase 5 - Length validation
@@ -143,7 +144,7 @@ export const inputSanitization = (config: Partial<SecurityConfig> = {}) => {
         return value.map(sanitizeValue);
       }
 
-      if (typeof value === 'object' && value !== null) {
+      if (typeof value === "object" && value !== null) {
         const sanitized: any = {};
         for (const [key, val] of Object.entries(value)) {
           sanitized[key] = sanitizeValue(val);
@@ -173,15 +174,15 @@ export const inputSanitization = (config: Partial<SecurityConfig> = {}) => {
       next();
     } catch (error) {
       logger.warn(
-        '🚫 [SecurityMiddleware] Input sanitization failed',
-        'SecurityMiddleware',
-        { error: error instanceof Error ? error.message : 'Unknown error' }
+        "🚫 [SecurityMiddleware] Input sanitization failed",
+        "SecurityMiddleware",
+        { error: error instanceof Error ? error.message : "Unknown error" },
       );
 
       return res.status(400).json({
         success: false,
-        error: 'Invalid input detected',
-        code: 'INPUT_SANITIZATION_FAILED',
+        error: "Invalid input detected",
+        code: "INPUT_SANITIZATION_FAILED",
       });
     }
   };
@@ -197,22 +198,22 @@ export const securityHeaders = (config: Partial<SecurityConfig> = {}) => {
     }
 
     // ✅ NEW: Phase 5 - Security headers
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "1; mode=block");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
     if (securityConfig.helmet.hsts) {
       res.setHeader(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains'
+        "Strict-Transport-Security",
+        "max-age=31536000; includeSubDomains",
       );
     }
 
     if (securityConfig.helmet.contentSecurityPolicy) {
       res.setHeader(
-        'Content-Security-Policy',
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+        "Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
       );
     }
 
@@ -224,11 +225,11 @@ export const securityHeaders = (config: Partial<SecurityConfig> = {}) => {
 export const securityLogging = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const startTime = Date.now();
-  const clientId = req.ip || req.connection.remoteAddress || 'unknown';
-  const userAgent = req.get('User-Agent') || 'unknown';
+  const clientId = req.ip || req.connection.remoteAddress || "unknown";
+  const userAgent = req.get("User-Agent") || "unknown";
 
   // ✅ NEW: Phase 5 - Log suspicious requests
   const suspiciousPatterns = [
@@ -241,13 +242,14 @@ export const securityLogging = (
   ];
 
   const isSuspicious = suspiciousPatterns.some(
-    pattern => pattern.test(req.url) || pattern.test(JSON.stringify(req.body))
+    (pattern) =>
+      pattern.test(req.url) || pattern.test(JSON.stringify(req.body)),
   );
 
   if (isSuspicious) {
     logger.warn(
-      '🚨 [SecurityMiddleware] Suspicious request detected',
-      'SecurityMiddleware',
+      "🚨 [SecurityMiddleware] Suspicious request detected",
+      "SecurityMiddleware",
       {
         clientId,
         userAgent,
@@ -255,18 +257,18 @@ export const securityLogging = (
         method: req.method,
         body: req.body,
         headers: req.headers,
-      }
+      },
     );
   }
 
   // ✅ NEW: Phase 5 - Response logging
-  res.on('finish', () => {
+  res.on("finish", () => {
     const duration = Date.now() - startTime;
     const statusCode = res.statusCode;
 
     logger.info(
-      '📊 [SecurityMiddleware] Request processed',
-      'SecurityMiddleware',
+      "📊 [SecurityMiddleware] Request processed",
+      "SecurityMiddleware",
       {
         clientId,
         method: req.method,
@@ -275,7 +277,7 @@ export const securityLogging = (
         duration,
         userAgent,
         suspicious: isSuspicious,
-      }
+      },
     );
   });
 
@@ -294,23 +296,23 @@ export const corsMiddleware = (config: Partial<SecurityConfig> = {}) => {
     const origin = req.headers.origin;
 
     if (origin && securityConfig.cors.origin.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader("Access-Control-Allow-Origin", origin);
     }
 
     res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+      "Access-Control-Allow-Methods",
+      "GET, POST, PUT, DELETE, PATCH, OPTIONS",
     );
     res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Content-Type, Authorization, X-Requested-With'
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With",
     );
 
     if (securityConfig.cors.credentials) {
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      res.setHeader("Access-Control-Allow-Credentials", "true");
     }
 
-    if (req.method === 'OPTIONS') {
+    if (req.method === "OPTIONS") {
       return res.status(200).end();
     }
 
@@ -320,7 +322,7 @@ export const corsMiddleware = (config: Partial<SecurityConfig> = {}) => {
 
 // ✅ NEW: Phase 5 - Combined security middleware
 export const createSecurityMiddleware = (
-  config: Partial<SecurityConfig> = {}
+  config: Partial<SecurityConfig> = {},
 ) => {
   return [
     securityHeaders(config),
@@ -361,9 +363,10 @@ export const securityUtils = {
 };
 
 // ✅ NEW: Phase 5 - Clean up rate limit store every hour
-setInterval(
+TimerManager.setInterval(
   () => {
     securityUtils.cleanRateLimitStore();
   },
-  60 * 60 * 1000
+  60 * 60 * 1000,
+  "auto-generated-interval-7",
 ); // 1 hour

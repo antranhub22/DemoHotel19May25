@@ -1,7 +1,8 @@
-import crypto from 'crypto';
-import { EventEmitter } from 'events';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import crypto from "crypto";
+import { EventEmitter } from "events";
+import * as fs from "fs/promises";
+import * as path from "path";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // Types & Interfaces
@@ -10,13 +11,13 @@ import * as path from 'path';
 export interface AuditConfig {
   logging: {
     enabled: boolean;
-    level: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+    level: "debug" | "info" | "warn" | "error" | "critical";
     maxLogSize: string;
     maxLogFiles: number;
     compressionEnabled: boolean;
   };
   storage: {
-    type: 'file' | 'database' | 'remote';
+    type: "file" | "database" | "remote";
     location: string;
     retention: {
       days: number;
@@ -55,25 +56,25 @@ export interface AuditConfig {
 export interface AuditLogEntry {
   id: string;
   timestamp: Date;
-  level: 'debug' | 'info' | 'warn' | 'error' | 'critical';
+  level: "debug" | "info" | "warn" | "error" | "critical";
   category:
-    | 'security'
-    | 'user'
-    | 'system'
-    | 'api'
-    | 'compliance'
-    | 'performance';
+    | "security"
+    | "user"
+    | "system"
+    | "api"
+    | "compliance"
+    | "performance";
   action: string;
   resource: string;
   actor: {
-    type: 'user' | 'system' | 'api' | 'service';
+    type: "user" | "system" | "api" | "service";
     id?: string;
     ip?: string;
     userAgent?: string;
     sessionId?: string;
   };
   target: {
-    type: 'user' | 'tenant' | 'system' | 'api' | 'data';
+    type: "user" | "tenant" | "system" | "api" | "data";
     id?: string;
     path?: string;
     method?: string;
@@ -87,7 +88,7 @@ export interface AuditLogEntry {
     metadata?: Record<string, any>;
   };
   security: {
-    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    riskLevel: "low" | "medium" | "high" | "critical";
     threatType?: string;
     mitigationAction?: string;
     complianceFlags: string[];
@@ -110,7 +111,7 @@ export interface ThreatDetectionRule {
   id: string;
   name: string;
   enabled: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   conditions: {
     timeWindow: number; // minutes
     threshold: number;
@@ -128,14 +129,14 @@ export interface ThreatDetectionRule {
 export interface SecurityAlert {
   id: string;
   timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   type: string;
   title: string;
   description: string;
   source: string;
   affectedResources: string[];
   recommendedActions: string[];
-  status: 'open' | 'investigating' | 'resolved' | 'false_positive';
+  status: "open" | "investigating" | "resolved" | "false_positive";
   assignee?: string;
   metadata: Record<string, any>;
 }
@@ -189,14 +190,14 @@ export interface ComplianceReport {
 const defaultAuditConfig: AuditConfig = {
   logging: {
     enabled: true,
-    level: 'info',
-    maxLogSize: '100MB',
+    level: "info",
+    maxLogSize: "100MB",
     maxLogFiles: 10,
     compressionEnabled: true,
   },
   storage: {
-    type: 'file',
-    location: './logs/audit',
+    type: "file",
+    location: "./logs/audit",
     retention: {
       days: 90,
       autoCleanup: true,
@@ -255,8 +256,8 @@ export class AuditLogger extends EventEmitter {
     this.startBackgroundTasks();
 
     console.log(
-      '🔍 AuditLogger initialized with comprehensive logging',
-      'AuditLogger'
+      "🔍 AuditLogger initialized with comprehensive logging",
+      "AuditLogger",
     );
   }
 
@@ -269,26 +270,26 @@ export class AuditLogger extends EventEmitter {
       await fs.mkdir(this.logPath, { recursive: true });
       console.log(`📁 Audit log directory created: ${this.logPath}`);
     } catch (error) {
-      console.error('Failed to create audit log directory:', error);
+      console.error("Failed to create audit log directory:", error);
     }
   }
 
   private generateEncryptionKey(): string {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(32).toString("hex");
   }
 
   private setupThreatDetectionRules() {
     this.threatRules = [
       {
-        id: 'failed-login-attempts',
-        name: 'Multiple Failed Login Attempts',
+        id: "failed-login-attempts",
+        name: "Multiple Failed Login Attempts",
         enabled: true,
-        severity: 'high',
+        severity: "high",
         conditions: {
           timeWindow: 5,
           threshold: 5,
-          patterns: ['login_failed'],
-          actions: ['authenticate'],
+          patterns: ["login_failed"],
+          actions: ["authenticate"],
         },
         response: {
           alert: true,
@@ -298,15 +299,15 @@ export class AuditLogger extends EventEmitter {
         },
       },
       {
-        id: 'suspicious-api-access',
-        name: 'Suspicious API Access Pattern',
+        id: "suspicious-api-access",
+        name: "Suspicious API Access Pattern",
         enabled: true,
-        severity: 'medium',
+        severity: "medium",
         conditions: {
           timeWindow: 10,
           threshold: 50,
-          patterns: ['api_call'],
-          actions: ['GET', 'POST', 'PUT', 'DELETE'],
+          patterns: ["api_call"],
+          actions: ["GET", "POST", "PUT", "DELETE"],
         },
         response: {
           alert: true,
@@ -316,15 +317,15 @@ export class AuditLogger extends EventEmitter {
         },
       },
       {
-        id: 'privilege-escalation',
-        name: 'Privilege Escalation Attempt',
+        id: "privilege-escalation",
+        name: "Privilege Escalation Attempt",
         enabled: true,
-        severity: 'critical',
+        severity: "critical",
         conditions: {
           timeWindow: 1,
           threshold: 1,
-          patterns: ['privilege_change', 'admin_access'],
-          actions: ['escalate', 'admin'],
+          patterns: ["privilege_change", "admin_access"],
+          actions: ["escalate", "admin"],
         },
         response: {
           alert: true,
@@ -334,15 +335,15 @@ export class AuditLogger extends EventEmitter {
         },
       },
       {
-        id: 'data-exfiltration',
-        name: 'Potential Data Exfiltration',
+        id: "data-exfiltration",
+        name: "Potential Data Exfiltration",
         enabled: true,
-        severity: 'critical',
+        severity: "critical",
         conditions: {
           timeWindow: 15,
           threshold: 100,
-          patterns: ['data_access', 'export'],
-          actions: ['download', 'export', 'bulk_access'],
+          patterns: ["data_access", "export"],
+          actions: ["download", "export", "bulk_access"],
         },
         response: {
           alert: true,
@@ -356,21 +357,30 @@ export class AuditLogger extends EventEmitter {
 
   private startBackgroundTasks() {
     // Flush buffer every 30 seconds
-    setInterval(() => {
-      this.flushLogBuffer();
-    }, 30000);
+    TimerManager.setInterval(
+      () => {
+        this.flushLogBuffer();
+      },
+      30000,
+      "auto-generated-interval-21",
+    );
 
     // Run threat detection every minute
-    setInterval(() => {
-      this.runThreatDetection();
-    }, 60000);
+    TimerManager.setInterval(
+      () => {
+        this.runThreatDetection();
+      },
+      60000,
+      "auto-generated-interval-22",
+    );
 
     // Cleanup old logs daily
-    setInterval(
+    TimerManager.setInterval(
       () => {
         this.cleanupOldLogs();
       },
-      24 * 60 * 60 * 1000
+      24 * 60 * 60 * 1000,
+      "auto-generated-interval-23",
     );
   }
 
@@ -385,12 +395,12 @@ export class AuditLogger extends EventEmitter {
     this.logBuffer.push(logEntry);
 
     // Emit event for real-time monitoring
-    this.emit('auditLog', logEntry);
+    this.emit("auditLog", logEntry);
 
     // Check for security threats
     if (
-      logEntry.category === 'security' ||
-      logEntry.security.riskLevel !== 'low'
+      logEntry.category === "security" ||
+      logEntry.security.riskLevel !== "low"
     ) {
       this.analyzeThreat(logEntry);
     }
@@ -410,16 +420,16 @@ export class AuditLogger extends EventEmitter {
     const logEntry: AuditLogEntry = {
       id,
       timestamp,
-      level: entry.level || 'info',
-      category: entry.category || 'system',
-      action: entry.action || 'unknown',
-      resource: entry.resource || 'system',
+      level: entry.level || "info",
+      category: entry.category || "system",
+      action: entry.action || "unknown",
+      resource: entry.resource || "system",
       actor: {
-        type: 'system',
+        type: "system",
         ...entry.actor,
       },
       target: {
-        type: 'system',
+        type: "system",
         ...entry.target,
       },
       details: {
@@ -427,16 +437,16 @@ export class AuditLogger extends EventEmitter {
         ...entry.details,
       },
       security: {
-        riskLevel: 'low',
+        riskLevel: "low",
         complianceFlags: [],
         ...entry.security,
       },
       context: {
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
         ...entry.context,
       },
       integrity: {
-        hash: '',
+        hash: "",
         verified: false,
       },
     };
@@ -458,9 +468,9 @@ export class AuditLogger extends EventEmitter {
     });
 
     return crypto
-      .createHmac('sha256', this.encryptionKey)
+      .createHmac("sha256", this.encryptionKey)
       .update(data)
-      .digest('hex');
+      .digest("hex");
   }
 
   // ============================================
@@ -472,13 +482,13 @@ export class AuditLogger extends EventEmitter {
     actor: any;
     target?: any;
     threatType?: string;
-    riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+    riskLevel?: "low" | "medium" | "high" | "critical";
     success: boolean;
     details?: any;
   }): Promise<string> {
     return this.log({
-      level: event.success ? 'info' : 'warn',
-      category: 'security',
+      level: event.success ? "info" : "warn",
+      category: "security",
       action: event.action,
       actor: event.actor,
       target: event.target,
@@ -487,9 +497,9 @@ export class AuditLogger extends EventEmitter {
         ...event.details,
       },
       security: {
-        riskLevel: event.riskLevel || 'medium',
+        riskLevel: event.riskLevel || "medium",
         threatType: event.threatType,
-        complianceFlags: ['security_event'],
+        complianceFlags: ["security_event"],
       },
     });
   }
@@ -505,11 +515,11 @@ export class AuditLogger extends EventEmitter {
     details?: any;
   }): Promise<string> {
     return this.log({
-      level: 'info',
-      category: 'user',
+      level: "info",
+      category: "user",
       action: action.action,
       actor: {
-        type: 'user',
+        type: "user",
         id: action.userId,
         ip: action.ip,
         userAgent: action.userAgent,
@@ -521,11 +531,11 @@ export class AuditLogger extends EventEmitter {
       },
       context: {
         tenantId: action.tenantId,
-        environment: process.env.NODE_ENV || 'development',
+        environment: process.env.NODE_ENV || "development",
       },
       security: {
-        riskLevel: 'low',
-        complianceFlags: action.action.includes('data') ? ['data_access'] : [],
+        riskLevel: "low",
+        complianceFlags: action.action.includes("data") ? ["data_access"] : [],
       },
     });
   }
@@ -540,12 +550,12 @@ export class AuditLogger extends EventEmitter {
     details?: any;
   }): Promise<string> {
     return this.log({
-      level: call.success ? 'info' : 'warn',
-      category: 'api',
-      action: 'api_call',
+      level: call.success ? "info" : "warn",
+      category: "api",
+      action: "api_call",
       actor: call.actor,
       target: {
-        type: 'api',
+        type: "api",
         path: call.path,
         method: call.method,
       },
@@ -556,8 +566,8 @@ export class AuditLogger extends EventEmitter {
         ...call.details,
       },
       security: {
-        riskLevel: call.success ? 'low' : 'medium',
-        complianceFlags: ['api_access'],
+        riskLevel: call.success ? "low" : "medium",
+        complianceFlags: ["api_access"],
       },
     });
   }
@@ -569,23 +579,23 @@ export class AuditLogger extends EventEmitter {
     details?: any;
   }): Promise<string> {
     return this.log({
-      level: event.success ? 'info' : 'error',
-      category: 'system',
+      level: event.success ? "info" : "error",
+      category: "system",
       action: event.action,
       resource: event.resource,
       actor: {
-        type: 'system',
+        type: "system",
       },
       target: {
-        type: 'system',
+        type: "system",
       },
       details: {
         success: event.success,
         ...event.details,
       },
       security: {
-        riskLevel: event.success ? 'low' : 'medium',
-        complianceFlags: ['system_event'],
+        riskLevel: event.success ? "low" : "medium",
+        complianceFlags: ["system_event"],
       },
     });
   }
@@ -597,7 +607,7 @@ export class AuditLogger extends EventEmitter {
   private runThreatDetection() {
     // Run periodic threat detection analysis
     const recentLogs = this.logBuffer.filter(
-      log => log.timestamp.getTime() > Date.now() - 5 * 60 * 1000 // Last 5 minutes
+      (log) => log.timestamp.getTime() > Date.now() - 5 * 60 * 1000, // Last 5 minutes
     );
 
     for (const log of recentLogs) {
@@ -617,16 +627,16 @@ export class AuditLogger extends EventEmitter {
 
   private matchesRule(
     entry: AuditLogEntry,
-    rule: ThreatDetectionRule
+    rule: ThreatDetectionRule,
   ): boolean {
     // Check if action matches patterns
-    const actionMatch = rule.conditions.patterns.some(pattern =>
-      entry.action.toLowerCase().includes(pattern.toLowerCase())
+    const actionMatch = rule.conditions.patterns.some((pattern) =>
+      entry.action.toLowerCase().includes(pattern.toLowerCase()),
     );
 
     // Check if category matches
     const categoryMatch =
-      entry.category === 'security' || entry.security.riskLevel !== 'low';
+      entry.category === "security" || entry.security.riskLevel !== "low";
 
     return actionMatch && categoryMatch;
   }
@@ -637,8 +647,8 @@ export class AuditLogger extends EventEmitter {
 
     // Count matching events in time window
     const matchingEvents = this.logBuffer.filter(
-      logEntry =>
-        logEntry.timestamp >= cutoff && this.matchesRule(logEntry, rule)
+      (logEntry) =>
+        logEntry.timestamp >= cutoff && this.matchesRule(logEntry, rule),
     ).length;
 
     if (matchingEvents >= rule.conditions.threshold) {
@@ -649,7 +659,7 @@ export class AuditLogger extends EventEmitter {
   private triggerSecurityAlert(
     rule: ThreatDetectionRule,
     triggerEvent: AuditLogEntry,
-    eventCount: number
+    eventCount: number,
   ) {
     const alert: SecurityAlert = {
       id: crypto.randomUUID(),
@@ -658,10 +668,10 @@ export class AuditLogger extends EventEmitter {
       type: rule.id,
       title: rule.name,
       description: `Detected ${eventCount} matching events for rule: ${rule.name}`,
-      source: 'audit_logger',
+      source: "audit_logger",
       affectedResources: [triggerEvent.resource],
       recommendedActions: this.getRecommendedActions(rule),
-      status: 'open',
+      status: "open",
       metadata: {
         ruleId: rule.id,
         triggerEvent: triggerEvent.id,
@@ -671,9 +681,9 @@ export class AuditLogger extends EventEmitter {
     };
 
     this.activeAlerts.push(alert);
-    this.emit('securityAlert', alert);
+    this.emit("securityAlert", alert);
 
-    console.warn(`🚨 Security Alert: ${alert.title}`, 'AuditLogger', {
+    console.warn(`🚨 Security Alert: ${alert.title}`, "AuditLogger", {
       severity: alert.severity,
       eventCount,
       resource: triggerEvent.resource,
@@ -681,23 +691,23 @@ export class AuditLogger extends EventEmitter {
 
     // Take automated response actions
     if (rule.response.alert) {
-      this.emit('threatDetected', { rule, alert, triggerEvent });
+      this.emit("threatDetected", { rule, alert, triggerEvent });
     }
   }
 
   private getRecommendedActions(rule: ThreatDetectionRule): string[] {
     const actions = [
-      'Review recent audit logs for suspicious activity',
-      'Verify user permissions and access patterns',
-      'Check system security configurations',
+      "Review recent audit logs for suspicious activity",
+      "Verify user permissions and access patterns",
+      "Check system security configurations",
     ];
 
-    if (rule.severity === 'critical') {
-      actions.unshift('Immediately investigate and contain potential threat');
+    if (rule.severity === "critical") {
+      actions.unshift("Immediately investigate and contain potential threat");
     }
 
     if (rule.response.block) {
-      actions.push('Consider blocking the source IP or user account');
+      actions.push("Consider blocking the source IP or user account");
     }
 
     return actions;
@@ -714,37 +724,37 @@ export class AuditLogger extends EventEmitter {
       const logs = [...this.logBuffer];
       this.logBuffer = [];
 
-      const filename = `audit-${new Date().toISOString().split('T')[0]}.jsonl`;
+      const filename = `audit-${new Date().toISOString().split("T")[0]}.jsonl`;
       const filepath = path.join(this.logPath, filename);
 
-      const logLines = logs.map(log => JSON.stringify(log)).join('\n') + '\n';
+      const logLines = logs.map((log) => JSON.stringify(log)).join("\n") + "\n";
 
       if (this.config.compliance.dataEncryption) {
         const encrypted = this.encryptData(logLines);
-        await fs.appendFile(filepath + '.enc', encrypted);
+        await fs.appendFile(filepath + ".enc", encrypted);
       } else {
         await fs.appendFile(filepath, logLines);
       }
 
       console.log(`📝 Flushed ${logs.length} audit logs to ${filename}`);
     } catch (error) {
-      console.error('Failed to flush audit logs:', error);
+      console.error("Failed to flush audit logs:", error);
       // Put logs back in buffer for retry
       this.logBuffer.unshift(...this.logBuffer);
     }
   }
 
   private encryptData(data: string): string {
-    const cipher = crypto.createCipher('aes-256-cbc', this.encryptionKey);
-    let encrypted = cipher.update(data, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
+    const cipher = crypto.createCipher("aes-256-cbc", this.encryptionKey);
+    let encrypted = cipher.update(data, "utf8", "hex");
+    encrypted += cipher.final("hex");
     return encrypted;
   }
 
   private decryptData(encryptedData: string): string {
-    const decipher = crypto.createDecipher('aes-256-cbc', this.encryptionKey);
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
+    const decipher = crypto.createDecipher("aes-256-cbc", this.encryptionKey);
+    let decrypted = decipher.update(encryptedData, "hex", "utf8");
+    decrypted += decipher.final("utf8");
     return decrypted;
   }
 
@@ -754,7 +764,7 @@ export class AuditLogger extends EventEmitter {
     try {
       const files = await fs.readdir(this.logPath);
       const cutoffDate = new Date(
-        Date.now() - this.config.storage.retention.days * 24 * 60 * 60 * 1000
+        Date.now() - this.config.storage.retention.days * 24 * 60 * 60 * 1000,
       );
 
       for (const file of files) {
@@ -767,7 +777,7 @@ export class AuditLogger extends EventEmitter {
         }
       }
     } catch (error) {
-      console.error('Failed to cleanup old audit logs:', error);
+      console.error("Failed to cleanup old audit logs:", error);
     }
   }
 
@@ -787,23 +797,23 @@ export class AuditLogger extends EventEmitter {
     let results = [...this.logBuffer];
 
     if (filter.startDate) {
-      results = results.filter(log => log.timestamp >= filter.startDate!);
+      results = results.filter((log) => log.timestamp >= filter.startDate!);
     }
 
     if (filter.endDate) {
-      results = results.filter(log => log.timestamp <= filter.endDate!);
+      results = results.filter((log) => log.timestamp <= filter.endDate!);
     }
 
     if (filter.category) {
-      results = results.filter(log => log.category === filter.category);
+      results = results.filter((log) => log.category === filter.category);
     }
 
     if (filter.level) {
-      results = results.filter(log => log.level === filter.level);
+      results = results.filter((log) => log.level === filter.level);
     }
 
     if (filter.actor) {
-      results = results.filter(log => log.actor.id === filter.actor);
+      results = results.filter((log) => log.actor.id === filter.actor);
     }
 
     if (filter.limit) {
@@ -811,12 +821,12 @@ export class AuditLogger extends EventEmitter {
     }
 
     return results.sort(
-      (a, b) => b.timestamp.getTime() - a.timestamp.getTime()
+      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
     );
   }
 
   getActiveAlerts(): SecurityAlert[] {
-    return this.activeAlerts.filter(alert => alert.status === 'open');
+    return this.activeAlerts.filter((alert) => alert.status === "open");
   }
 
   getThreatRules(): ThreatDetectionRule[] {
@@ -842,29 +852,30 @@ export class AuditLogger extends EventEmitter {
       period,
       compliance: {
         gdpr: {
-          dataProcessingActivities: logs.filter(log =>
-            log.security.complianceFlags.includes('data_access')
+          dataProcessingActivities: logs.filter((log) =>
+            log.security.complianceFlags.includes("data_access"),
           ).length,
           consentManagement: true,
           rightToErasure: logs.filter(
-            log => log.action.includes('delete') || log.action.includes('erase')
+            (log) =>
+              log.action.includes("delete") || log.action.includes("erase"),
           ).length,
           dataBreaches: logs.filter(
-            log =>
-              log.security.riskLevel === 'critical' &&
-              log.security.threatType?.includes('breach')
+            (log) =>
+              log.security.riskLevel === "critical" &&
+              log.security.threatType?.includes("breach"),
           ).length,
         },
         soc2: {
           securityPrinciples: {
-            security: logs.filter(log => log.category === 'security').length,
-            availability: logs.filter(log => log.details.success).length,
-            integrity: logs.filter(log => log.integrity.verified).length,
-            confidentiality: logs.filter(log =>
-              log.security.complianceFlags.includes('confidential')
+            security: logs.filter((log) => log.category === "security").length,
+            availability: logs.filter((log) => log.details.success).length,
+            integrity: logs.filter((log) => log.integrity.verified).length,
+            confidentiality: logs.filter((log) =>
+              log.security.complianceFlags.includes("confidential"),
             ).length,
-            privacy: logs.filter(log =>
-              log.security.complianceFlags.includes('privacy')
+            privacy: logs.filter((log) =>
+              log.security.complianceFlags.includes("privacy"),
             ).length,
           },
           controlsImplemented: 15, // Fixed number of implemented controls
@@ -879,10 +890,11 @@ export class AuditLogger extends EventEmitter {
       },
       auditSummary: {
         totalEvents: logs.length,
-        securityEvents: logs.filter(log => log.category === 'security').length,
-        userActions: logs.filter(log => log.category === 'user').length,
-        systemEvents: logs.filter(log => log.category === 'system').length,
-        failedAttempts: logs.filter(log => !log.details.success).length,
+        securityEvents: logs.filter((log) => log.category === "security")
+          .length,
+        userActions: logs.filter((log) => log.category === "user").length,
+        systemEvents: logs.filter((log) => log.category === "system").length,
+        failedAttempts: logs.filter((log) => !log.details.success).length,
       },
       recommendations: this.generateComplianceRecommendations(logs),
     };
@@ -894,34 +906,34 @@ export class AuditLogger extends EventEmitter {
     const recommendations: string[] = [];
 
     const failureRate =
-      logs.filter(log => !log.details.success).length / logs.length;
+      logs.filter((log) => !log.details.success).length / logs.length;
     if (failureRate > 0.1) {
       recommendations.push(
-        'High failure rate detected - review system stability'
+        "High failure rate detected - review system stability",
       );
     }
 
     const securityEvents = logs.filter(
-      log => log.category === 'security'
+      (log) => log.category === "security",
     ).length;
     if (securityEvents > 100) {
       recommendations.push(
-        'High number of security events - consider enhanced monitoring'
+        "High number of security events - consider enhanced monitoring",
       );
     }
 
     const criticalEvents = logs.filter(
-      log => log.security.riskLevel === 'critical'
+      (log) => log.security.riskLevel === "critical",
     ).length;
     if (criticalEvents > 0) {
       recommendations.push(
-        'Critical security events detected - immediate investigation required'
+        "Critical security events detected - immediate investigation required",
       );
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('System operating within normal parameters');
-      recommendations.push('Continue regular monitoring and review');
+      recommendations.push("System operating within normal parameters");
+      recommendations.push("Continue regular monitoring and review");
     }
 
     return recommendations;
@@ -933,17 +945,17 @@ export class AuditLogger extends EventEmitter {
 
   updateConfig(newConfig: Partial<AuditConfig>) {
     this.config = { ...this.config, ...newConfig };
-    console.log('🔧 AuditLogger configuration updated');
-    this.emit('configUpdated', this.config);
+    console.log("🔧 AuditLogger configuration updated");
+    this.emit("configUpdated", this.config);
   }
 
-  async exportLogs(format: 'json' | 'csv' | 'xml' = 'json'): Promise<string> {
+  async exportLogs(format: "json" | "csv" | "xml" = "json"): Promise<string> {
     const logs = await this.queryLogs({ limit: 1000 });
 
     switch (format) {
-      case 'csv':
+      case "csv":
         return this.exportAsCSV(logs);
-      case 'xml':
+      case "xml":
         return this.exportAsXML(logs);
       default:
         return JSON.stringify(logs, null, 2);
@@ -952,20 +964,20 @@ export class AuditLogger extends EventEmitter {
 
   private exportAsCSV(logs: AuditLogEntry[]): string {
     const headers = [
-      'ID',
-      'Timestamp',
-      'Level',
-      'Category',
-      'Action',
-      'Resource',
-      'Actor Type',
-      'Actor ID',
-      'Target Type',
-      'Success',
-      'Risk Level',
+      "ID",
+      "Timestamp",
+      "Level",
+      "Category",
+      "Action",
+      "Resource",
+      "Actor Type",
+      "Actor ID",
+      "Target Type",
+      "Success",
+      "Risk Level",
     ];
 
-    const rows = logs.map(log => [
+    const rows = logs.map((log) => [
       log.id,
       log.timestamp.toISOString(),
       log.level,
@@ -973,19 +985,19 @@ export class AuditLogger extends EventEmitter {
       log.action,
       log.resource,
       log.actor.type,
-      log.actor.id || '',
+      log.actor.id || "",
       log.target.type,
       log.details.success,
       log.security.riskLevel,
     ]);
 
-    return [headers, ...rows].map(row => row.join(',')).join('\n');
+    return [headers, ...rows].map((row) => row.join(",")).join("\n");
   }
 
   private exportAsXML(logs: AuditLogEntry[]): string {
     const xmlLogs = logs
       .map(
-        log => `
+        (log) => `
     <log>
       <id>${log.id}</id>
       <timestamp>${log.timestamp.toISOString()}</timestamp>
@@ -995,9 +1007,9 @@ export class AuditLogger extends EventEmitter {
       <resource>${log.resource}</resource>
       <success>${log.details.success}</success>
       <riskLevel>${log.security.riskLevel}</riskLevel>
-    </log>`
+    </log>`,
       )
-      .join('\n');
+      .join("\n");
 
     return `<?xml version="1.0" encoding="UTF-8"?>\n<auditLogs>\n${xmlLogs}\n</auditLogs>`;
   }
@@ -1017,10 +1029,10 @@ export class AuditLogger extends EventEmitter {
         return acc;
       }, {}),
       securityMetrics: {
-        activeAlerts: alerts.filter(alert => alert.status === 'open').length,
-        criticalAlerts: alerts.filter(alert => alert.severity === 'critical')
+        activeAlerts: alerts.filter((alert) => alert.status === "open").length,
+        criticalAlerts: alerts.filter((alert) => alert.severity === "critical")
           .length,
-        threatDetectionRules: this.threatRules.filter(rule => rule.enabled)
+        threatDetectionRules: this.threatRules.filter((rule) => rule.enabled)
           .length,
       },
       storage: {

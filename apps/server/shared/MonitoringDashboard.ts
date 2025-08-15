@@ -6,6 +6,7 @@
 
 import { logger } from "@shared/utils/logger";
 import { EventEmitter } from "events";
+import { TimerManager } from "../utils/TimerManager";
 
 // Dashboard interfaces
 export interface DashboardConfig {
@@ -626,7 +627,7 @@ export class MonitoringDashboard extends EventEmitter {
 
   private async setupAlertSystem(): Promise<void> {
     // Start alert monitoring
-    this.alertChecksInterval = setInterval(async () => {
+    this.alertChecksInterval = TimerManager.setInterval(async () => {
       try {
         await this.checkAlertConditions();
       } catch (error) {
@@ -645,7 +646,7 @@ export class MonitoringDashboard extends EventEmitter {
   }
 
   private startRealTimeUpdates(): void {
-    this.updateInterval = setInterval(async () => {
+    this.updateInterval = TimerManager.setInterval(async () => {
       try {
         const metrics = await this.getCurrentMetrics();
 

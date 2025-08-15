@@ -5,7 +5,8 @@
 // system health tracking, and real-time analytics integration
 // Works with EnhancedLogger, ServiceContainer, FeatureFlags, and ModuleLifecycle
 
-import { EnhancedLogger } from './EnhancedLogger';
+import { EnhancedLogger } from "./EnhancedLogger";
+import { TimerManager } from "../utils/TimerManager";
 
 // ============================================
 // TYPES AND INTERFACES
@@ -45,14 +46,14 @@ export interface SystemMetrics {
     queryCount: number;
     averageQueryTime: number;
     slowQueries: number;
-    connectionHealth: 'healthy' | 'degraded' | 'critical';
+    connectionHealth: "healthy" | "degraded" | "critical";
   };
   custom: Record<string, any>;
 }
 
 export interface ModuleMetrics {
   name: string;
-  state: 'running' | 'degraded' | 'failed' | 'stopped';
+  state: "running" | "degraded" | "failed" | "stopped";
   uptime: number;
   requestCount: number;
   errorCount: number;
@@ -85,7 +86,7 @@ export interface PerformanceSpan {
 export interface MetricsAlert {
   id: string;
   timestamp: Date;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: "low" | "medium" | "high" | "critical";
   metric: string;
   value: number;
   threshold: number;
@@ -122,7 +123,7 @@ export class MetricsCollector {
   private static alerts: MetricsAlert[] = [];
   private static alertThresholds = new Map<
     string,
-    { threshold: number; comparison: 'gt' | 'lt' }
+    { threshold: number; comparison: "gt" | "lt" }
   >();
 
   // Request tracking
@@ -136,8 +137,8 @@ export class MetricsCollector {
 
   // Logger instance
   private static logger = EnhancedLogger.createModuleLogger(
-    'MetricsCollector',
-    '2.0.0'
+    "MetricsCollector",
+    "2.0.0",
   );
 
   // ============================================
@@ -152,10 +153,10 @@ export class MetricsCollector {
       collectInterval?: number;
       maxHistory?: number;
       autoStart?: boolean;
-    } = {}
+    } = {},
   ): void {
     if (this.isInitialized) {
-      this.logger.warn('MetricsCollector already initialized');
+      this.logger.warn("MetricsCollector already initialized");
       return;
     }
 
@@ -168,7 +169,7 @@ export class MetricsCollector {
     this.maxMetricsHistory = maxHistory;
     this.setupDefaultAlerts();
 
-    this.logger.info('🔧 MetricsCollector v2.0 initializing...', {
+    this.logger.info("🔧 MetricsCollector v2.0 initializing...", {
       collectInterval,
       maxHistory,
       autoStart,
@@ -179,7 +180,7 @@ export class MetricsCollector {
     }
 
     this.isInitialized = true;
-    this.logger.success('✅ MetricsCollector v2.0 initialized successfully');
+    this.logger.success("✅ MetricsCollector v2.0 initialized successfully");
   }
 
   /**
@@ -187,23 +188,27 @@ export class MetricsCollector {
    */
   static startCollection(interval: number = 30000): void {
     if (this.collectInterval) {
-      this.logger.warn('Metrics collection already running');
+      this.logger.warn("Metrics collection already running");
       return;
     }
 
     this.logger.info(
-      `🚀 Starting metrics collection (interval: ${interval}ms)`
+      `🚀 Starting metrics collection (interval: ${interval}ms)`,
     );
 
     // Collect initial metrics
     this.collectMetrics();
 
     // Set up periodic collection
-    this.collectInterval = setInterval(() => {
-      this.collectMetrics();
-    }, interval);
+    this.collectInterval = TimerManager.setInterval(
+      () => {
+        this.collectMetrics();
+      },
+      interval,
+      "auto-generated-interval-42",
+    );
 
-    this.logger.success('✅ Metrics collection started');
+    this.logger.success("✅ Metrics collection started");
   }
 
   /**
@@ -213,7 +218,7 @@ export class MetricsCollector {
     if (this.collectInterval) {
       clearInterval(this.collectInterval);
       this.collectInterval = null;
-      this.logger.info('🛑 Metrics collection stopped');
+      this.logger.info("🛑 Metrics collection stopped");
     }
   }
 
@@ -256,7 +261,7 @@ export class MetricsCollector {
       this.checkAlerts(metrics);
 
       // Log metrics summary
-      this.logger.debug('📊 Metrics collected', {
+      this.logger.debug("📊 Metrics collected", {
         memoryUsage: `${Math.round(systemMetrics.memoryUsage.heapUsed / 1024 / 1024)}MB`,
         requestCount: applicationMetrics.requestCount,
         errorRate: `${applicationMetrics.errorRate.toFixed(2)}%`,
@@ -265,7 +270,7 @@ export class MetricsCollector {
 
       return metrics;
     } catch (error) {
-      this.logger.error('❌ Failed to collect metrics', error);
+      this.logger.error("❌ Failed to collect metrics", error);
       throw error;
     }
   }
@@ -273,11 +278,11 @@ export class MetricsCollector {
   /**
    * Collect system-level metrics
    */
-  private static collectSystemMetrics(): SystemMetrics['system'] {
+  private static collectSystemMetrics(): SystemMetrics["system"] {
     const memoryUsage = process.memoryUsage();
     const cpuUsage = process.cpuUsage();
     const uptime = process.uptime();
-    const loadAverage = require('os').loadavg();
+    const loadAverage = require("os").loadavg();
 
     return {
       uptime,
@@ -296,7 +301,7 @@ export class MetricsCollector {
   /**
    * Collect application-level metrics
    */
-  private static collectApplicationMetrics(): SystemMetrics['application'] {
+  private static collectApplicationMetrics(): SystemMetrics["application"] {
     const now = Date.now();
     const timeWindow = now - this.lastRequestTime;
     const throughput =
@@ -347,14 +352,14 @@ export class MetricsCollector {
   /**
    * Collect database metrics (simulated)
    */
-  private static collectDatabaseMetrics(): SystemMetrics['database'] {
+  private static collectDatabaseMetrics(): SystemMetrics["database"] {
     // TODO: Implement actual database metrics collection
     return {
       connectionCount: 5,
-      queryCount: this.getCustomCounter('db_queries') || 0,
-      averageQueryTime: this.getCustomGauge('db_avg_query_time') || 0,
-      slowQueries: this.getCustomCounter('db_slow_queries') || 0,
-      connectionHealth: 'healthy',
+      queryCount: this.getCustomCounter("db_queries") || 0,
+      averageQueryTime: this.getCustomGauge("db_avg_query_time") || 0,
+      slowQueries: this.getCustomCounter("db_slow_queries") || 0,
+      connectionHealth: "healthy",
     };
   }
 
@@ -401,7 +406,7 @@ export class MetricsCollector {
     this.requestCount++;
     this.lastRequestTime = Date.now();
 
-    this.logger.debug('📥 Request recorded', { requestId, ...metadata });
+    this.logger.debug("📥 Request recorded", { requestId, ...metadata });
     return requestId;
   }
 
@@ -411,7 +416,7 @@ export class MetricsCollector {
   static recordResponse(
     requestId: string,
     responseTime: number,
-    success: boolean = true
+    success: boolean = true,
   ): void {
     this.responseTimes.push(responseTime);
 
@@ -424,7 +429,7 @@ export class MetricsCollector {
       this.responseTimes.shift();
     }
 
-    this.logger.debug('📤 Response recorded', {
+    this.logger.debug("📤 Response recorded", {
       requestId,
       responseTime: `${responseTime}ms`,
       success,
@@ -440,11 +445,11 @@ export class MetricsCollector {
    */
   static registerModule(
     moduleName: string,
-    initialMetrics: Partial<ModuleMetrics> = {}
+    initialMetrics: Partial<ModuleMetrics> = {},
   ): void {
     const moduleMetric: ModuleMetrics = {
       name: moduleName,
-      state: 'running',
+      state: "running",
       uptime: 0,
       requestCount: 0,
       errorCount: 0,
@@ -466,7 +471,7 @@ export class MetricsCollector {
    */
   static updateModuleMetrics(
     moduleName: string,
-    updates: Partial<ModuleMetrics>
+    updates: Partial<ModuleMetrics>,
   ): void {
     const existing = this.moduleMetrics.get(moduleName);
     if (!existing) {
@@ -538,7 +543,7 @@ export class MetricsCollector {
    */
   static endTrace(
     traceId: string,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): number | null {
     const trace = this.performanceTraces.get(traceId);
     if (!trace) {
@@ -573,7 +578,7 @@ export class MetricsCollector {
     spanName: string,
     startTime: number,
     endTime: number,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, any> = {},
   ): void {
     const trace = this.performanceTraces.get(traceId);
     if (!trace) return;
@@ -655,10 +660,10 @@ export class MetricsCollector {
    * Set up default alert thresholds
    */
   private static setupDefaultAlerts(): void {
-    this.setAlertThreshold('memory_usage_mb', 500, 'gt'); // > 500MB
-    this.setAlertThreshold('error_rate_percent', 5, 'gt'); // > 5%
-    this.setAlertThreshold('response_time_p95', 1000, 'gt'); // > 1000ms
-    this.setAlertThreshold('cpu_usage_percent', 80, 'gt'); // > 80%
+    this.setAlertThreshold("memory_usage_mb", 500, "gt"); // > 500MB
+    this.setAlertThreshold("error_rate_percent", 5, "gt"); // > 5%
+    this.setAlertThreshold("response_time_p95", 1000, "gt"); // > 1000ms
+    this.setAlertThreshold("cpu_usage_percent", 80, "gt"); // > 80%
   }
 
   /**
@@ -667,11 +672,11 @@ export class MetricsCollector {
   static setAlertThreshold(
     metricName: string,
     threshold: number,
-    comparison: 'gt' | 'lt'
+    comparison: "gt" | "lt",
   ): void {
     this.alertThresholds.set(metricName, { threshold, comparison });
     this.logger.debug(
-      `🚨 Alert threshold set: ${metricName} ${comparison} ${threshold}`
+      `🚨 Alert threshold set: ${metricName} ${comparison} ${threshold}`,
     );
   }
 
@@ -684,24 +689,24 @@ export class MetricsCollector {
     const responseTimeP95 = metrics.application.responseTime.p95;
 
     // Check memory usage
-    this.checkMetricAlert('memory_usage_mb', memoryUsageMB, {
-      metric: 'Memory Usage',
+    this.checkMetricAlert("memory_usage_mb", memoryUsageMB, {
+      metric: "Memory Usage",
       value: memoryUsageMB,
-      unit: 'MB',
+      unit: "MB",
     });
 
     // Check error rate
-    this.checkMetricAlert('error_rate_percent', errorRate, {
-      metric: 'Error Rate',
+    this.checkMetricAlert("error_rate_percent", errorRate, {
+      metric: "Error Rate",
       value: errorRate,
-      unit: '%',
+      unit: "%",
     });
 
     // Check response time
-    this.checkMetricAlert('response_time_p95', responseTimeP95, {
-      metric: 'Response Time P95',
+    this.checkMetricAlert("response_time_p95", responseTimeP95, {
+      metric: "Response Time P95",
       value: responseTimeP95,
-      unit: 'ms',
+      unit: "ms",
     });
   }
 
@@ -711,7 +716,7 @@ export class MetricsCollector {
   private static checkMetricAlert(
     metricName: string,
     value: number,
-    context: Record<string, any>
+    context: Record<string, any>,
   ): void {
     const alertConfig = this.alertThresholds.get(metricName);
     if (!alertConfig) return;
@@ -719,9 +724,9 @@ export class MetricsCollector {
     const { threshold, comparison } = alertConfig;
     let triggered = false;
 
-    if (comparison === 'gt' && value > threshold) {
+    if (comparison === "gt" && value > threshold) {
       triggered = true;
-    } else if (comparison === 'lt' && value < threshold) {
+    } else if (comparison === "lt" && value < threshold) {
       triggered = true;
     }
 
@@ -755,14 +760,14 @@ export class MetricsCollector {
   private static determineSeverity(
     _metricName: string,
     value: number,
-    threshold: number
-  ): MetricsAlert['severity'] {
+    threshold: number,
+  ): MetricsAlert["severity"] {
     const ratio = value / threshold;
 
-    if (ratio > 2) return 'critical';
-    if (ratio > 1.5) return 'high';
-    if (ratio > 1.2) return 'medium';
-    return 'low';
+    if (ratio > 2) return "critical";
+    if (ratio > 1.5) return "high";
+    if (ratio > 1.2) return "medium";
+    return "low";
   }
 
   // ============================================
@@ -790,7 +795,7 @@ export class MetricsCollector {
    */
   static getMetricsInRange(startTime: Date, endTime: Date): SystemMetrics[] {
     return this.metrics.filter(
-      m => m.timestamp >= startTime && m.timestamp <= endTime
+      (m) => m.timestamp >= startTime && m.timestamp <= endTime,
     );
   }
 
@@ -805,13 +810,13 @@ export class MetricsCollector {
    * Get system health summary
    */
   static getHealthSummary(): {
-    overall: 'healthy' | 'degraded' | 'critical';
+    overall: "healthy" | "degraded" | "critical";
     components: {
-      memory: 'healthy' | 'warning' | 'critical';
-      cpu: 'healthy' | 'warning' | 'critical';
-      responseTime: 'healthy' | 'warning' | 'critical';
-      errorRate: 'healthy' | 'warning' | 'critical';
-      modules: 'healthy' | 'warning' | 'critical';
+      memory: "healthy" | "warning" | "critical";
+      cpu: "healthy" | "warning" | "critical";
+      responseTime: "healthy" | "warning" | "critical";
+      errorRate: "healthy" | "warning" | "critical";
+      modules: "healthy" | "warning" | "critical";
     };
     recentAlerts: number;
     uptime: number;
@@ -819,13 +824,13 @@ export class MetricsCollector {
     const current = this.getCurrentMetrics();
     if (!current) {
       return {
-        overall: 'critical',
+        overall: "critical",
         components: {
-          memory: 'critical',
-          cpu: 'critical',
-          responseTime: 'critical',
-          errorRate: 'critical',
-          modules: 'critical',
+          memory: "critical",
+          cpu: "critical",
+          responseTime: "critical",
+          errorRate: "critical",
+          modules: "critical",
         },
         recentAlerts: 0,
         uptime: 0,
@@ -833,62 +838,64 @@ export class MetricsCollector {
     }
 
     const memoryUsageMB = current.system.memoryUsage.heapUsed / 1024 / 1024;
-    const memory: 'healthy' | 'warning' | 'critical' =
+    const memory: "healthy" | "warning" | "critical" =
       memoryUsageMB > 500
-        ? 'critical'
+        ? "critical"
         : memoryUsageMB > 300
-          ? 'warning'
-          : 'healthy';
+          ? "warning"
+          : "healthy";
 
     const errorRate = current.application.errorRate;
-    const errorHealth: 'healthy' | 'warning' | 'critical' =
-      errorRate > 5 ? 'critical' : errorRate > 2 ? 'warning' : 'healthy';
+    const errorHealth: "healthy" | "warning" | "critical" =
+      errorRate > 5 ? "critical" : errorRate > 2 ? "warning" : "healthy";
 
     const responseTime = current.application.responseTime.p95;
-    const responseHealth: 'healthy' | 'warning' | 'critical' =
+    const responseHealth: "healthy" | "warning" | "critical" =
       responseTime > 1000
-        ? 'critical'
+        ? "critical"
         : responseTime > 500
-          ? 'warning'
-          : 'healthy';
+          ? "warning"
+          : "healthy";
 
     const moduleStates = Object.values(current.modules);
-    const failedModules = moduleStates.filter(m => m.state === 'failed').length;
-    const degradedModules = moduleStates.filter(
-      m => m.state === 'degraded'
+    const failedModules = moduleStates.filter(
+      (m) => m.state === "failed",
     ).length;
-    const moduleHealth: 'healthy' | 'warning' | 'critical' =
+    const degradedModules = moduleStates.filter(
+      (m) => m.state === "degraded",
+    ).length;
+    const moduleHealth: "healthy" | "warning" | "critical" =
       failedModules > 0
-        ? 'critical'
+        ? "critical"
         : degradedModules > 0
-          ? 'warning'
-          : 'healthy';
+          ? "warning"
+          : "healthy";
 
     const components = {
       memory,
-      cpu: 'healthy' as const, // TODO: Implement CPU monitoring
+      cpu: "healthy" as const, // TODO: Implement CPU monitoring
       responseTime: responseHealth,
       errorRate: errorHealth,
       modules: moduleHealth,
     };
 
     const criticalCount = Object.values(components).filter(
-      c => c === 'critical'
+      (c) => c === "critical",
     ).length;
     const warningCount = Object.values(components).filter(
-      c => c === 'warning'
+      (c) => c === "warning",
     ).length;
 
     const overall =
       criticalCount > 0
-        ? 'critical'
+        ? "critical"
         : warningCount > 0
-          ? 'degraded'
-          : 'healthy';
+          ? "degraded"
+          : "healthy";
 
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const recentAlerts = this.alerts.filter(
-      a => a.timestamp >= oneHourAgo
+      (a) => a.timestamp >= oneHourAgo,
     ).length;
 
     return {
