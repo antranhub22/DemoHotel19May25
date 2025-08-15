@@ -462,8 +462,6 @@ class DashboardWebSocketService {
   private extractTenantFromSocket(socket: Socket): string {
     try {
       // Try to get from auth token or handshake
-      const _token =
-        socket.handshake.auth?.token || socket.handshake.query?.token;
 
       // Try to get from referer header
       const referer = socket.handshake.headers.referer || "";
@@ -507,8 +505,12 @@ class DashboardWebSocketService {
    */
   shutdown(): void {
     try {
+      logger.info("🔄 [WebSocket] Starting graceful shutdown", "WebSocket");
+
+      // Clear heartbeat timer
       if (this.heartbeatTimer) {
         clearInterval(this.heartbeatTimer);
+        this.heartbeatTimer = undefined;
       }
 
       if (this.io) {
@@ -518,12 +520,36 @@ class DashboardWebSocketService {
           timestamp: new Date().toISOString(),
         });
 
-        // Close all connections
+        // Close all socket connections with cleanup
+        this.io.sockets.sockets.forEach((socket) => {
+          try {
+            socket.removeAllListeners();
+            socket.disconnect(true);
+          } catch (error) {
+            logger.warn("Error closing socket connection", "WebSocket", error);
+          }
+        });
+
+        // Close SocketIO server
         this.io.close();
+        this.io = undefined;
       }
 
-      logger.info(
-        "🛑 [WebSocket] Dashboard WebSocket service shutdown completed",
+      // ✅ MEMORY FIX: Clear connections tracking
+      this.connections.clear();
+
+      // ✅ MEMORY FIX: Reset stats
+      this.stats = {
+        totalConnections: 0,
+        activeConnections: 0,
+        messagesReceived: 0,
+        messagesSent: 0,
+        errors: 0,
+        lastActivity: new Date(),
+      };
+
+      logger.success(
+        "✅ [WebSocket] Dashboard WebSocket service shutdown completed",
         "WebSocket",
       );
     } catch (error) {

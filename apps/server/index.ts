@@ -570,6 +570,29 @@ app.use((req, res, next) => {
           void 0;
         }
 
+        // ✅ MEMORY FIX: Shutdown WebSocket services
+        try {
+          const {
+            dashboardWebSocket,
+          } = require("@server/services/DashboardWebSocket");
+          dashboardWebSocket.shutdown();
+        } catch (_e) {
+          void 0;
+        }
+
+        // ✅ MEMORY FIX: Shutdown WebSocket Dashboard
+        try {
+          const {
+            WebSocketDashboard,
+          } = require("@server/shared/WebSocketDashboard");
+          const webSocketDashboard = WebSocketDashboard.getInstance();
+          if (webSocketDashboard) {
+            await webSocketDashboard.shutdown();
+          }
+        } catch (_e) {
+          void 0;
+        }
+
         // ✅ Stop external memory monitoring
         try {
           externalMemoryMonitor.stopMonitoring();
