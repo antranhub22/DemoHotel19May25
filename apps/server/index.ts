@@ -499,6 +499,17 @@ app.use((req, res, next) => {
     externalMemoryLogger.startTracking();
     console.log("📊 External memory monitoring started");
 
+    // ✅ MEMORY FIX: Start memory verification monitoring
+    try {
+      const {
+        memoryVerification,
+      } = require("@server/utils/MemoryVerification");
+      memoryVerification.startVerification(60); // Every 60 seconds
+      logger.info("🔍 Memory verification monitoring started", "Server");
+    } catch (_e) {
+      void 0;
+    }
+
     // 🚨 Initialize Real-Time External Memory Leak Detection System
     try {
       const externalMemorySystem = getExternalMemorySystem();
@@ -598,6 +609,21 @@ app.use((req, res, next) => {
           externalMemoryMonitor.stopMonitoring();
           externalMemoryLogger.stopTracking();
           externalMemoryDashboard.shutdown();
+        } catch (_e) {
+          void 0;
+        }
+
+        // ✅ MEMORY FIX: Stop memory verification and generate report
+        try {
+          const {
+            memoryVerification,
+          } = require("@server/utils/MemoryVerification");
+          const report = memoryVerification.stopVerification();
+          console.log(memoryVerification.generateReport());
+          logger.info("📊 Memory verification completed", "Server", {
+            trend: report.trend,
+            growthRate: `${report.averageGrowth.toFixed(2)}MB/min`,
+          });
         } catch (_e) {
           void 0;
         }

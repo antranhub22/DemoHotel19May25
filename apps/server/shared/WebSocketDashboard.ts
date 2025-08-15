@@ -6,7 +6,7 @@
 
 import { EventEmitter } from "events";
 import { WebSocket, WebSocketServer } from "ws";
-import { logger } from "../../packages/shared/utils/logger";
+import { logger } from "../../../packages/shared/utils/logger";
 import { MonitoringDashboard } from "./MonitoringDashboard";
 
 // WebSocket interfaces

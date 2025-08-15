@@ -3,7 +3,7 @@
  * Prevents memory leaks from untracked setTimeout/setInterval calls
  */
 
-import { logger } from "../../packages/shared/utils/logger";
+import { logger } from "../../../packages/shared/utils/logger";
 
 interface TrackedTimer {
   id: NodeJS.Timeout;
