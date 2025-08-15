@@ -491,8 +491,15 @@ app.use((req, res, next) => {
       `🔍 Memory dashboard: http://localhost:${port}/api/memory/dashboard`,
     );
 
-    // ✅ Initialize external memory monitoring dashboard
-    externalMemoryDashboard.initialize(io);
+    // 🚨 NUCLEAR FIX: DISABLE ExternalMemoryDashboard (MAJOR LEAK SOURCE!)
+    // externalMemoryDashboard.initialize(io);
+    console.log(
+      "🚫 ExternalMemoryDashboard DISABLED - This was a major memory leak source!",
+    );
+    logger.info(
+      "🎯 BREAKTHROUGH: ExternalMemoryDashboard disabled - ProcessMemoryAnalyzer leak source!",
+      "Server",
+    );
 
     // 🚨 NUCLEAR OPTION: DISABLE ALL MONITORING to isolate real leak source
     try {
