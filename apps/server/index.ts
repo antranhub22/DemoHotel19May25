@@ -510,6 +510,17 @@ app.use((req, res, next) => {
       void 0;
     }
 
+    // ✅ MEMORY FIX: Initialize aggressive native module cleanup
+    try {
+      const {
+        nativeModuleCleanup,
+      } = require("@server/utils/NativeModuleCleanup");
+      nativeModuleCleanup.initialize();
+      logger.info("🧹 Aggressive native module cleanup initialized", "Server");
+    } catch (_e) {
+      void 0;
+    }
+
     // 🚨 Initialize Real-Time External Memory Leak Detection System
     try {
       const externalMemorySystem = getExternalMemorySystem();
@@ -624,6 +635,20 @@ app.use((req, res, next) => {
             trend: report.trend,
             growthRate: `${report.averageGrowth.toFixed(2)}MB/min`,
           });
+        } catch (_e) {
+          void 0;
+        }
+
+        // ✅ MEMORY FIX: Aggressive native module cleanup
+        try {
+          const {
+            nativeModuleCleanup,
+          } = require("@server/utils/NativeModuleCleanup");
+          nativeModuleCleanup.performCompleteCleanup();
+          logger.info(
+            "🧹 Aggressive native module cleanup completed",
+            "Server",
+          );
         } catch (_e) {
           void 0;
         }
