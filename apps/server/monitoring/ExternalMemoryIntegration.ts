@@ -151,10 +151,10 @@ export class ExternalMemorySystem {
       enableEmergencyAlerts: true,
       emergencyThreshold: 600, // 600MB
 
-      // Data retention
-      maxSnapshots: 500, // 500 snapshots (~25 minutes at 3s intervals)
-      maxPatterns: 25,
-      maxAlerts: 50,
+      // 🚨 MEMORY FIX: Data retention DRASTICALLY reduced
+      maxSnapshots: 20, // ✅ REDUCED: 500→20 (96% reduction!)
+      maxPatterns: 5, // ✅ REDUCED: 25→5 (80% reduction!)
+      maxAlerts: 10, // ✅ REDUCED: 50→10 (80% reduction!)
 
       // Integration
       enableDashboardIntegration: true,

@@ -139,8 +139,8 @@ export class ExternalMemoryMonitor extends EventEmitter {
       },
 
       storage: {
-        maxSnapshots: 500, // Keep 500 snapshots in memory
-        persistToDisk: true,
+        maxSnapshots: 15, // ✅ MEMORY FIX: 500→15 (97% reduction!)
+        persistToDisk: false, // ✅ MEMORY FIX: Disable disk persistence
         dataDirectory: path.join(process.cwd(), "monitoring-data"),
       },
 
